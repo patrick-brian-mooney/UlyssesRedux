@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Script to create the text generated based on the fifth chapter of Joyce's
-Ulysses, 'Hades.' Currently, just generates 108 sentences based on the
-text of 'Hades', aiming for an average paragraph length of 6.787, which
+"""Script to create the text generated based on the sixth chapter of Joyce's
+Ulysses, 'Hades.' Currently, just generates 408 sentences based on the
+text of 'Hades', aiming for an average paragraph length of 4.63, which
 is the actual number of sentences and average paragraph length from that
 chapter.
 

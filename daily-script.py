@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """Script to call modules that generate the blog's content, then posts that
 content to the ulyssesredux.tumblr.com.
 
@@ -17,7 +18,7 @@ import re
 from tumblpy import Tumblpy
 
 from patrick_logger import log_it
-import patrick_logger
+import patrick_logger # From https://github.com/patrick-brian-mooney/personal-library
 
 patrick_logger.verbosity_level = 3
 
