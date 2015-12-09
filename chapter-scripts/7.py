@@ -23,8 +23,8 @@ import sys
 
 sys.path.append(markov_generator_path)
 from sentence_generator import *
-from patrick_logger import log_it
 import patrick_logger # From https://github.com/patrick-brian-mooney/personal-library
+from patrick_logger import log_it
 
 patrick_logger.verbosity_level = 0
 log_it("INFO: Imports successful, moving on", 2)
