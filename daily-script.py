@@ -17,8 +17,8 @@ import re
 
 from tumblpy import Tumblpy
 
-from patrick_logger import log_it
 import patrick_logger # From https://github.com/patrick-brian-mooney/personal-library
+from patrick_logger import log_it
 
 patrick_logger.verbosity_level = 3
 
@@ -114,9 +114,9 @@ while len(first_sentence) > 600 or len(first_sentence.split(' ')) > 150:
     first_sentence = first_sentence.split(' ')[math.floor(len(first_sentence.split(' ')) * 0.75)] + '...'   # Lop off the last quarter and try again.
 
 the_line = '<li><a rel="me muse" href="%s">%s</a>' %(new_post_url, the_title)
-the_line = the_line + ' (%s):</p>' %  datetime.date.today().strftime("%d %B %Y")
+the_line = the_line + ' (%s):' %  datetime.date.today().strftime("%d %B %Y")
 the_line = the_line + ' (tags: ' + html_tags + ') '
-the_line = the_line + '<blockquote><p>%s.</p>' % first_sentence
+the_line = the_line + '<blockquote><p>%s</p>' % first_sentence
 the_line = the_line + '</blockquote></li>\n'
 
 # Now record the new line to the index file.
