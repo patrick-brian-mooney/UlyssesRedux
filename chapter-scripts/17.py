@@ -1,6 +1,84 @@
 #!/usr/bin/env python3
-"""Script to create the text generated based on the seventeenth chapter of Joyce's Ulysses, 'Ithaca.'
-Currently, just returns the actual text of 'Ithaca' exactly as Joyce wrote it.
+"""Script to create the text generated based on the seventeenth chapter of
+Joyce's Ulysses, 'Ithaca.' It relies on a simply formatted text file that summarizes
+an automated analysis of 'Ithaca' performed by the script at /UlyssesRedux/
+code/utility-scrips/get-chapter-17-stats.py, which classifies the paragraphs of
+this chapter into two categories: questions and answers; and aims to replicate
+the structure of that chapter by reproducing the same calling separate routines
+that produce 'questions' and 'answers' of appropriate lengths drawn from the
+separate base corpora.
 """
 
-print(open('/UlyssesRedux/corpora/joyce/ulysses/17.txt').read())
+# First, set up constants
+markov_generator_path = '/UlyssesRedux/code/markov-sentence-generator'
+ithaca_base_text_path = '/UlyssesRedux/corpora/joyce/ulysses/17.txt'
+ithaca_questions_path = '/UlyssesRedux/corpora/joyce/ulysses/17/questions.txt'
+ithaca_answers_path = '/UlyssesRedux/corpora/joyce/ulysses/17/answers.txt'
+ithaca_stats_path = '/UlyssesRedux/stats/17-stats.csv'
+
+questions_chain_length = 1
+answers_chain_length = 3
+
+import sys
+
+sys.path.append(markov_generator_path)
+from sentence_generator import *
+import patrick_logger                 # From https://github.com/patrick-brian-mooney/personal-library
+from patrick_logger import log_it
+
+patrick_logger.verbosity_level = 0
+log_it("INFO: Imports successful, moving on", 2)
+
+# Create the necessary sets of Markov chains once, at the beginning of the script's run
+questions_starts, questions_mapping = buildMapping(word_list(ithaca_questions_path), markov_length=questions_chain_length)
+answers_starts, answers_mapping = buildMapping(word_list(ithaca_answers_path), markov_length=answers_chain_length)
+log_it("INFO: built mappings from both question and answer files, moving on", 2) 
+
+# Unlike the 'Aeolus' script, this script makes no effort to enforce sticking within word-limit boundaries.
+# You can see that in the next two routines, which just call sentence_generator.gen_text() directly.
+
+def getQuestion(num_sents, num_words):
+    log_it("    getQuestion() called", 2)
+    log_it("      num_sents: %d; num_words: %d" % (num_sents, num_words), 3)
+    return gen_text(questions_mapping, questions_starts, markov_length=questions_chain_length, sentences_desired=num_sents, paragraph_break_probability=0)
+
+def getAnswer(num_sents, num_words):
+    log_it("    getAnswer() called", 2)
+    log_it("      num_sents: %d; num_words: %d" % (num_sents, num_words), 3)
+    return gen_text(answers_mapping, answers_starts, markov_length=answers_chain_length, sentences_desired=num_sents, paragraph_break_probability=0)
+
+def get_appropriate_paragraph(structure_description):
+    """Parse the coded lines in /UlyssesRedux/stats/17-stats.csv and produce an
+    appropriate paragraph in response.
+    
+    Currently, these lines have the following structure:
+      * A one-character type code, one of:
+        - '?', a question mark, indicating one of the questions in the
+          question-and-answer pattern of 'Ithaca'; or
+        - a blank space, indicating "other."
+      * This is followed by a number, which is the number of sentences in the 
+        paragraph.
+      * Then there is a comma.
+      * Then there is another base-10, non-zero-padded number, which is the total
+        number of words in those sentences. 
+    
+    This function just parses the lines and delegates to other functions.
+    """
+    num_sents, num_words = tuple(structure_description[1:].split(','))
+    if structure_description[0] == "?":
+        return getQuestion(int(num_sents), int(num_words))
+    elif structure_description[0] == " ":
+        return getAnswer(int(num_sents), int(num_words))
+    else:
+        raise LookupError("Cannot interpret the Aeolus stats file located at %s:\n    line begins with unknown character '%s'." % (aeolus_stats_path, structure_description[0].encode()))
+
+
+chapter_paragraphs = []
+log_it("INFO: about to start reading and processing the stats file", 2)
+with open(ithaca_stats_path) as statsfile:     # OK, parse the coded structure line
+    log_it("INFO: successfully opened stats file %s." % ithaca_stats_path, 3)
+    for structure_line in statsfile:
+        log_it("  processing line '%s'." % structure_line.rstrip())
+        chapter_paragraphs.append(get_appropriate_paragraph(structure_line))
+
+print('\n'.join(chapter_paragraphs))

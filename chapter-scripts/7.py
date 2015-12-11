@@ -23,7 +23,7 @@ import sys
 
 sys.path.append(markov_generator_path)
 from sentence_generator import *
-import patrick_logger # From https://github.com/patrick-brian-mooney/personal-library
+import patrick_logger    # From https://github.com/patrick-brian-mooney/personal-library
 from patrick_logger import log_it
 
 patrick_logger.verbosity_level = 0
@@ -88,7 +88,6 @@ def get_appropriate_paragraph(structure_description):
         return getNonQuoteParagraph(int(num_sents), int(num_words))
     else:
         raise LookupError("Cannot interpret the Aeolus stats file located at %s:\n    line begins with unknown character '%s'." % (aeolus_stats_path, structure_description[0].encode()))
-
 
 
 chapter_paragraphs = []

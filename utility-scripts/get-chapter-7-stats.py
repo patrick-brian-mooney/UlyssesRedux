@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Produces a quick .csv file summarizing number of sentences in each paragraph
-in a chapter. Makes a lot of assumptions about the structure of the text file,
-including one paragraph per line with no blank lines.
+in this particular chapter, encoding basic facts about structure that are
+relevant to the script 7.py. Makes a lot of assumptions about the structure of
+the text file it's processing, including the assumption of one paragraph per
+line with no blank lines.
 
-usage: get_chapter_stats FILE, where FILE is the chapter filename.
+usage: ./get_chapter_7_stats.py.
 """
 import sys, os, re
-import nltk
 
 filename = '/UlyssesRedux/corpora/joyce/ulysses/07.txt'
 stats_file_name = os.path.splitext(filename)[0] + '-stats.csv'
