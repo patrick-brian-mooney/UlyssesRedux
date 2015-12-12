@@ -33,11 +33,16 @@ import os
 if debugging_flag: print("INFO: imports successful.")
 
 # Set up some constants
-toc_fragment = "/UlyssesRedux/current-run/index.html"
-webpage_contents_directory = '/~patrick/projects/UlyssesRedux/contents/'
-current_run_data_path = '/UlyssesRedux/current-run/data.csv'
-git_repo_path = '/home/patrick/Documents/programming/python projects/UlyssesRedux/'
+# Paths on local file system.
+toc_fragment                = "/UlyssesRedux/current-run/index.html"
+current_run_data_path       = '/UlyssesRedux/current-run/data.csv'
+webpage_contents_directory  = '/~patrick/projects/UlyssesRedux/contents/'
+git_repo_path               = '/home/patrick/Documents/programming/python projects/UlyssesRedux/'
 
+# Paths on Internet
+github_branch_base_path = 'https://github.com/patrick-brian-mooney/UlyssesRedux/tree/'
+
+# Other constants
 current_episode_number =  1 + int(sorted(glob.glob('%s???.html' % webpage_contents_directory ))[-1][-8:-5])
 
 # All right, let's read the expected data from the data file
@@ -66,7 +71,7 @@ if input('Sync code to Git-watched repository? ').lower()[0] == 'y':
     os.chdir(git_repo_path)
     try:
         current_git_branch = subprocess.check_output(['git symbolic-ref --short HEAD'], shell=True).decode().split('\n')[0]
-        print("Current git branch is:\n   " + current_git_branch)
+        print("\n\nCurrent git branch is:\n   " + current_git_branch)
         if input('update code files in this branch? ').lower()[0] == 'y':
             subprocess.check_call(['git add -u'], shell=True)
             current_git_status = subprocess.check_output(['git status'], shell=True)
@@ -74,13 +79,15 @@ if input('Sync code to Git-watched repository? ').lower()[0] == 'y':
             if input('GIVEN THIS STATUS, do you want to commit? ').lower()[0] == 'y':
                 subprocess.check_call(['git commit'], shell=True)
                 if input('Push to remote server? ').lower()[0] == 'y':
-                    subprocess.check_call(['git push'], shell=True)
+                    subprocess.check_call(['git push origin %s' % current_git_branch], shell=True)
                     if input('Switch to master branch and merge these changes? ').lower()[0] == 'y':
                         subprocess.check_call(['git checkout master'], shell=True)
+                        subprocess.check_call(['git merge %s' % current_git_branch], shell=True)
+                        print("WARNING: YOU ARE NOW SET ON THE MASTER BRANCH")
     finally:
         os.chdir(oldpath)
 
-if debugging_flag: print("INFO: Git work done, beginning to generate HTML table of contents")
+if debugging_flag: print("\n\nINFO: Git work done, beginning to generate HTML table of contents")
 
 html_header = """<!doctype html>
 <html prefix="og: http://ogp.me/ns#" xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml">
@@ -165,15 +172,40 @@ html_file = html_header + """<body lang="en-US" xml:lang="en-US">
 
 <div class="body-wrapper container main-content">
 <h1>Ulysses Redux #%03d: %s</h1>
+""" % (current_episode_number, current_run_data['current-run-name'])
+
+# OK, get a summary fragment and turn it into valid HTML, if it isn't already. Assumption: if the fragment as a whole is bracketed <p> ... </p>,
+# then assume that it's a pre-formatted HTML fragment; otherwise, split it into lines and bracket those lines <p> ... </p>.
+
+if current_run_data['summary'].startswith('<p>') and current_run_data['summary'].endswith('</p>'):
+    summary_text = current_run_data['summary']
+else:
+    summary_text = '\n'.join(['<p>' + the_line.strip() + '</p>' for the_line in current_run_data['summary'].split('\n')])
+
+html_file = html_file + """
+<h2 id="summary">Summary</h2>
+
+%s
+""" % summary_text
+
+html_file = html_file + """
+
+<h2 id="toc">Contents</h2>
 
 <ol>
-""" % (current_episode_number, current_run_data['current-run-name'])
+"""
 
 html_file = html_file + open(toc_fragment).read()
 
 html_file = html_file + """</ol>
 
-<footer class="status vevent vcard"><a class="url location" href="#">This web page</a> is copyright © %s by <a rel="me" href="/~patrick/" class="fn url">Patrick Mooney</a>. <abbr class="summary description" title="Last update to table of contents for Ulysses Redux #%03d">Last update to <a class="url" href="#">this HTML file</a></abbr>: <abbr class="dtstart" title="%s">%s</abbr>.</footer>
+<h2 id="scripts">Scripts</h2>
+
+<p>The scripts used to generate this edition of <cite class="book-title">Ulysses Redux</cite> are available <a rel="me" href="%s">here</a>.</p>
+
+""" % (github_branch_base_path + current_git_branch)
+
+html_file = html_file + """<footer class="status vevent vcard"><a class="url location" href="#">This web page</a> is copyright © %s by <a rel="me" href="/~patrick/" class="fn url">Patrick Mooney</a>. <abbr class="summary description" title="Last update to table of contents for Ulysses Redux #%03d">Last update to <a class="url" href="#">this HTML file</a></abbr>: <abbr class="dtstart" title="%s">%s</abbr>.</footer>
 
 </div>
 </body>
@@ -188,8 +220,9 @@ the_output_file.close
 
 if debugging_flag: print("INFO: HTML file written; tidying ...")
 
-try:
-    subprocess.check_call(['tidy -m -i -w 0 -utf8 --doctype html5 --fix-uri true --new-blocklevel-tags footer --quote-nbsp true --preserve-entities yes %s%03d.html' % (webpage_contents_directory, current_episode_number)], shell=True)
-except subprocess.CalledProcessError:
-    pass                                    # Exit status is 1 for non-fatal errors; don't let this stop the rest of the script from running
+subprocess.call(['tidy -m -i -w 0 -utf8 --doctype html5 --fix-uri true --new-blocklevel-tags footer --quote-nbsp true --preserve-entities yes %s%03d.html' % (webpage_contents_directory, current_episode_number)], shell=True)
 
+print('\n\n\nWARNING: new table of contents NOT LINKED from meta-table of contents.') 
+if input('Sync web page to main site? ').lower()[0] == 'y':
+    # This script lives on my hard drive at ~/.scripts/sync-website.sh
+    subprocess.check_call(['sync-website.sh'], shell=True)
