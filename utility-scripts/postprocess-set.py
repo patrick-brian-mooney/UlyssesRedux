@@ -61,17 +61,20 @@ for which_key in list(expected_keys.keys()):
 
 if debugging_flag: print("INFO: constants set up; .csv dictionary has been read.")
 
-# All right, let's sync the code to the folder that actually maintains the Git repository.
-if input('Sync code to Git-watched repository? ').lower()[0] == 'y':
-    # This next call syncs the code to git_repo_path, patching it to remove authentication tokens
-    subprocess.check_call(['/UlyssesRedux/code/utility-scripts/sync-code.sh'], shell=True)
-    print('\n\nINFO: OK, synced.')
-    # Assume that syncing the code may also mean we want to commit and push it.
-    oldpath = os.getcwd()
+# All right, let's sync the code to the folder that actually maintains the Git repository. If desired
+
+# First, though, let's get basic info about the current git branch that we'll need later even if not syncing.
+oldpath = os.getcwd()
+try:
     os.chdir(git_repo_path)
-    try:
-        current_git_branch = subprocess.check_output(['git symbolic-ref --short HEAD'], shell=True).decode().split('\n')[0]
-        print("\n\nCurrent git branch is:\n   " + current_git_branch)
+    current_git_branch = subprocess.check_output(['git symbolic-ref --short HEAD'], shell=True).decode().split('\n')[0]
+    print("\n\nCurrent git branch is:\n   " + current_git_branch)
+    if input('Sync code to Git-watched repository? ').lower()[0] == 'y':
+        # This next call syncs the code to git_repo_path, patching it to remove authentication tokens
+        subprocess.check_call(['/UlyssesRedux/code/utility-scripts/sync-code.sh'], shell=True)
+        print('\n\nINFO: OK, synced.')
+        # Assume that syncing the code may also mean we want to commit and push it.
+        print("\n\nReminder: current git branch is:\n   " + current_git_branch)
         if input('update code files in this branch? ').lower()[0] == 'y':
             subprocess.check_call(['git add -u'], shell=True)
             current_git_status = subprocess.check_output(['git status'], shell=True)
@@ -83,9 +86,9 @@ if input('Sync code to Git-watched repository? ').lower()[0] == 'y':
                     if input('Switch to master branch and merge these changes? ').lower()[0] == 'y':
                         subprocess.check_call(['git checkout master'], shell=True)
                         subprocess.check_call(['git merge %s' % current_git_branch], shell=True)
-                        print("WARNING: YOU ARE NOW SET ON THE MASTER BRANCH")
-    finally:
-        os.chdir(oldpath)
+                        print("WARNING: THE MASTER BRANCH IS NOW CURRENT")
+finally:
+    os.chdir(oldpath)
 
 if debugging_flag: print("\n\nINFO: Git work done, beginning to generate HTML table of contents")
 
