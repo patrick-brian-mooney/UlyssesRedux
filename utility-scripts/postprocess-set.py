@@ -66,7 +66,7 @@ if input('Sync code to Git-watched repository? ').lower()[0] == 'y':
     os.chdir(git_repo_path)
     try:
         current_git_branch = subprocess.check_output(['git symbolic-ref --short HEAD'], shell=True).decode().split('\n')[0]
-        print("Current git branch is:\n   " + current_git_branch)
+        print("\n\nCurrent git branch is:\n   " + current_git_branch)
         if input('update code files in this branch? ').lower()[0] == 'y':
             subprocess.check_call(['git add -u'], shell=True)
             current_git_status = subprocess.check_output(['git status'], shell=True)
@@ -167,9 +167,28 @@ html_file = html_header + """<body lang="en-US" xml:lang="en-US">
 
 <div class="body-wrapper container main-content">
 <h1>Ulysses Redux #%03d: %s</h1>
+""" % (current_episode_number, current_run_data['current-run-name'])
+
+# OK, get a summary fragment and turn it into valid HTML, if it isn't already. Assumption: if the fragment as a whole is bracketed <p> ... </p>,
+# then assume that it's a pre-formatted HTML fragment; otherwise, split it into lines and bracket those lines <p> ... </p>.
+
+if current_run_data['summary'].startswith('<p>') and current_run_data['summary'].endswith('</p>'):
+    summary_text = current_run_data['summary']
+else:
+    summary_text = '\n'.join(['<p>' + the_line.strip() + '</p>' for the_line in current_run_data['summary'].split('\n')])
+
+html_file = html_file + """
+<h2 id="summary">Summary</h2>
+
+%s
+""" % summary_text
+
+html_file = html_file + """
+
+<h2 id="toc">Contents</h2>
 
 <ol>
-""" % (current_episode_number, current_run_data['current-run-name'])
+"""
 
 html_file = html_file + open(toc_fragment).read()
 
@@ -190,10 +209,7 @@ the_output_file.close
 
 if debugging_flag: print("INFO: HTML file written; tidying ...")
 
-try:
-    subprocess.check_call(['tidy -m -i -w 0 -utf8 --doctype html5 --fix-uri true --new-blocklevel-tags footer --quote-nbsp true --preserve-entities yes %s%03d.html' % (webpage_contents_directory, current_episode_number)], shell=True)
-except subprocess.CalledProcessError:
-    pass                                    # Exit status is 1 for non-fatal errors; don't let this stop the rest of the script from running
+subprocess.call(['tidy -m -i -w 0 -utf8 --doctype html5 --fix-uri true --new-blocklevel-tags footer --quote-nbsp true --preserve-entities yes %s%03d.html' % (webpage_contents_directory, current_episode_number)], shell=True)
 
 print('\n\n\nWARNING: new table of contents NOT LINKED from meta-table of contents.') 
 if input('Sync web page to main site? ').lower()[0] == 'y':
