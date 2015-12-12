@@ -111,7 +111,7 @@ html_tags = ' | '.join([ '<a rel="me muse" href="%s">%s</a>' % (blog_url + "tagg
 
 # Avoid using a really really long first sentence as a summary (a problem sometimes in tests with "Penelope").
 while len(first_sentence) > 600 or len(first_sentence.split(' ')) > 150:
-    first_sentence = first_sentence.split(' ')[math.floor(len(first_sentence.split(' ')) * 0.75)] + '...'   # Lop off the last quarter and try again.
+    first_sentence = first_sentence.split(' ')[math.floor(len(first_sentence.split(' ')) * 0.75)] + '…'   # Lop off the last quarter and try again.
 
 the_line = '<li><a rel="me muse" href="%s">%s</a>' %(new_post_url, the_title)
 the_line = the_line + ' (%s):' %  datetime.date.today().strftime("%d %B %Y")
