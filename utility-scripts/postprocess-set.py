@@ -86,7 +86,7 @@ try:
                     if input('Switch to master branch and merge these changes? ').lower()[0] == 'y':
                         subprocess.check_call(['git checkout master'], shell=True)
                         subprocess.check_call(['git merge %s' % current_git_branch], shell=True)
-                        print("WARNING: THE MASTER BRANCH IS NOW CURRENT")
+                        print("WARNING: THE MASTER BRANCH IS NOW THE CURRENT BRANCH")
 finally:
     os.chdir(oldpath)
 
