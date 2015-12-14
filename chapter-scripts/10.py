@@ -26,7 +26,7 @@ from sentence_generator import *
 import patrick_logger # From https://github.com/patrick-brian-mooney/personal-library
 from patrick_logger import log_it
 
-patrick_logger.verbosity_level = 3
+patrick_logger.verbosity_level = 0
 
 output_text = [].copy()
 

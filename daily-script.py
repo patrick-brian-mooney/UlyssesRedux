@@ -65,7 +65,10 @@ ulysses_chapters = open(base_directory + scripts_directory + "chapter-titles.txt
 the_title = ulysses_chapters[ which_script - 1 ].strip()
 
 recurring_tags = ['Ulysses (novel)', 'James Joyce', '1922', 'automatically generated text', 'Patrick Mooney', the_title]
-temporary_tags = ['Ulysses Remix', '002'].copy()
+temporary_tags = [].copy()
+with open('%s%stemporary-tags' %(base_directory, current_run_directory) ) as temp_tags_file:
+    for which_tag in temp_tags_file:
+        temporary_tags.append(which_tag.strip())
 the_tags = recurring_tags + temporary_tags
 
 if which_script not in range(1,19):
@@ -115,8 +118,8 @@ while len(first_sentence) > 600 or len(first_sentence.split(' ')) > 150:
 
 the_line = '<li><a rel="me muse" href="%s">%s</a>' %(new_post_url, the_title)
 the_line = the_line + ' (%s):' %  datetime.date.today().strftime("%d %B %Y")
-the_line = the_line + ' (tags: ' + html_tags + ') '
 the_line = the_line + '<blockquote><p>%s</p>' % first_sentence
+the_line = the_line + '<p><small>tags: ' + html_tags + '</small></p>'
 the_line = the_line + '</blockquote></li>\n'
 
 # Now record the new line to the index file.

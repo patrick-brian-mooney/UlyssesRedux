@@ -33,16 +33,6 @@ import os
 if debugging_flag: print("INFO: imports successful.")
 
 # Set up some constants
-<<<<<<< HEAD
-<<<<<<< HEAD
-toc_fragment                = "/UlyssesRedux/current-run/index.html"
-webpage_contents_directory  = '/~patrick/projects/UlyssesRedux/contents/'
-current_run_data_path       = '/UlyssesRedux/current-run/data.csv'
-git_repo_path               = '/home/patrick/Documents/programming/python projects/UlyssesRedux/'
-
-=======
-=======
->>>>>>> 002UlyssesRemix
 # Paths on local file system.
 toc_fragment                = "/UlyssesRedux/current-run/index.html"
 current_run_data_path       = '/UlyssesRedux/current-run/data.csv'
@@ -53,10 +43,6 @@ git_repo_path               = '/home/patrick/Documents/programming/python projec
 github_branch_base_path = 'https://github.com/patrick-brian-mooney/UlyssesRedux/tree/'
 
 # Other constants
-<<<<<<< HEAD
->>>>>>> 002UlyssesRemix
-=======
->>>>>>> 002UlyssesRemix
 current_episode_number =  1 + int(sorted(glob.glob('%s???.html' % webpage_contents_directory ))[-1][-8:-5])
 
 # All right, let's read the expected data from the data file
@@ -96,15 +82,7 @@ try:
             if input('GIVEN THIS STATUS, do you want to commit? ').lower()[0] == 'y':
                 subprocess.check_call(['git commit'], shell=True)
                 if input('Push to remote server? ').lower()[0] == 'y':
-<<<<<<< HEAD
-<<<<<<< HEAD
-                    subprocess.check_call(['git push'], shell=True)
-=======
                     subprocess.check_call(['git push origin %s' % current_git_branch], shell=True)
->>>>>>> 002UlyssesRemix
-=======
-                    subprocess.check_call(['git push origin %s' % current_git_branch], shell=True)
->>>>>>> 002UlyssesRemix
                     if input('Switch to master branch and merge these changes? ').lower()[0] == 'y':
                         subprocess.check_call(['git checkout master'], shell=True)
                         subprocess.check_call(['git merge %s' % current_git_branch], shell=True)
@@ -224,12 +202,6 @@ html_file = html_file + open(toc_fragment).read()
 
 html_file = html_file + """</ol>
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<footer class="status vevent vcard"><a class="url location" href="#">This web page</a> is copyright © %s by <a rel="me" href="/~patrick/" class="fn url">Patrick Mooney</a>. <abbr class="summary description" title="Last update to table of contents for Ulysses Redux #%03d">Last update to <a class="url" href="#">this HTML file</a></abbr>: <abbr class="dtstart" title="%s">%s</abbr>.</footer>
-=======
-=======
->>>>>>> 002UlyssesRemix
 <h2 id="scripts">Scripts</h2>
 
 <p>The scripts used to generate this edition of <cite class="book-title">Ulysses Redux</cite> are available <a rel="me" href="%s">here</a>.</p>
@@ -237,10 +209,6 @@ html_file = html_file + """</ol>
 """ % (github_branch_base_path + current_git_branch)
 
 html_file = html_file + """<footer class="status vevent vcard"><a class="url location" href="#">This web page</a> is copyright © %s by <a rel="me" href="/~patrick/" class="fn url">Patrick Mooney</a>. <abbr class="summary description" title="Last update to table of contents for Ulysses Redux #%03d">Last update to <a class="url" href="#">this HTML file</a></abbr>: <abbr class="dtstart" title="%s">%s</abbr>.</footer>
-<<<<<<< HEAD
->>>>>>> 002UlyssesRemix
-=======
->>>>>>> 002UlyssesRemix
 
 </div>
 </body>
