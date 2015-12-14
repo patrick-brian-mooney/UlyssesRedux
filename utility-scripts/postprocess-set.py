@@ -75,18 +75,20 @@ try:
         print('\n\nINFO: OK, synced.')
         # Assume that syncing the code may also mean we want to commit and push it.
         print("\n\nReminder: current git branch is:\n   " + current_git_branch)
-        if input('update code files in this branch? ').lower()[0] == 'y':
+        if input('update Git repo with changed code files in this branch? ').lower()[0] == 'y':
             subprocess.check_call(['git add -u'], shell=True)
             current_git_status = subprocess.check_output(['git status'], shell=True)
             print("Current git status is\n  " + current_git_status.decode())
             if input('GIVEN THIS STATUS, do you want to commit? ').lower()[0] == 'y':
                 subprocess.check_call(['git commit'], shell=True)
-                if input('Push to remote server? ').lower()[0] == 'y':
+                if input('Push branch %s to remote server? ' % current_git_branch).lower()[0] == 'y':
                     subprocess.check_call(['git push origin %s' % current_git_branch], shell=True)
                     if input('Switch to master branch and merge these changes? ').lower()[0] == 'y':
                         subprocess.check_call(['git checkout master'], shell=True)
                         subprocess.check_call(['git merge %s' % current_git_branch], shell=True)
                         print("WARNING: THE MASTER BRANCH IS NOW THE CURRENT BRANCH")
+                        if input('Push master branch to remote server? ').lower()[0] == 'y':
+                            subprocess.check_call(['git push origin master'], shell=True)
 finally:
     os.chdir(oldpath)
 
@@ -238,3 +240,6 @@ print('\n\n\nWARNING: new table of contents NOT LINKED from meta-table of conten
 if input('Sync web page to main site? ').lower()[0] == 'y':
     # This script lives on my hard drive at ~/.scripts/sync-website.sh
     subprocess.check_call(['sync-website.sh'], shell=True)
+
+if input("\n\n\nWe're done here. Want to set up the next run? ").lower()[0] == 'y':
+    subprocess.check_call(['/UlyssesRedux/code/utility-scripts/setup-run.py'], shell=True)
