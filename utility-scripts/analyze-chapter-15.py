@@ -37,7 +37,7 @@ def separate_line(the_line):
         end_pos = spoken_text.find(')')
         if end_pos == -1: end_pos = 100000000           # If the parens are never closed, use a really big number; clearly past the end of the paragraph.
         stage_directions = stage_directions + spoken_text[start_pos + 1:end_pos]
-        stage_directions = stage_directions.strip()
+        stage_directions = stage_directions.strip().strip('\n').strip()
         if len(stage_directions) > 0:
             if stage_directions[-1] not in '.!?':
                 stage_directons = stage_directions + '.'
@@ -47,13 +47,13 @@ def separate_line(the_line):
             spoken_text = spoken_text[0:start_pos] + ' ' + spoken_text[end_pos + 1:]
         else:
             spoken_text = spoken_text[0:start_pos]
-        spoken_text = spoken_text.strip()
+        spoken_text = spoken_text.strip().strip('\n').strip()
         if len(spoken_text) > 0:
             if spoken_text[-1] not in '.!?':
                 spoken_text = spoken_text + '.'
             if spoken_text[-1] != ' ':
                 spoken_text = spoken_text + ' '
-    return stage_directions.replace('  ', ' ').replace(' .', '.').strip(), spoken_text.replace('  ', ' ').replace(' .', '.').strip()
+    return stage_directions.replace('  ', ' ').replace(' .', '.').strip().strip('\n').strip(), spoken_text.replace('  ', ' ').replace(' .', '.').strip().strip('\n').strip()
 
 def num_sentences(the_text):
     return len(list(filter(None, re.split("[!?.]+", the_text))))
@@ -64,6 +64,9 @@ with open(circe_text_path) as circe_source_file, open(circe_structure_path, 'w')
         split_line = the_line.split(':')
         if len(split_line) == 1 or the_line[0:4] != the_line[0:4].upper():          # It's a stage direction
             the_directions = the_line.strip('()')                                   # Strip beginning and ending parentheses.
+            if len(the_directions) > 0:
+                if the_directions[-1] not in '.!?':
+                    the_directions = the_directions + '.'
             stage_directions.append(the_directions)                                 # Strip beginning and ending parentheses.
             structure_code = 'STAGE|'                                               # Start putting together the structure code for the line
             to_encode = the_directions
@@ -74,6 +77,10 @@ with open(circe_text_path) as circe_source_file, open(circe_structure_path, 'w')
             to_encode = spoken_text
             while '(' in spoken_text:                           # Sigh. Line contains at least one stage direction.
                 this_stage_direction, spoken_text = separate_line(spoken_text)
+                this_stage_direction = this_stage_direction.strip()
+                if len(this_stage_direction) > 0:
+                    if this_stage_direction[-1] not in '.!?':
+                        this_stage_direction = this_stage_direction + '.'
                 stage_directions.append(this_stage_direction)
             try:
                 characters_lines[character_name].append(spoken_text + "\n")
@@ -107,5 +114,5 @@ for the_name in characters_lines:
 # OK, that produces 269 files. But only 35 characters speak more than 512 characters' worth of speech.
 # Speech from the other 234 is manually combined into the minor characters corpus by moving them into a folder and using the Unix `cat` command.
 
-with open(circe_stage_directions_corpus, 'w') as stage_directions_file:
+with open(circe_corpora_path + circe_stage_directions_corpus, 'w') as stage_directions_file:
     stage_directions_file.writelines(stage_directions)
