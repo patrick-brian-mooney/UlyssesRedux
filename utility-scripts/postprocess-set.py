@@ -225,6 +225,15 @@ if debugging_flag: print("INFO: HTML file written; tidying ...")
 
 subprocess.call(['tidy -m -i -w 0 -utf8 --doctype html5 --fix-uri true --new-blocklevel-tags footer --quote-nbsp true --preserve-entities yes %s%03d.html' % (webpage_contents_directory, current_episode_number)], shell=True)
 
+if debugging_flag: print("\n\nINFO: Tidying done.")
+
+if input('\n\nUpdate coding journal on website? ').lower()[0] == 'y':
+    subprocess.call(["pandoc -f markdown -s -t html5 -o '/~patrick/projects/UlyssesRedux/coding.html' '/UlyssesRedux/coding thoughts.md'"], shell=True)
+    subprocess.call(['patch /~patrick/projects/UlyssesRedux/coding.html /UlyssesRedux/coding\ thoughts.patch'], shell=True)
+    subprocess.call(['rm /~patrick/projects/UlyssesRedux/coding.html.bak'], shell=True)
+    subprocess.call(['tidy -m -i -w 0 -utf8 --doctype html5 --fix-uri true --new-blocklevel-tags footer --quote-nbsp true --preserve-entities yes /~patrick/projects/UlyssesRedux/coding.html'], shell=True)
+
+
 print('\n\n\nWARNING: new table of contents NOT LINKED from meta-table of contents.') 
 if input('Sync web page to main site? ').lower()[0] == 'y':
     # This script lives on my hard drive at ~/.scripts/sync-website.sh
