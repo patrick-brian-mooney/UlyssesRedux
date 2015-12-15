@@ -27,7 +27,7 @@ with open(current_run_data_path, mode='r') as last_run_data_file:
 is_done = False
 while not is_done:
     print("\n\nOK, let's set up the parameters for the next run.")
-    print("You can type SAME at any prompt to re-use the last run's answer to that question.")
+    print("You can type SAME at any prompt to re-use the last run's answer to that question.\n")
     current_run_data = {}.copy()
     for which_key in last_run_data:
         answer = input('%s (previously "%s") ---|  ' % (which_key, last_run_data[which_key]))
@@ -35,6 +35,7 @@ while not is_done:
             current_run_data[which_key] = last_run_data[which_key]
         elif answer != "":
             current_run_data[which_key] = answer
+    print('')
     is_done = input("Are you satisfied with that data? ").lower()[0] == 'y'
 
 print('Remember, too, that you can edit %s manually.' % current_run_data_path)

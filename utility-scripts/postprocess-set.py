@@ -229,7 +229,8 @@ subprocess.call(['tidy -m -i -w 0 -utf8 --doctype html5 --fix-uri true --new-blo
 
 if debugging_flag: print("\n\nINFO: Tidying done.")
 
-if input('\n\nUpdate coding journal on website? ').lower()[0] == 'y':
+print('\n')
+if input('Update coding journal on website? ').lower()[0] == 'y':
     subprocess.call(["pandoc -f markdown -s -t html5 -o '/~patrick/projects/UlyssesRedux/coding.html' '/UlyssesRedux/coding thoughts.md'"], shell=True)
     subprocess.call(['patch /~patrick/projects/UlyssesRedux/coding.html /UlyssesRedux/coding\ thoughts.patch'], shell=True)
     subprocess.call(['rm /~patrick/projects/UlyssesRedux/coding.html.bak'], shell=True)
@@ -241,5 +242,6 @@ if input('Sync web page to main site? ').lower()[0] == 'y':
     # This script lives on my hard drive at ~/.scripts/sync-website.sh
     subprocess.check_call(['sync-website.sh'], shell=True)
 
-if input("\n\n\nWe're done here. Want to set up the next run? ").lower()[0] == 'y':
+print('\n\n')
+if input("We're done here. Want to set up the next run? ").lower()[0] == 'y':
     subprocess.check_call(['/UlyssesRedux/code/utility-scripts/setup-run.py'], shell=True)
