@@ -17,7 +17,7 @@ circe_corpora_folder_path = '/UlyssesRedux/corpora/joyce/ulysses/15/'
 circe_base_text_path = '/UlyssesRedux/corpora/joyce/ulysses/15.txt'
 circe_stats = '/UlyssesRedux/stats/15-stats.psv'
 
-chain_length = 3
+chain_length = 2
 debugging_flag = False
 
 import sys

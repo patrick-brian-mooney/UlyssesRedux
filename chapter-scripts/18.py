@@ -12,7 +12,7 @@ evaluated informally.
 # First, set up constants
 markov_generator_path = '/UlyssesRedux/code/markov-sentence-generator'
 joyce_base_text_path = '/UlyssesRedux/corpora/joyce/ulysses/18.txt'
-chain_length = 3
+chain_length = 2
 chapter_length = 9                            # Measured in sentences.
 sentences_per_paragraph = 1.2222222222        # On average, in this chapter
 
@@ -21,4 +21,4 @@ sys.path.append(markov_generator_path)
 from sentence_generator import *
 
 starts, the_mapping = buildMapping(word_list(joyce_base_text_path), markov_length=chain_length)
-print(gen_text(the_mapping, starts, markov_length=chain_length, sentences_desired=chapter_length, paragraph_break_probability=(1/sentences_per_paragraph)) + "\n\nTrieste-Zurich-Paris 1914-1921")
+print(gen_text(the_mapping, starts, markov_length=chain_length, sentences_desired=chapter_length, paragraph_break_probability=(1/sentences_per_paragraph)) + "\n\nTrieste-Zurich-Paris 1914-1921\nSanta Barbara 2015")

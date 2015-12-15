@@ -12,7 +12,7 @@ evaluated informally.
 markov_generator_path = '/UlyssesRedux/code/markov-sentence-generator'
 joyce_base_text_path = '/UlyssesRedux/corpora/joyce/ulysses/12.txt'
 chain_length = 3
-chapter_length = 577                          # Measured in sentences.
+chapter_length = 1663                         # Measured in sentences.
 sentences_per_paragraph = 2.8821490468        # On average, in this chapter
 
 import sys

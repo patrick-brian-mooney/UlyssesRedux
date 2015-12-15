@@ -16,7 +16,7 @@ aeolus_nonheadlines_path = '/UlyssesRedux/corpora/joyce/ulysses/07/non-headlines
 aeolus_stats_path = '/UlyssesRedux/stats/07-stats.csv'
 
 headline_chain_length = 1
-nonheadline_chain_length = 3
+nonheadline_chain_length = 2
 length_tolerance = 0.4      # e.g., 0.3 means the generated text can be up to 30% over or under the length of the requested text.
 
 import sys

@@ -17,7 +17,7 @@ ithaca_answers_path = '/UlyssesRedux/corpora/joyce/ulysses/17/answers.txt'
 ithaca_stats_path = '/UlyssesRedux/stats/17-stats.csv'
 
 questions_chain_length = 1
-answers_chain_length = 3
+answers_chain_length = 2
 
 import sys
 

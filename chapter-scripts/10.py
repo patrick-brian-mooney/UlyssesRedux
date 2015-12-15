@@ -14,7 +14,7 @@ wandering_rocks_sections_path = '/UlyssesRedux/corpora/joyce/ulysses/10/'
 wandering_rocks_whole_chapter = '/UlyssesRedux/corpora/joyce/ulysses/10.txt'
 wandering_rocks_stats_file = '/UlyssesRedux/stats/10-stats.csv'
 
-chain_length = 3
+chain_length = 2
 sections_in_chapter = 19
 
 import sys

@@ -50,7 +50,7 @@ oldpath = os.getcwd()
 try:
     os.chdir(git_repo_path)
     current_git_branch = subprocess.check_output(['git symbolic-ref --short HEAD'], shell=True).decode().split('\n')[0]
-    if input ('Current Git branch is "%s". Commit changes, push to remote, and switch to master branch? ').lower()[0] == 'y':
+    if input ('Current Git branch is "%s". Commit changes, push to remote, and switch to master branch? ' % current_git_branch).lower()[0] == 'y':
         if input('Sync code from working directory first? ').lower()[0] == 'y':
             subprocess.check_call(['/UlyssesRedux/code/utility-scripts/sync-code.sh'], shell=True)
             print('\n\nINFO: OK, synced.')
