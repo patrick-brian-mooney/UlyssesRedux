@@ -59,7 +59,8 @@ try:
         subprocess.check_call(['git commit'], shell=True)
         subprocess.check_call(['git push origin %s' % current_git_branch], shell=True)
         subprocess.check_call(['git checkout master'], shell=True)
-        if input('\nMerge changes from branch "%s" into master branch? ').lower()[0] == 'y':
+        print('')
+        if input('Merge changes from branch "%s" into master branch? ' % current_git_branch).lower()[0] == 'y':
             subprocess.check_call(['git merge %s' % current_git_branch], shell=True)
     if input('Create and switch to new Git branch? ').lower()[0] == 'y':
         current_episode_number =  1 + int(sorted(glob.glob('%s???.html' % webpage_contents_directory ))[-1][-8:-5])

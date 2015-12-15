@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 """Produces 18 chapters at once. Doesn't do any postprocessing (yet)."""
 
