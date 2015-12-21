@@ -241,7 +241,7 @@ if input('Update meta-TOC on local copy of website? ').lower()[0] == 'y':
     with open(meta_TOC_path) as TOC_file:
         TOC_text = TOC_file.read()
     TOC_split = TOC_text.split('</ol>')     # Works as long as there's only one ordered list in the document
-    TOC_text = TOC_split[0] + '<li class="vevent"><a class="url location" rel="me muse" href="%03d.html"><cite class="book-title">%s</cite></a> (<span class="dtstart">%s</span>): <span class="summary description">%s</span>.</li>' % () + '  </ol>\n</section>\n</div>\n</body>\n</html>' %(current_episode_number, current_run_data['current-run-name'], time.strftime("%Y-%m-%dT%H:%M:%S"), current_run_data['summary'])
+    TOC_text = TOC_split[0] + '<li class="vevent"><a class="url location" rel="me muse" href="%03d.html"><cite class="book-title">%s</cite></a> (<span class="dtstart">%s</span>): <span class="summary description">%s</span>.</li>' % (current_episode_number, current_run_data['current-run-name'], time.strftime("%Y-%m-%dT%H:%M:%S"), current_run_data['summary']) + '  </ol>\n</section>\n</div>\n</body>\n</html>'
     with open(meta_TOC_path, 'w') as TOC_file:
         TOC_file.write(TOC_text)
 
