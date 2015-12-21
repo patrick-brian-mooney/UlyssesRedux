@@ -7,7 +7,7 @@ Currently, this script performs the following actions:
       multiple runs of daily-script.py, into a full-fledged table of contents
       file, then puts that file with an appropriate name in the directory
       /~patrick/projects/UlyssesRedux/contents, which is the local directory
-      from which it will be synced to my web site.
+      from which it will be synced to my actual web site.
       * In order to do so, it reads the file /UlyssesRedux/current-run/data.csv
         and looks for data about the current run there. What it can't find, it
         prompts for.
@@ -38,6 +38,7 @@ toc_fragment                = "/UlyssesRedux/current-run/index.html"
 current_run_data_path       = '/UlyssesRedux/current-run/data.csv'
 webpage_contents_directory  = '/~patrick/projects/UlyssesRedux/contents/'
 git_repo_path               = '/home/patrick/Documents/programming/python projects/UlyssesRedux/'
+meta_TOC_path               = '/~patrick/projects/UlyssesRedux/contents/index.html'
 
 # Paths on Internet
 github_branch_base_path = 'https://github.com/patrick-brian-mooney/UlyssesRedux/tree/'
@@ -235,6 +236,14 @@ if input('Update coding journal on website? ').lower()[0] == 'y':
     subprocess.call(['patch /~patrick/projects/UlyssesRedux/coding.html /UlyssesRedux/coding\ thoughts.patch'], shell=True)
     subprocess.call(['rm /~patrick/projects/UlyssesRedux/coding.html.bak'], shell=True)
     subprocess.call(['tidy -m -i -w 0 -utf8 --doctype html5 --fix-uri true --new-blocklevel-tags footer --quote-nbsp true --preserve-entities yes /~patrick/projects/UlyssesRedux/coding.html'], shell=True)
+
+if input('Update meta-TOC on local copy of website? ').lower()[0] == 'y':
+    with open(meta_TOC_path) as TOC_file:
+        TOC_text = TOC_file.read()
+    TOC_split = TOC_text.split('</ol>')     # Works as long as there's only one ordered list in the document
+    TOC_text = TOC_split[0] + '<li class="vevent"><a class="url location" rel="me muse" href="%03d.html"><cite class="book-title">%s</cite></a> (<span class="dtstart">%s</span>): <span class="summary description">%s</span>.</li>' % () + '  </ol>\n</section>\n</div>\n</body>\n</html>' %(current_episode_number, current_run_data['current-run-name'], time.strftime("%Y-%m-%dT%H:%M:%S"), current_run_data['summary'])
+    with open(meta_TOC_path, 'w') as TOC_file:
+        TOC_file.write(TOC_text)
 
 
 print('\n\n\nWARNING: new table of contents NOT LINKED from meta-table of contents.') 

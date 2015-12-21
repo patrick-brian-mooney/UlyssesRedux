@@ -56,7 +56,7 @@ try:
             subprocess.check_call(['/UlyssesRedux/code/utility-scripts/sync-code.sh'], shell=True)
             print('\n\nINFO: OK, synced.')
         subprocess.check_call(['git add -u'], shell=True)
-        subprocess.check_call(['git commit'], shell=True)
+        subprocess.call(['git commit'], shell=True)
         subprocess.check_call(['git push origin %s' % current_git_branch], shell=True)
         subprocess.check_call(['git checkout master'], shell=True)
         print('')
