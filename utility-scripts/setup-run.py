@@ -38,7 +38,7 @@ while not is_done:
     print('')
     is_done = input("Are you satisfied with that data? ").lower()[0] == 'y'
 
-print('Remember, too, that you can edit %s manually.' % current_run_data_path)
+print('Remember, too, that you can edit %s manually. (Be careful about auto-adding of smart quotes.)' % current_run_data_path)
 
 # OK, write the new dictionary
 with open(current_run_data_path, mode='w') as current_run_data_file:

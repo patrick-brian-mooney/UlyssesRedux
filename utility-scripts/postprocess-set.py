@@ -241,12 +241,10 @@ if input('Update meta-TOC on local copy of website? ').lower()[0] == 'y':
     with open(meta_TOC_path) as TOC_file:
         TOC_text = TOC_file.read()
     TOC_split = TOC_text.split('</ol>')     # Works as long as there's only one ordered list in the document
-    TOC_text = TOC_split[0] + '<li class="vevent"><a class="url location" rel="me muse" href="%03d.html"><cite class="book-title">%s</cite></a> (<span class="dtstart">%s</span>): <span class="summary description">%s</span>.</li>' % (current_episode_number, current_run_data['current-run-name'], time.strftime("%Y-%m-%dT%H:%M:%S"), current_run_data['summary']) + '  </ol>\n</section>\n</div>\n</body>\n</html>'
+    TOC_text = TOC_split[0] + '<li class="vevent"><a class="url location" rel="me muse" href="%03d.html"><cite class="book-title">%s</cite></a> (<span class="dtstart">%s</span>): <span class="summary description">%s</span>.</li>' % (current_episode_number, current_run_data['current-run-name'], time.strftime("%Y-%m-%d"), current_run_data['summary']) + '\n  </ol>\n</section>\n</div>\n</body>\n</html>'
     with open(meta_TOC_path, 'w') as TOC_file:
         TOC_file.write(TOC_text)
 
-
-print('\n\n\nWARNING: new table of contents NOT LINKED from meta-table of contents.') 
 if input('Sync web page to main site? ').lower()[0] == 'y':
     # This script lives on my hard drive at ~/.scripts/sync-website.sh
     subprocess.check_call(['sync-website.sh'], shell=True)
