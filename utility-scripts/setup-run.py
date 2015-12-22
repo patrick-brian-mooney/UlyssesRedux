@@ -6,12 +6,9 @@ import glob
 import csv
 import subprocess
 
-# Set up constants
-toc_fragment                = "/UlyssesRedux/current-run/index.html"
-current_run_data_path       = '/UlyssesRedux/current-run/data.csv'
-git_repo_path               = '/home/patrick/Documents/programming/python projects/UlyssesRedux/'
-webpage_contents_directory  = '/~patrick/projects/UlyssesRedux/contents/'
-temporary_tags_file         = '/UlyssesRedux/current-run/temporary-tags'
+import sys
+sys.path.append('/UlyssesRedux/code/')
+from directory_structure import *           # Gets us the listing of file and directory locations. 
 
 # First, remove the old index file
 if os.path.isfile(toc_fragment):
@@ -38,7 +35,7 @@ while not is_done:
     print('')
     is_done = input("Are you satisfied with that data? ").lower()[0] == 'y'
 
-print('Remember, too, that you can edit %s manually. (Be careful about auto-adding of smart quotes.)' % current_run_data_path)
+print('Remember, too, that you can edit %s manually. (Be careful about auto-substitution of smart quotes.)' % current_run_data_path)
 
 # OK, write the new dictionary
 with open(current_run_data_path, mode='w') as current_run_data_file:

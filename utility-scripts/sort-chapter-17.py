@@ -7,13 +7,13 @@ questions begin with four spaces, the answers don't.
 usage: ./get_chapter_17_stats.py.
 """
 
-ch17_filename = '/UlyssesRedux/corpora/joyce/ulysses/17.txt'
-questions_filename = '/UlyssesRedux/corpora/joyce/ulysses/17/questions.txt'
-answers_filename = '/UlyssesRedux/corpora/joyce/ulysses/17/answers.txt'
+import sys
+sys.path.append('/UlyssesRedux/code/')
+from directory_structure import *           # Gets us the listing of file and directory locations. 
 
-ch17_text = open(ch17_filename).readlines()
-questions_file = open(questions_filename, 'w')
-answers_file = open(answers_filename, 'w')
+ch17_text = open(ithaca_base_text_path).readlines()
+questions_file = open(ithaca_questions_path  , 'w')
+answers_file = open(ithaca_answers_path, 'w')
 
 for the_line in [ which_line for which_line in ch17_text if len(which_line.strip()) > 0 ]:
     if the_line.startswith('    '):     # It's a questions

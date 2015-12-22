@@ -4,11 +4,9 @@
 
 import re
 
-circe_text_path = '/UlyssesRedux/corpora/joyce/ulysses/15.txt'
-circe_corpora_path = '/UlyssesRedux/corpora/joyce/ulysses/15/'
-circe_minor_characters_corpus = 'MINOR CHARACTERS.txt'
-circe_stage_directions_corpus = 'STAGE DIRECTIONS.txt'
-circe_structure_path = '/UlyssesRedux/stats/15-stats.psv'
+import sys
+sys.path.append('/UlyssesRedux/code/')
+from directory_structure import *           # Gets us the listing of file and directory locations. 
 
 debugging = True
 
@@ -58,7 +56,7 @@ def separate_line(the_line):
 def num_sentences(the_text):
     return len(list(filter(None, re.split("[!?.]+", the_text))))
 
-with open(circe_text_path) as circe_source_file, open(circe_structure_path, 'w') as circe_stats_file:
+with open(circe_text_path) as circe_source_file, open(circe_stats_path, 'w') as circe_stats_file:
     for the_line in circe_source_file:
         if debugging: print("INFO: processing this line: " + the_line)
         split_line = the_line.split(':')
@@ -112,7 +110,7 @@ for the_name in characters_lines:
         current_corpus.writelines(characters_lines[the_name])
 
 # OK, that produces 269 files. But only 35 characters speak more than 512 characters' worth of speech.
-# Speech from the other 234 is manually combined into the minor characters corpus by moving them into a folder and using the Unix `cat` command.
+# Speech from the other 234 is manually combined into the minor characters corpus by moving them into a folder using the Unix `cat` command.
 
 with open(circe_corpora_path + circe_stage_directions_corpus, 'w') as stage_directions_file:
     stage_directions_file.writelines(stage_directions)

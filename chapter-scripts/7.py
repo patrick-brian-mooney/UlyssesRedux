@@ -9,20 +9,17 @@ paragraph types, with similar lengths, in the same order.
 """
 
 # First, set up constants
-markov_generator_path = '/UlyssesRedux/code/markov-sentence-generator'
-aeolus_base_text_path = '/UlyssesRedux/corpora/joyce/ulysses/07.txt'
-aeolus_headlines_path = '/UlyssesRedux/corpora/joyce/ulysses/07/headlines.txt'
-aeolus_nonheadlines_path = '/UlyssesRedux/corpora/joyce/ulysses/07/non-headlines.txt'
-aeolus_stats_path = '/UlyssesRedux/stats/07-stats.csv'
-
 headline_chain_length = 1
 nonheadline_chain_length = 2
 length_tolerance = 0.4      # e.g., 0.3 means the generated text can be up to 30% over or under the length of the requested text.
 
 import sys
+sys.path.append('/UlyssesRedux/code/')
+from directory_structure import *           # Gets us the listing of file and directory locations. 
 
 sys.path.append(markov_generator_path)
 from sentence_generator import *
+
 import patrick_logger    # From https://github.com/patrick-brian-mooney/personal-library
 from patrick_logger import log_it
 

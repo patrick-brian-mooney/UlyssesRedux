@@ -9,22 +9,19 @@ that produce 'questions' and 'answers' of appropriate lengths drawn from the
 separate base corpora.
 """
 
-# First, set up constants
-markov_generator_path = '/UlyssesRedux/code/markov-sentence-generator'
-ithaca_base_text_path = '/UlyssesRedux/corpora/joyce/ulysses/17.txt'
-ithaca_questions_path = '/UlyssesRedux/corpora/joyce/ulysses/17/questions.txt'
-ithaca_answers_path = '/UlyssesRedux/corpora/joyce/ulysses/17/answers.txt'
-ithaca_stats_path = '/UlyssesRedux/stats/17-stats.csv'
-
-questions_chain_length = 1
-answers_chain_length = 2
-
 import sys
+sys.path.append('/UlyssesRedux/code/')
+from directory_structure import *           # Gets us the listing of file and directory locations. 
 
 sys.path.append(markov_generator_path)
 from sentence_generator import *
+
 import patrick_logger                 # From https://github.com/patrick-brian-mooney/personal-library
 from patrick_logger import log_it
+
+# First, set up constants
+questions_chain_length = 1
+answers_chain_length = 2
 
 patrick_logger.verbosity_level = 0
 log_it("INFO: Imports successful, moving on", 2)

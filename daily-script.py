@@ -15,6 +15,10 @@ import datetime
 import math
 import re
 
+import sys
+sys.path.append('/UlyssesRedux/code/')
+from directory_structure import *           # Gets us the listing of file and directory locations.
+
 from tumblpy import Tumblpy
 
 import patrick_logger # From https://github.com/patrick-brian-mooney/personal-library
@@ -23,13 +27,6 @@ from patrick_logger import log_it
 patrick_logger.verbosity_level = 3
 
 # First, set up some parameters.
-
-# Local filesystem parameters ...
-base_directory = "/UlyssesRedux/"
-current_run_directory = "current-run/"
-scripts_directory = "code/"
-daily_scripts_directory = "chapter-scripts/"
-
 # Web parameters ...
 blog_url = 'http://ulyssesredux.tumblr.com/'
 

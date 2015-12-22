@@ -10,27 +10,24 @@ A Markov length of 3 seems to work well here, according to insufficient tests
 evaluated informally.
 """
 
+import glob, os
+import sys
+
+sys.path.append('/UlyssesRedux/code/')
+from directory_structure import *           # Gets us the listing of file and directory locations. 
+
+sys.path.append(markov_generator_path)
+from sentence_generator import *
 
 # First, set up constants
-markov_generator_path = '/UlyssesRedux/code/markov-sentence-generator'
-circe_corpora_folder_path = '/UlyssesRedux/corpora/joyce/ulysses/15/' 
-circe_base_text_path = '/UlyssesRedux/corpora/joyce/ulysses/15.txt'
-circe_stats = '/UlyssesRedux/stats/15-stats.psv'
-
 chain_length = 2
 debugging_flag = False
-
-import sys
-sys.path.append(markov_generator_path)
-import glob, os
-
-from sentence_generator import *
 
 corpora = {}.copy()
 
 if debugging_flag: print("INFO: about to start processing corpora.")
 
-for which_corpus in glob.glob(circe_corpora_folder_path + '*txt'):
+for which_corpus in glob.glob(circe_corpora_path + '*txt'):
     if debugging_flag: print('INFO: processing "%s".' % which_corpus)
     starts, the_mapping = buildMapping(word_list(which_corpus), markov_length=chain_length)
     corpus_name = os.path.basename(which_corpus)[:-4]
@@ -54,7 +51,7 @@ def get_speaker_text(speaker_name, num_sentences):
 
 if debugging_flag: print("INFO: About to process stats file.")
 
-with open(circe_stats) as circe_stats_file:
+with open(circe_stats_path) as circe_stats_file:
     for the_encoded_paragraph in circe_stats_file:
         # Process each line, using it as a map of the corresponding paragraph in 'Circe'.
         # Structure of these lines is defined in /UlyssesRedux/code/utility-scripts/analyze-chapter-15.py.

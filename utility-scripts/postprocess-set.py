@@ -29,21 +29,13 @@ import time
 import glob
 import subprocess
 import os
+import sys
+sys.path.append('/UlyssesRedux/code/')
+from directory_structure import *           # Gets us the listing of file and directory locations. 
 
 if debugging_flag: print("INFO: imports successful.")
 
 # Set up some constants
-# Paths on local file system.
-toc_fragment                = "/UlyssesRedux/current-run/index.html"
-current_run_data_path       = '/UlyssesRedux/current-run/data.csv'
-webpage_contents_directory  = '/~patrick/projects/UlyssesRedux/contents/'
-git_repo_path               = '/home/patrick/Documents/programming/python projects/UlyssesRedux/'
-meta_TOC_path               = '/~patrick/projects/UlyssesRedux/contents/index.html'
-
-# Paths on Internet
-github_branch_base_path = 'https://github.com/patrick-brian-mooney/UlyssesRedux/tree/'
-
-# Other constants
 current_episode_number =  1 + int(sorted(glob.glob('%s???.html' % webpage_contents_directory ))[-1][-8:-5])
 
 # All right, let's read the expected data from the data file

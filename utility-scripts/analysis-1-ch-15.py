@@ -2,8 +2,9 @@
 """Looks at the text of Joyce's 'Circe' chapter and coughs up some basic stats."""
 
 from pprint import pprint
-
-circe_text_path = '/UlyssesRedux/corpora/joyce/ulysses/15.txt'
+import sys
+sys.path.append('/UlyssesRedux/code/')
+from directory_structure import *           # Gets us the listing of file and directory locations. 
 
 characters_dict = {}
 stage_direction_paragraphs = 0

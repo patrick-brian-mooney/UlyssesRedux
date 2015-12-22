@@ -10,11 +10,11 @@ usage: ./get_chapter_7_stats.py.
 """
 import sys, os, re
 
-filename = '/UlyssesRedux/corpora/joyce/ulysses/07.txt'
-stats_file_name = os.path.splitext(filename)[0] + '-stats.csv'
+sys.path.append('/UlyssesRedux/code/')
+from directory_structure import *           # Gets us the listing of file and directory locations. 
 
-ch7_text = open(filename).readlines()
-the_stats_file = open('%s-stats.csv' % filename, 'w')
+ch7_text = open(aeolus_base_text_path).readlines()
+the_stats_file = open(aeolus_stats_path, 'w')
 
 for the_line in [ which_line.strip() for which_line in ch7_text if len(which_line.strip()) > 0 ]:
     num_sents = len(list(filter(None, re.split("[!?.]+", the_line))))

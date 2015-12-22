@@ -7,18 +7,20 @@ including one paragraph per line with no blank lines.
 usage: get_chapter_stats FILE, where FILE is the chapter filename.
 """
 import sys, os, re
-import nltk
 
-sections_path = '/UlyssesRedux/corpora/joyce/ulysses/10/'
+sys.path.append('/UlyssesRedux/code/')
+from directory_structure import *           # Gets us the listing of file and directory locations. 
+
+
 stats_file_name = '/UlyssesRedux/stats/10-stats.csv'
 chapter_sections = 19
 
-stats_file = open(stats_file_name, 'w')
+stats_file = open(wandering_rocks_stats_file , 'w')
 stats_file.write("section number,number of paragraphs,number of sentences,number of words\n")
 
 # OK: for each section in the chapter, produce a line indicating basic stats for that section
 for which_section in range(1, 1 + chapter_sections):
-    section_file = open(sections_path + '%02d.txt' % which_section)
+    section_file = open(wandering_rocks_sections_path + '%02d.txt' % which_section)
     section_text = section_file.read()
     num_paragraphs = len(section_text.split('\n'))
     num_sentences = len(re.findall(r"[\w]+[.!?]", section_text))
