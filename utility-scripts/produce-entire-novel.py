@@ -11,4 +11,4 @@ from directory_structure import *           # Gets us the listing of file and di
 for which_chapter in range(0, 18):
     subprocess.call([daily_script_path], shell=True)
 
-subprocess.call(['/UlyssesRedux/code/utility-scripts/postprocess-set.py'], shell=True)
+subprocess.call([postprocessing_script], shell=True)

@@ -15,7 +15,6 @@ import datetime
 import math
 import re
 
-import sys
 sys.path.append('/UlyssesRedux/code/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 

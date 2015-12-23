@@ -18,7 +18,6 @@ chain_length = 2
 chapter_length = 1985                         # Measured in sentences.
 sentences_per_paragraph = 2.0317297851        # On average, in this chapter
 
-import sys
 sys.path.append(markov_generator_path)
 from sentence_generator import *
 
