@@ -111,7 +111,7 @@ html_header = html_header + """  <link rel="start" href="001.html" />
   <link rel="next" href="%03d.html" />
 
   <title>Ulysses Redux #%03d</title>
-  <meta name="generator" content="Bluefish 2.2.7" />
+  <meta name="generator" content="Bluefish 2.2.5" />
   <meta name="author" content="Patrick Mooney" />
   <meta name="dcterms.rights" content="Copyright © 2015 Patrick Mooney" />
   <meta name="description" content="Table of contents for Ulysses Redux #%03d" />
