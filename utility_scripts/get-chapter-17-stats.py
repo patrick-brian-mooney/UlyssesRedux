@@ -10,14 +10,14 @@ usage: ./get_chapter_17_stats.py.
 """
 import sys, os, re
 sys.path.append('/UlyssesRedux/code/')
-from directory_structure import *           # Gets us the listing of file and directory locations. 
+from directory_structure import *           # Gets us the listing of file and directory locations.
 
 stats_file_name = os.path.splitext(ithaca_base_text_path)[0] + '-stats.csv'
 
-ch7_text = open(ithaca_base_text_path).readlines()
+ch17_text = open(ithaca_base_text_path).readlines()
 the_stats_file = open('%s-stats.csv' % stats_file_name, 'w')
 
-for the_line in [ which_line for which_line in ch7_text if len(which_line.strip()) > 0 ]:
+for the_line in [ which_line for which_line in ch17_text if len(which_line.strip()) > 0 ]:
     num_sents = len(list(filter(None, re.split("[!?.]+", the_line))))
     num_tokens = len(the_line.split(' '))
     if the_line[0:4] == "    ":                 # It's an interrogative, even if it doesn't end with a question mark.

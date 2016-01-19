@@ -32,7 +32,7 @@ def write_story():
     # First, set up table of filenames
     section_filenames = [].copy()
     for which_section in range(1, 1 + sections_in_chapter):
-        section_filenames.append(wandering_rocks_sections_path + '%02d.txt' % which_section)
+        section_filenames.append('%s/%02d.txt' % (wandering_rocks_sections_path, which_section))
 
     log_it("INFO: filenames table set up")
     log_it("  length is %d" % len(section_filenames), 2)
@@ -52,7 +52,8 @@ def write_story():
             raise IndexError("The stats file for Wandering Rocks is corrupt: section number %d encountered out of order." % sec)
         log_it("    generating based on sections %d, %d, %d." % (1 + (which_section + 17) % 19, which_section, (which_section + 1) % 19), 2)
         log_it("      asking for %d sentences with paragraph break probability of %f." % (sents, pars/sents))
-        the_word_list = word_list(section_filenames[1 + (which_section + 17) % 19 - 1]) + word_list(section_filenames[which_section - 1]) +  word_list(section_filenames[(which_section + 1) % 19 - 1])
+        the_word_list = word_list(section_filenames[1 + (which_section + 17) % 19 - 1]) + word_list(
+                 section_filenames[which_section - 1]) +  word_list(section_filenames[(which_section + 1) % 19 - 1])
         starts, the_mapping = buildMapping(the_word_list, markov_length=chain_length)
         output_text.append(gen_text(the_mapping, starts, markov_length=chain_length, sentences_desired=sents,
                 paragraph_break_probability=(pars/sents)))

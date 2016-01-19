@@ -45,7 +45,7 @@ aeolus_nonheadlines_path            = '%s/07/non-headlines.txt' % ulysses_chapte
 lestrygonians_base_text_path        = '%s/08.txt' % ulysses_chapters_base_path
 scylla_and_charybdis_base_text_path = '%s/09.txt' % ulysses_chapters_base_path
 
-wandering_rocks_sections_path       = '%s/10/' % ulysses_chapters_base_path
+wandering_rocks_sections_path       = '%s/10' % ulysses_chapters_base_path
 wandering_rocks_whole_chapter       = '%s/10.txt' % ulysses_chapters_base_path
 
 sirens_base_text_path               = '%s/11.txt' % ulysses_chapters_base_path
@@ -68,7 +68,7 @@ penelope_base_text_path             = '%s/18.txt' % ulysses_chapters_base_path
 
 
 # Stats files, for those chapter scripts that use them
-aeolus_stats_path                   = '/UlyssesRedux/stats/07-stats.csv'
-wandering_rocks_stats_file          = '/UlyssesRedux/stats/10-stats.csv'
-circe_stats_path                    = '/UlyssesRedux/stats/15-stats.psv'
-ithaca_stats_path                   = '/UlyssesRedux/stats/17-stats.csv'
+aeolus_stats_path                   = '%s/%s/07-stats.csv' % (base_directory, stats_directory)
+wandering_rocks_stats_file          = '%s/%s/10-stats.csv' % (base_directory, stats_directory)
+circe_stats_path                    = '%s/%s/15-stats.psv' % (base_directory, stats_directory)
+ithaca_stats_path                   = '%s/%s/17-stats.csv' % (base_directory, stats_directory)

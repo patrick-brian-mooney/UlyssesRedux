@@ -18,8 +18,6 @@ Currently, this script performs the following actions:
       copy of my website to the server, not just the Ulysses Redux content (and
       so I sometimes say 'no' if there are other, incomplete changes in process).
       * Currently, it's probably wise to delay answering this question "yes"
-        until the line in /~patrick/projects/UlyssesRedux/contents/index.html
-        has been manually added.
 """
 
 debugging_flag = True
@@ -31,7 +29,7 @@ import subprocess
 import os
 import sys
 sys.path.append('/UlyssesRedux/code/')
-from directory_structure import *           # Gets us the listing of file and directory locations. 
+from directory_structure import *           # Gets us the listing of file and directory locations.
 
 if debugging_flag: print("INFO: imports successful.")
 
