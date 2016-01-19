@@ -10,7 +10,7 @@ evaluated informally.
 
 import sys
 sys.path.append('/UlyssesRedux/code/')
-from directory_structure import *           # Gets us the listing of file and directory locations. 
+from directory_structure import *           # Gets us the listing of file and directory locations.
 
 # First, set up constants
 chain_length = 2
@@ -20,5 +20,11 @@ sentences_per_paragraph = 6.787037037         # On average, in this chapter
 sys.path.append(markov_generator_path)
 from sentence_generator import *
 
-starts, the_mapping = buildMapping(word_list(proteus_base_text_path), markov_length=chain_length)
-print(gen_text(the_mapping, starts, markov_length=chain_length, sentences_desired=chapter_length, paragraph_break_probability=(1/sentences_per_paragraph)))
+def write_story():
+    starts, the_mapping = buildMapping(word_list(proteus_base_text_path), markov_length=chain_length)
+    return gen_text(the_mapping, starts, markov_length=chain_length, sentences_desired=chapter_length,
+              paragraph_break_probability=(1/sentences_per_paragraph))
+
+if __name__ == "__main__":
+    debugging = True
+    print(write_story())
