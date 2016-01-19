@@ -14,6 +14,6 @@ rsync -avv --exclude "__pycache__" --exclude ".git" --exclude "markov-sentence-g
 echo -e "\n\n"
 
 # Obfuscate the login creds by applying the patch file
-patch "/home/patrick/Documents/programming/python projects/UlyssesRedux/daily-script.py" "/home/patrick/Documents/programming/python projects/UlyssesRedux/daily-script.patch"
+patch "/home/patrick/Documents/programming/python projects/UlyssesRedux/daily_script.py" "/home/patrick/Documents/programming/python projects/UlyssesRedux/daily-script.patch"
 
 echo -e "\n\n\nREADY FOR GIT COMMIT AND PUSH, if desired.\n"

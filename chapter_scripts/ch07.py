@@ -2,7 +2,7 @@
 """Script to create the text generated based on the seventh chapter of Joyce's
 Ulysses, 'Aeolus.' It relies on a simply formatted text file that summarizes
 an automated analysis of 'Aeolus' performed by the script at /UlyssesRedux/
-code/utility-scrips/get-chapter-7-stats.py, which classifies the paragraphs of
+code/utility_scripts/get-chapter-7-stats.py, which classifies the paragraphs of
 this chapter into three categories: headlines, spoken phrases, and other; and
 aims to replicate the structure of that chapter by reproducing the same
 paragraph types, with similar lengths, in the same order.
@@ -15,7 +15,7 @@ length_tolerance = 0.4      # e.g., 0.3 means the generated text can be up to 30
 
 import sys
 sys.path.append('/UlyssesRedux/code/')
-from directory_structure import *           # Gets us the listing of file and directory locations. 
+from directory_structure import *           # Gets us the listing of file and directory locations.
 
 sys.path.append(markov_generator_path)
 from sentence_generator import *
@@ -29,7 +29,7 @@ log_it("INFO: Imports successful, moving on", 2)
 # Create the necessary sets of Markov chains once, at the beginning of the script's run
 headlines_starts, headlines_mapping = buildMapping(word_list(aeolus_headlines_path), markov_length=headline_chain_length)
 nonheadlines_starts, nonheadlines_mapping = buildMapping(word_list(aeolus_nonheadlines_path), markov_length=nonheadline_chain_length)
-log_it("INFO: built mappings from both headlines and non-headlines files, moving on", 2) 
+log_it("INFO: built mappings from both headlines and non-headlines files, moving on", 2)
 
 def getParagraph(num_sents, num_words, chain_length, mapping, starts):
     "Generic text-generation routine that all other text-generation routines call internally."
@@ -56,24 +56,24 @@ def getNonQuoteParagraph(num_sents, num_words):
 
 def getQuoteParagraph(num_sents, num_words):
     log_it("    getQuoteParagraph() called", 2)
-    return "―" + getNonQuoteParagraph(num_sents, num_words) 
+    return "―" + getNonQuoteParagraph(num_sents, num_words)
 
 def get_appropriate_paragraph(structure_description):
     """Parse the coded lines in /UlyssesRedux/stats/07-stats.csv and produce an
     appropriate paragraph in response.
-    
+
     Currently, these lines have the following structure:
       * A one-character type code, one of:
         - 'H', capitalized, indicating one of the 'headlines' common in the Aeolus
            episode;
         - an em dash, indicating the paragraph begins with a quote; or
         - a blank space, indicating "other."
-      * This is followed by a number, which is the number of sentences in the 
+      * This is followed by a number, which is the number of sentences in the
         paragraph.
       * Then there is a comma.
       * Then there is another base-10, non-zero-padded number, which is the total
-        number of words in those sentences. 
-    
+        number of words in those sentences.
+
     This function just parses the lines and delegates to other functions.
     """
     num_sents, num_words = tuple(structure_description[1:].split(','))
@@ -86,13 +86,16 @@ def get_appropriate_paragraph(structure_description):
     else:
         raise LookupError("Cannot interpret the Aeolus stats file located at %s:\n    line begins with unknown character '%s'." % (aeolus_stats_path, structure_description[0].encode()))
 
+def write_story():
+    chapter_paragraphs = []
+    log_it("INFO: about to start reading and processing the stats file", 2)
+    with open(aeolus_stats_path) as statsfile:     # OK, parse the coded structure line
+        log_it("INFO: successfully opened stats file %s." % aeolus_stats_path, 3)
+        for structure_line in statsfile:
+            log_it("  processing line '%s'." % structure_line.rstrip())
+            chapter_paragraphs.append(get_appropriate_paragraph(structure_line))
+    return '\n'.join(chapter_paragraphs)
 
-chapter_paragraphs = []
-log_it("INFO: about to start reading and processing the stats file", 2)
-with open(aeolus_stats_path) as statsfile:     # OK, parse the coded structure line
-    log_it("INFO: successfully opened stats file %s." % aeolus_stats_path, 3)
-    for structure_line in statsfile:
-        log_it("  processing line '%s'." % structure_line.rstrip())
-        chapter_paragraphs.append(get_appropriate_paragraph(structure_line))
-
-print('\n'.join(chapter_paragraphs))
+if __name__ == "__main__":
+    debugging = True
+    print(write_story())

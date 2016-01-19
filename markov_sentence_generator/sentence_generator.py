@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Patrick Mooney's Markov sentence generator: generates random (but often
 intelligible) text based on a frequency analysis of one or more existing texts.
-it is based on Harry R. Schwartz's Markov sentence generator, but is intended
-to be more flexible for use in other projects. Licensed under the GPL v3+.
-Available at https://github.com/patrick-brian-mooney/markov-sentence-generator.
-See README.md for more details.
+It is based on Harry R. Schwartz's Markov sentence generator, but is intended
+to be more flexible for use in other projects (primarily my automated text blog,
+UlyssesRedux). Licensed under the GPL v3+. Available at
+https://github.com/patrick-brian-mooney/markov-sentence-generator. See README.md
+for more details.
 
 USAGE:
 
@@ -49,9 +50,9 @@ COMMAND-LINE OPTIONS
       generate and work with, and take more memory (and disk space) to store.
       Optimal values depend on the source text and its characteristics, but you
       might reasonably experiment with numbers from 1 to 4 to see what you get.
-      Larger numbers will usually result in the script just coughing up whole
-      sentences from the original source texts, which may or may not be what
-      you want.
+      Larger numbers will increasingly result in the script just coughing up
+      whole sentences from the original source texts, which may or may not be
+      what you want.
       
       You cannot specify a chain length with this option if you are loading 
       generated probability data from a previous run with -l or --load, because
@@ -75,7 +76,11 @@ COMMAND-LINE OPTIONS
       
       You can specify -i or --input multiple times, but you cannot use both 
       -i / --input and -l / --load: you need to EITHER load pre-generated
-      probability data, OR ELSE generate it fresh from plain-text files.
+      probability data, OR ELSE generate it fresh from plain-text files. (The
+      reason for this is that, once all of the input files have been processed,
+      the program discards some data that would be necessary to combine the
+      file with other files in order to process the chains more efficiently,
+      and it is these postprocessed chains that are saved with -o / --output.)
       
       sentence_generator.py ONLY understands PLAIN TEXT files (not HTML. not
       markdown. not Microsoft Word. not mailbox files. not RTF. Just plain
@@ -136,8 +141,8 @@ import pickle
 import getopt
 import pprint
 
-import patrick_logger
-from patrick_logger import log_it, verbosity_level # From https://github.com/patrick-brian-mooney/personal-library
+import patrick_logger  # From https://github.com/patrick-brian-mooney/personal-library
+from patrick_logger import log_it
 
 
 # Schwartz's version stored mappings globally to save copying time, but this
@@ -167,7 +172,11 @@ def print_usage():
     print(__doc__)
 
 def fix_caps(word):
-    """We want to be able to compare words independent of their capitalization."""
+    """HRS initially said:
+    We want to be able to compare words independent of their capitalization.
+    
+    I disagree, though, so I'm commenting out this routine to see how that plays
+    out.
     # Ex: "FOO" -> "foo"
     if word.isupper() and word != "I":
         word = word.lower()
@@ -177,6 +186,7 @@ def fix_caps(word):
         # Ex: "wOOt" -> "woot"
     else:
         word = word.lower()
+    """
     return word
 
 def to_hash_key(lst):
@@ -189,7 +199,8 @@ def word_list(filename):
     """Returns the contents of the file, split into a list of words and
     (some) punctuation."""
     the_file = open(filename, 'r')
-    word_list = [fix_caps(w) for w in re.findall(r"[\w']+|[.,!?;]", the_file.read())]
+    word_list = [fix_caps(w) for w in re.findall(r"[\w']+|[.,!?;—․]", the_file.read())]
+    # Note that last character is U+2024, "one-dot leader"; I substitute it in for a non-sentence-ending-period sometimes.
     the_file.close()
     return word_list
 
@@ -223,8 +234,8 @@ def buildMapping(word_list, markov_length):
         else:
             history = word_list[i - markov_length + 1 : i + 1]
         follow = word_list[i + 1]
-        # if the last elt was a period, add the next word to the start list
-        if history[-1] == "." and follow not in ".,!?;":
+        # if the last elt was a sentence-ending punctuation, add the next word to the start list
+        if history[-1] in ".!?" and follow not in ".,!?;":
             starts.append(follow)
         addItemToTempMapping(history, follow, the_temp_mapping)
     # Normalize the values in the_temp_mapping, put them into mapping
@@ -241,32 +252,36 @@ def next(prevList, the_mapping):
     retval = ""
     index = random.random()
     # Shorten prevList until it's in the_mapping
-    while to_hash_key(prevList) not in the_mapping:
-        prevList.pop(0)
-    # Get a random word from the_mapping, given prevList
-    for k, v in the_mapping[to_hash_key(prevList)].items():
-        sum += v
-        if sum >= index and retval == "":
-            retval = k
+    try:
+        while to_hash_key(prevList) not in the_mapping:
+            prevList.pop(0)
+    except IndexError:  # If we somehow wind up with an empty list (shouldn't happen), then just end the sentence there to force us to start over.
+        retval = "."
+    # Get a random word from the_mapping, given prevList, if prevList isn't empty
+    else:
+        for k, v in the_mapping[to_hash_key(prevList)].items():
+            sum += v
+            if sum >= index and retval == "":
+                retval = k
     return retval
 
 def genSentence(markov_length, the_mapping, starts):
     '''Start with a random "starting word"'''
-    log_it("genSentence() called.", 2)
-    log_it("  markov_length = %d." % markov_length, 4)
-    log_it("  the_mapping = %s." % the_mapping, 4)
-    log_it("  starts = %s." % starts, 4)
+    log_it("      genSentence() called.", 4)
+    log_it("        markov_length = %d." % markov_length, 5)
+    log_it("        the_mapping = %s." % the_mapping, 5)
+    log_it("        starts = %s." % starts, 5)
     curr = random.choice(starts)
     sent = curr.capitalize()
     prevList = [curr]
     # Keep adding words until we hit a period
-    while curr not in ".":
+    while curr not in ".?!":
         curr = next(prevList, the_mapping)
         prevList.append(curr)
         # if the prevList has gotten too long, trim it
         if len(prevList) > markov_length:
             prevList.pop(0)
-        if curr not in ".,!?;":
+        if curr not in ".,!?;—․":
             sent += " " # Add spaces between words (but not punctuation)
         sent += curr
     return sent
@@ -299,17 +314,17 @@ def read_chains(filename):
 
 def gen_text(the_mapping, starts, markov_length=1, sentences_desired=1, is_html=False, paragraph_break_probability = 0.25):
     """Actually generate the text."""
-    log_it("gen_text() called.", 1)
-    log_it("  Markov length is %d; requesting %d sentences." % (markov_length, sentences_desired), 2)
-    log_it("  Legitimate starts: %s" % starts, 3)
-    log_it("  Probability data: %s" % the_mapping, 4)
+    log_it("gen_text() called.", 4)
+    log_it("  Markov length is %d; requesting %d sentences." % (markov_length, sentences_desired), 4)
+    log_it("  Legitimate starts: %s" % starts, 5)
+    log_it("  Probability data: %s" % the_mapping, 5)
     if is_html:
-        log_it("  -- and we're generating HTML.", 2)
+        log_it("  -- and we're generating an HTML fragment.", 3)
         the_text = "<p>"
     else:
         the_text = ""
     if sentences_desired > 0:
-        for which_sentence in range(0,sentences_desired):
+        for which_sentence in range(0, sentences_desired):
             try:
                 if the_text[-1] != "\n" and the_text[-3:] != "<p>":
                     the_text = the_text + " "   # Add a space to the end if we're not starting a new paragraph.
@@ -334,10 +349,12 @@ def main():
     sentences_desired = 1
     inputs = [].copy()
     is_html = False
-    # First, parse command-line options, if there are any
+    # Next, parse command-line options, if there are any
     if len(sys.argv) > 1: # The first option in argv, of course, is the name of the program itself.
         try:
-            opts, args = getopt.getopt(sys.argv[1:], 'vhqo:l:c:w:p:i:m:', ['verbose', 'help', 'quiet', 'output=', 'load=', 'count=', 'columns=', 'pause=', 'html', 'input=', 'markov-length='])
+            opts, args = getopt.getopt(sys.argv[1:], 'vhqo:l:c:w:p:i:m:',
+                    ['verbose', 'help', 'quiet', 'output=', 'load=', 'count=',
+                    'columns=', 'pause=', 'html', 'input=', 'markov-length='])
             log_it('INFO: options returned from getopt.getopt() are: ' + pprint.pformat(opts), 2)
         except getopt.GetoptError:
             log_it('ERROR: Bad command-line arguments; exiting to shell')

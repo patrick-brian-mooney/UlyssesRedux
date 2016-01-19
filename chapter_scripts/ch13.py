@@ -11,7 +11,7 @@ evaluated informally.
 
 import sys
 sys.path.append('/UlyssesRedux/code/')
-from directory_structure import *           # Gets us the listing of file and directory locations. 
+from directory_structure import *           # Gets us the listing of file and directory locations.
 
 sys.path.append(markov_generator_path)
 from sentence_generator import *
@@ -21,5 +21,11 @@ chain_length = 2
 chapter_length = 1424                         # Measured in sentences.
 sentences_per_paragraph = 10.1714285714       # On average, in this chapter
 
-starts, the_mapping = buildMapping(word_list(nausicaa_base_text_path), markov_length=chain_length)
-print(gen_text(the_mapping, starts, markov_length=chain_length, sentences_desired=chapter_length, paragraph_break_probability=(1/sentences_per_paragraph)))
+def write_story():
+    starts, the_mapping = buildMapping(word_list(nausicaa_base_text_path), markov_length=chain_length)
+    return gen_text(the_mapping, starts, markov_length=chain_length, sentences_desired=chapter_length,
+               paragraph_break_probability=(1/sentences_per_paragraph))
+
+if __name__ == "__main__":
+    debugging = True
+    print(write_story())

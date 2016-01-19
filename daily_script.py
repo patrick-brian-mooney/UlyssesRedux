@@ -3,8 +3,8 @@
 """Script to call modules that generate the blog's content, then posts that
 content to the ulyssesredux.tumblr.com.
 
-Each chapter is written by a different script that resides in the 
-chapter-scripts/ directory. Each of these scripts then draw from
+Each chapter is written by a different script that resides in the
+chapter_scripts/ directory. Each of these scripts then draw from
 texts in the corpora/ directory.
 """
 
@@ -14,13 +14,14 @@ import subprocess
 import datetime
 import math
 import re
+import importlib
 
 sys.path.append('/UlyssesRedux/code/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 
 from tumblpy import Tumblpy
 
-import patrick_logger # From https://github.com/patrick-brian-mooney/personal-library
+import patrick_logger       # From https://github.com/patrick-brian-mooney/personal-library
 from patrick_logger import log_it
 
 patrick_logger.verbosity_level = 3
@@ -39,7 +40,7 @@ the_client = Tumblpy( 'FILL ME IN',
 
 def out_of_content_warning():
     """Remind me that we're out of content."""
-    log_it("WARNING: There's work to be done! You have to reset the state to get ulyssesredux.tumblr.com working again! A full Ulysses project is done and needs to be cleared!")       
+    log_it("WARNING: There's work to be done! You have to reset the state to get ulyssesredux.tumblr.com working again! A full Ulysses project is done and needs to be cleared!")
     log_it("    REMINDER: make this a more prominent warning!", 2)  # For now
     sys.exit(2)
 
@@ -48,7 +49,7 @@ def dump(obj):
     print("obj.%s = %s" % (attr, getattr(obj, attr)))
 
 try:
-    index_file = open(base_directory + current_run_directory + 'index.html', 'r')
+    index_file = open('%s/%s/index.html' %(base_directory, current_run_directory), 'r')
     the_lines = index_file.readlines()
     which_script = 1 + len(the_lines)   # If so far we've got, say, six lines in the file, we need to run script #7.
     index_file.close()
@@ -57,12 +58,12 @@ except FileNotFoundError:
     the_lines = []
 
 # Post parameters
-ulysses_chapters = open(base_directory + scripts_directory + "chapter-titles.txt").readlines()
+ulysses_chapters = open('%s/%s/%s' % (base_directory, scripts_directory, "chapter-titles.txt")).readlines()
 the_title = ulysses_chapters[ which_script - 1 ].strip()
 
 recurring_tags = ['Ulysses (novel)', 'James Joyce', '1922', 'automatically generated text', 'Patrick Mooney', the_title]
 temporary_tags = [].copy()
-with open('%s%stemporary-tags' %(base_directory, current_run_directory) ) as temp_tags_file:
+with open('%s/%s/temporary-tags' % (base_directory, current_run_directory)) as temp_tags_file:
     for which_tag in temp_tags_file:
         temporary_tags.append(which_tag.strip())
 the_tags = recurring_tags + temporary_tags
@@ -70,17 +71,15 @@ the_tags = recurring_tags + temporary_tags
 if which_script not in range(1,19):
     out_of_content_warning()
 
-script_path = base_directory + scripts_directory + daily_scripts_directory +"%d.py" % which_script
+script_path = '%s.ch%02d' % (daily_scripts_directory, which_script)
 
-log_it ("INFO: About to run script %s." % script_path, 2)
+log_it ("INFO: About to run script %s.py." % script_path, 2)
 
-# The following section is a first-pass ugly hack to avoid having to deal with module imports.
-# It should be replaced with an interface that actually imports the scripts that write individual chapters. Currently, they're launched as
-# external scripts in a separate process, which works, but is suboptimal logically, ideologically, and in terms of execution efficiency.
-# Still, it works for now, though it's an ugly hack. 
+# OK, import the relevant chapter script as a module and write the story.
 
-the_content = subprocess.check_output([ script_path ], shell=True).decode().strip()   # Call the script to generate a chapter.
-                                                                                      # Note: currently, no command-line parameters to indiv. scripts
+the_script = importlib.import_module(script_path)
+the_content = the_script.write_story()
+
 log_it("content generated ...\n\n  ... postprocessing...", 2)
 
 content_lines = the_content.split("\n")
@@ -120,6 +119,6 @@ the_line = the_line + '</blockquote></li>\n'
 
 # Now record the new line to the index file.
 the_lines.append(the_line)
-index_file = open(base_directory + current_run_directory + 'index.html', 'w')
+index_file = open('%s/%s/index.html' % (base_directory, current_run_directory), 'w')
 index_file.writelines(the_lines)
 index_file.close()
