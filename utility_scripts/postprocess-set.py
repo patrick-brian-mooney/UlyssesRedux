@@ -60,26 +60,20 @@ try:
     os.chdir(git_repo_path)
     current_git_branch = subprocess.check_output(['git symbolic-ref --short HEAD'], shell=True).decode().split('\n')[0]
     print("\n\nCurrent git branch is:\n   " + current_git_branch)
-    if input('Sync code to Git-watched repository? ').lower()[0] == 'y':
-        # This next call syncs the code to git_repo_path, patching it to remove authentication tokens
-        subprocess.check_call(['/UlyssesRedux/code/utility_scripts/sync-code.sh'], shell=True)
-        print('\n\nINFO: OK, synced.')
-        # Assume that syncing the code may also mean we want to commit and push it.
-        print("\n\nReminder: current git branch is:\n   " + current_git_branch)
-        if input('update Git repo with changed code files in this branch? ').lower()[0] == 'y':
-            subprocess.check_call(['git add -u'], shell=True)
-            current_git_status = subprocess.check_output(['git status'], shell=True)
-            print("Current git status is\n  " + current_git_status.decode())
-            if input('GIVEN THIS STATUS, do you want to commit? ').lower()[0] == 'y':
-                subprocess.check_call(['git commit'], shell=True)
-                if input('Push branch %s to remote server? ' % current_git_branch).lower()[0] == 'y':
-                    subprocess.check_call(['git push origin %s' % current_git_branch], shell=True)
-                    if input('Switch to master branch and merge these changes? ').lower()[0] == 'y':
-                        subprocess.check_call(['git checkout master'], shell=True)
-                        subprocess.check_call(['git merge %s' % current_git_branch], shell=True)
-                        print("WARNING: THE MASTER BRANCH IS NOW THE CURRENT BRANCH")
-                        if input('Push master branch to remote server? ').lower()[0] == 'y':
-                            subprocess.check_call(['git push origin master'], shell=True)
+    if input('update Git repo with changed code files in this branch? ').lower()[0] == 'y':
+        subprocess.check_call(['git add -u'], shell=True)
+        current_git_status = subprocess.check_output(['git status'], shell=True)
+        print("Current git status is\n  " + current_git_status.decode())
+        if input('GIVEN THIS STATUS, do you want to commit? ').lower()[0] == 'y':
+            subprocess.check_call(['git commit'], shell=True)
+            if input('Push branch %s to remote server? ' % current_git_branch).lower()[0] == 'y':
+                subprocess.check_call(['git push origin %s' % current_git_branch], shell=True)
+                if input('Switch to master branch and merge these changes? ').lower()[0] == 'y':
+                    subprocess.check_call(['git checkout master'], shell=True)
+                    subprocess.check_call(['git merge %s' % current_git_branch], shell=True)
+                    print("WARNING: THE MASTER BRANCH IS NOW THE CURRENT BRANCH")
+                    if input('Push master branch to remote server? ').lower()[0] == 'y':
+                        subprocess.check_call(['git push origin master'], shell=True)
 finally:
     os.chdir(oldpath)
 

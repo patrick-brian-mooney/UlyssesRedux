@@ -38,7 +38,7 @@ while not is_done:
 print('Remember, too, that you can edit %s manually. (Be careful about auto-substitution of smart quotes.)' % current_run_data_path)
 
 # OK, write the new dictionary
-with open(current_run_data_path, mode='w') as current_run_data_file:
+with open(current_run_data_path, 'w') as current_run_data_file:
     writer = csv.writer(current_run_data_file)
     for which_key in current_run_data:
         writer.writerow([which_key, current_run_data[which_key]])

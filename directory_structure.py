@@ -4,10 +4,15 @@
 # Basic local filesystem parameters ...
 base_directory                      = "/UlyssesRedux"
 current_run_directory               = "current-run"
+
+stats_directory                     = 'stats'
+
 scripts_directory                   = "code"
 daily_scripts_directory             = "chapter_scripts"
-stats_directory                     = 'stats'
 utility_scripts_directory           = 'utility_scripts'
+
+corpora_directory                   = 'corpora'
+ulysses_corpus_directory            = 'joyce/ulysses'
 
 markov_generator_path               = '%s/%s/markov_sentence_generator' % (base_directory, scripts_directory)
 
@@ -29,8 +34,10 @@ github_branch_base_path             = 'https://github.com/patrick-brian-mooney/U
 
 
 # Now, paths related to corpora and subcorpora for individual chapter scripts.
-ulysses_chapters_base_path          = '/UlyssesRedux/corpora/joyce/ulysses/'
+current_run_corpus_directory        = '%s/%s/current-run/' % (base_directory, corpora_directory)    # Files named 01.txt, 02.txt, etc.
+unsorted_corpus_directory           = '%s/%s/unsorted/' % (base_directory, corpora_directory)       # Files named whatever, for evaluation.
 
+ulysses_chapters_base_path          = '%s/%s/%s/' % (base_directory, corpora_directory, ulysses_corpus_directory)
 telemachus_base_text_path           = '%s/01.txt' % ulysses_chapters_base_path
 nestor_base_text_path               = '%s/02.txt' % ulysses_chapters_base_path
 proteus_base_text_path              = '%s/03.txt' % ulysses_chapters_base_path

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 """Patrick Mooney's Markov sentence generator: generates random (but often
 intelligible) text based on a frequency analysis of one or more existing texts.
 It is based on Harry R. Schwartz's Markov sentence generator, but is intended
@@ -10,11 +12,11 @@ for more details.
 USAGE:
 
   ./sentence_generator.py [options] -i FILENAME [-i FILENAME ] | -l FILENAME
- 
+
 sentence_generator.py needs existing text to use as the basis for the text that
 it generates. You must either use -l to specify a file containing compiled
 probability data, saved with -o on a previous run, or else must specify at
-least one plain-text file (with -i or --input) for this purpose. 
+least one plain-text file (with -i or --input) for this purpose.
 
 It can also be imported by a Python 3 script. A typical, fairly simple use
 might be something like:
@@ -53,17 +55,17 @@ COMMAND-LINE OPTIONS
       Larger numbers will increasingly result in the script just coughing up
       whole sentences from the original source texts, which may or may not be
       what you want.
-      
-      You cannot specify a chain length with this option if you are loading 
+
+      You cannot specify a chain length with this option if you are loading
       generated probability data from a previous run with -l or --load, because
       the probability data was compiled with chains of a certain length on that
       previous run, and that length is the length that will be used when you
       load the data. If you need to use a different chain length, you also need
       to re-generate the probability data by re-loading the files with -i or
       --input.
-      
+
       The default Markov chain length, if not overridden with this parameter,
-      is one. 
+      is one.
 
   -i FILENAME, --input=FILENAME
       Specify an input file to use as the basis of the generated text. You can
@@ -72,16 +74,16 @@ COMMAND-LINE OPTIONS
       of the input files. If you are going to be regularly calling the script
       with the same input files, consider saving the probability data with -o,
       then loading that data with -l on subsequent runs; loading pre-compiled
-      probability data with -l is much faster than re-generating it with -i. 
-      
-      You can specify -i or --input multiple times, but you cannot use both 
+      probability data with -l is much faster than re-generating it with -i.
+
+      You can specify -i or --input multiple times, but you cannot use both
       -i / --input and -l / --load: you need to EITHER load pre-generated
       probability data, OR ELSE generate it fresh from plain-text files. (The
       reason for this is that, once all of the input files have been processed,
       the program discards some data that would be necessary to combine the
       file with other files in order to process the chains more efficiently,
       and it is these postprocessed chains that are saved with -o / --output.)
-      
+
       sentence_generator.py ONLY understands PLAIN TEXT files (not HTML. not
       markdown. not Microsoft Word. not mailbox files. not RTF. Just plain
       text). Trying to feed it anything else will either fail or produce
@@ -107,10 +109,10 @@ COMMAND-LINE OPTIONS
       re-generating the data on every run by specifying the same input files
       with -i. However, if the Markov length is greater than 1, the generated
       chains are notably larger than the individual files.
-      
+
       This option does NOT specify an output file into which the generated text
       is saved. To do that, use shell redirection, e.g. by doing:
-          
+
           ./sentence_generator -i somefile.txt > outputfile.txt
 
   -c NUM, --count=NUM
@@ -124,26 +126,41 @@ COMMAND-LINE OPTIONS
       Currently unimplemented.
 
   --html
-      Wrap paragraphs of text output by the program with <p> ... </p>. It does
-      NOT generate a complete, formally valid HTML document (which would
-      involve generating a heading and title, among other things), but rather
-      generates an HTML fragment that you can insert into another HTML
-      document, as you wish. 
+      Wrap paragraphs of text output by the program with HTML paragraph tags.
+      It does NOT generate a complete, formally valid HTML document (which
+      would involve generating a heading and title, among other things), but
+      rather generates an HTML fragment that you can insert into another HTML
+      document, as you wish.
 
 This program is licensed under the GPL v3 or, at your option, any later
 version. See the file LICENSE.md for a copy of this licence.
 """
 
-import re
-import random
-import sys
-import pickle
-import getopt
-import pprint
+import re, random, sys, pickle, getopt, pprint
 
 import patrick_logger  # From https://github.com/patrick-brian-mooney/personal-library
 from patrick_logger import log_it
 
+# Set up some constants
+patrick_logger.verbosity_level = 0  # Bump above zero to get more verbose messages about processing and to skip the
+# "are we running on a webserver?" check.
+
+punct_with_space_after = r'.,\:!?;'
+sentence_ending_punct = r'.!?'
+punct_with_no_space_before = r'.,!?;—․\-\:'
+punct_with_no_space_after = r'—\-․'     # Note that last character is U+2024, "one-dot leader".
+word_punct = r"'’❲❳%"                   # Punctuation marks to be considered part of a word.
+token_punct = r".,\:\-!?;—"             # These punctuation marks also count as tokens.
+
+final_substitutions = [     # list of lists: each [search_string, replace_string]
+    ['--', '—'],
+    ['...', '…'],
+    ['․', '.'],             # replace one-dot leader with period
+    ['..', '.'],
+    [" ' ", ''],
+    ["\n' ", ''],
+    ["<p>'", '<p>']
+]
 
 # Schwartz's version stored mappings globally to save copying time, but this
 # makes the code less flexible for my purposes; still, I've kept his
@@ -164,19 +181,20 @@ from patrick_logger import log_it
 # starts: a list of words that can begin sentences. Initially an empty list, []
 # Contains the set of words that can start sentences
 
-patrick_logger.verbosity_level = 0
-
 def print_usage():
     """Print a usage message to the terminal"""
-    patrick_logger.log_it("INFO: print_usage() was called")
+    patrick_logger.log_it("INFO: print_usage() was called", 2)
+    print('\n\n')
     print(__doc__)
 
 def fix_caps(word):
     """HRS initially said:
-    We want to be able to compare words independent of their capitalization.
-    
+    "We want to be able to compare words independent of their capitalization."
+
     I disagree, though, so I'm commenting out this routine to see how that plays
     out.
+    
+    Schwartz further said:
     # Ex: "FOO" -> "foo"
     if word.isupper() and word != "I":
         word = word.lower()
@@ -199,8 +217,7 @@ def word_list(filename):
     """Returns the contents of the file, split into a list of words and
     (some) punctuation."""
     the_file = open(filename, 'r')
-    word_list = [fix_caps(w) for w in re.findall(r"[\w']+|[.,!?;—․]", the_file.read())]
-    # Note that last character is U+2024, "one-dot leader"; I substitute it in for a non-sentence-ending-period sometimes.
+    word_list = [fix_caps(w) for w in re.findall(r"[\w%s]+|[%s]" % (word_punct, token_punct), the_file.read())]
     the_file.close()
     return word_list
 
@@ -235,7 +252,7 @@ def buildMapping(word_list, markov_length):
             history = word_list[i - markov_length + 1 : i + 1]
         follow = word_list[i + 1]
         # if the last elt was a sentence-ending punctuation, add the next word to the start list
-        if history[-1] in ".!?" and follow not in ".,!?;":
+        if history[-1] in sentence_ending_punct and follow not in punct_with_space_after:
             starts.append(follow)
         addItemToTempMapping(history, follow, the_temp_mapping)
     # Normalize the values in the_temp_mapping, put them into mapping
@@ -255,7 +272,8 @@ def next(prevList, the_mapping):
     try:
         while to_hash_key(prevList) not in the_mapping:
             prevList.pop(0)
-    except IndexError:  # If we somehow wind up with an empty list (shouldn't happen), then just end the sentence there to force us to start over.
+    except IndexError:  # If we somehow wind up with an empty list (shouldn't happen), then just end the sentence to
+        # force us to start a new sentence.
         retval = "."
     # Get a random word from the_mapping, given prevList, if prevList isn't empty
     else:
@@ -274,14 +292,14 @@ def genSentence(markov_length, the_mapping, starts):
     curr = random.choice(starts)
     sent = curr.capitalize()
     prevList = [curr]
-    # Keep adding words until we hit a period
-    while curr not in ".?!":
+    # Keep adding words until we hit a period, exclamation point, or question mark
+    while curr not in sentence_ending_punct:
         curr = next(prevList, the_mapping)
         prevList.append(curr)
         # if the prevList has gotten too long, trim it
         if len(prevList) > markov_length:
             prevList.pop(0)
-        if curr not in ".,!?;—․":
+        if curr not in punct_with_no_space_before and (len(prevList) < 2 or prevList[-2] not in punct_with_no_space_after):     # reminder: Python short-circuits
             sent += " " # Add spaces between words (but not punctuation)
         sent += curr
     return sent
@@ -298,7 +316,7 @@ def store_chains(markov_length, the_starts, the_mapping, filename):
     except IOError as e:
         log_it("ERROR: Can't write chains to %s; the system said '%s'." % (filename, str(e)), 0)
     except pickle.PickleError as e:
-        log_it("ERROR: Can't write chains to %s because a pickling error occurred; the system said '%s'." % (filename, str(e)), 0) 
+        log_it("ERROR: Can't write chains to %s because a pickling error occurred; the system said '%s'." % (filename, str(e)), 0)
 
 def read_chains(filename):
     """Read the pickled chain-based data from a chains file."""
@@ -309,7 +327,7 @@ def read_chains(filename):
     except IOError as e:
         log_it("ERROR: Can't read chains from %s; the system said '%s'." % (filename, str(e)), 0)
     except pickle.PickleError as e:
-        log_it("ERROR: Can't read chains from %s because a pickling error occurred; the system said '%s'." % (filename, str(e)), 0) 
+        log_it("ERROR: Can't read chains from %s because a pickling error occurred; the system said '%s'." % (filename, str(e)), 0)
     return chains_dictionary['markov_length'], chains_dictionary['the_starts'], chains_dictionary['the_mapping']
 
 def gen_text(the_mapping, starts, markov_length=1, sentences_desired=1, is_html=False, paragraph_break_probability = 0.25):
@@ -338,10 +356,16 @@ def gen_text(the_mapping, starts, markov_length=1, sentences_desired=1, is_html=
                     the_text = the_text.strip() + "\n\n"
     if is_html:
         the_text = the_text + "</p>"
+    for which_replacement in final_substitutions:
+        the_text = the_text.replace(which_replacement[0], which_replacement[1])
     return the_text
 
 def main():
     # Set up variables for this run
+    if (not sys.stdout.isatty()) and (patrick_logger.verbosity_level < 1): # Assume we're running on a web server.
+        print('Content-type: text/html\n\n')
+        print("""<!doctype html><html><head><title>Patrick Mooney's Markov chain–based text generator</title><link rel="profile" href="http://gmpg.org/xfn/11" /></head><body><h1>Patrick Mooney's Markov chain–based text generator</h1><p>Code is available <a rel="muse" href="https://github.com/patrick-brian-mooney/markov-sentence-generator">here</a>.</p><pre>%s</pre></body></html>"""% __doc__)
+        sys.exit(0)
     markov_length = 1
     chains_file = ''
     starts = None
@@ -379,7 +403,7 @@ def main():
                     markov_length = int(args)
                 else:
                     log_it("ERROR: If you load previously generated chains with -l, that file specifies the\nMarkov chain length. It cannot be overriden with -m or --markov-length.")
-                    sys.exit(2) 
+                    sys.exit(2)
             elif opt in ('-o', '--output'):
                 chains_file = args          # Specify output file for compiled chains.
             elif opt in ('-l', '--load'):   # Load compiled chains.
@@ -387,7 +411,7 @@ def main():
                     markov_length, the_starts, the_mapping = read_chains(args)
                 else:
                     log_it("ERROR: you cannot both specify a chains file with -m and also load a chains file\nwith -l. If you specify a file with -l, that file contains the chain length.")
-                    sys.exit(2)     
+                    sys.exit(2)
             elif opt in ('-c', '--count'):
                 sentences_desired = int(args)    # How many sentences to generate (0 is "keep working until interrupted").
             elif opt in ('-i', '--input'):
@@ -401,6 +425,7 @@ def main():
                 is_html = True    # Wrap paragraphs of text that are output in <p> ... </p>.
     else:
         log_it('DEBUGGING: No command-line parameters', 2)
+        print_usage()
     log_it('DEBUGGING: verbosity_level after parsing command line is %d.' % patrick_logger.verbosity_level, 2)
     if starts == None or the_mapping == None:     # then no chains file was loaded.
         log_it("INFO: No chains file specified; parsing text files specified.", 1)

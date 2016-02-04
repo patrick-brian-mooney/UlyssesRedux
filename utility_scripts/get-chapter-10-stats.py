@@ -12,7 +12,6 @@ sys.path.append('/UlyssesRedux/code/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 
 
-stats_file_name = '/UlyssesRedux/stats/10-stats.csv'
 chapter_sections = 19
 
 stats_file = open(wandering_rocks_stats_file , 'w')

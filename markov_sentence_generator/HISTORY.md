@@ -18,3 +18,20 @@ v1.1, 29 November 2015
 * Added a more comprehensive usage message.
 * Added ability to store (-o) and load (-l) chains instead of creating them from scratch; this may help when runnng multiple times over the same text(s).
 * Added ability to add multiple texts with -i or --input.
+
+v1.1, 27 January 2016
+---------------------
+* Minor tweaks have happened here and there; I keep forgetting to update this HISTORY.md document.
+* Added encoding declaration.
+
+v1.1, 29 January 2016
+----------------------
+* Expanding what counds as punctuation tokens.
+
+v1.1, 2 February 2016
+---------------------
+Still tweaking punctuation settings.
+
+v1.1, 3 February 2016.
+----------------------
+Pulled regex patterns to the front of the file, as constants. (Well, Python doesn't really have constants. Still.) Still tweaking the "what counts as a word?" question.

@@ -19,28 +19,22 @@ import importlib
 sys.path.append('/UlyssesRedux/code/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 
-from tumblpy import Tumblpy
-
 import patrick_logger       # From https://github.com/patrick-brian-mooney/personal-library
 from patrick_logger import log_it
 
+import social_media         # From https://github.com/patrick-brian-mooney/personal-library
+from social_media_auth import ulysses_client
+
 patrick_logger.verbosity_level = 3
 
-# First, set up some parameters.
-# Web parameters ...
+# First, set up parameters.
 blog_url = 'http://ulyssesredux.tumblr.com/'
-
-# Tumblr authentication constants:
-the_client = Tumblpy( 'FILL ME IN',
-  'FILL ME IN',
-  'FILL ME IN',
-  'FILL ME IN')
 
 # Some utility routines
 
 def out_of_content_warning():
     """Remind me that we're out of content."""
-    log_it("WARNING: There's work to be done! You have to reset the state to get ulyssesredux.tumblr.com working again! A full Ulysses project is done and needs to be cleared!")
+    log_it("WARNING: There's work to be done! You have to reset the blog state on ulyssesredux.tumblr.com to get it working again! A full Ulysses project is done and needs to be cleared!")
     log_it("    REMINDER: make this a more prominent warning!", 2)  # For now
     sys.exit(2)
 
@@ -96,11 +90,9 @@ log_it("INFO: tags are %s." % str(recurring_tags + temporary_tags), 2)
 
 # All right, post this content
 log_it('\nINFO: Attempting to post the content', 1)
-the_status = the_client.post('post', blog_url=blog_url, params={'type': 'text', 'tags': ', '.join(the_tags), 'title': the_title, 'body': the_content})
+the_status = social_media.tumblr_text_post(ulysses_client, the_tags, the_title, the_content)
 log_it('\nINFO: the_status is: ' + pprint.pformat(the_status), 2)
 if patrick_logger.verbosity_level >= 2: dump(the_status)
-log_it('\nINFO: the_client is: ', 3)
-if patrick_logger.verbosity_level >= 3: dump(the_client)
 
 new_post_url = blog_url + "post/" + str(the_status['id'])
 
