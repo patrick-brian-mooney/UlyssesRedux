@@ -43,7 +43,7 @@ def dump(obj):
     print("obj.%s = %s" % (attr, getattr(obj, attr)))
 
 try:
-    index_file = open('%s/%s/index.html' %(base_directory, current_run_directory), 'r')
+    index_file = open('%s/index.html' % current_run_directory, 'r')
     the_lines = index_file.readlines()
     which_script = 1 + len(the_lines)   # If so far we've got, say, six lines in the file, we need to run script #7.
     index_file.close()

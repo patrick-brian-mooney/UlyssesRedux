@@ -3,7 +3,7 @@
 
 # Basic local filesystem parameters ...
 base_directory                      = "/UlyssesRedux"
-current_run_directory               = "current-run"
+current_run_directory               = "%s/current-run" % base_directory
 
 stats_directory                     = 'stats'
 
