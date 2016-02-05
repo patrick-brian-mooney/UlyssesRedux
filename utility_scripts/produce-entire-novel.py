@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Produces 18 chapters at once. Then it runs the postprocessing script, which (in
-turn) offers the chance to set up the next run."""
+turn) offers the chance to set up the next run.
+
+This program is licensed under the GPL v3 or, at your option, any later
+version. See the file LICENSE.md for a copy of this licence.
+"""
 
 import subprocess
 

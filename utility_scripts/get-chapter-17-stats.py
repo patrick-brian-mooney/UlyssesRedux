@@ -6,8 +6,14 @@ relevant to the script 17.py. Makes a lot of assumptions about the structure of
 the text file it's processing, including the assumption of one paragraph per
 line with no blank lines.
 
-usage: ./get_chapter_17_stats.py.
+usage:
+
+    ./get_chapter_17_stats.py
+
+This program is licensed under the GPL v3 or, at your option, any later
+version. See the file LICENSE.md for a copy of this licence.
 """
+
 import sys, os, re
 sys.path.append('/UlyssesRedux/code/')
 from directory_structure import *           # Gets us the listing of file and directory locations.

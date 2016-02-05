@@ -4,7 +4,12 @@
 sorting criterion is simply that I've preprocessed Eumaeus so that the
 questions begin with four spaces, the answers don't.
 
-usage: ./get_chapter_17_stats.py.
+usage:
+
+    ./get_chapter_17_stats.py
+
+This program is licensed under the GPL v3 or, at your option, any later
+version. See the file LICENSE.md for a copy of this licence.
 """
 
 import sys

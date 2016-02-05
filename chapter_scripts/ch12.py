@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Script to create the text generated based on the first chapter of Joyce's
-Ulysses, 'Cyclops.' Currently, just generates 642 sentences based on the text
-of 'Cyclops', aiming for an average paragraph length of 4.04, which is the
+Ulysses, 'Cyclops.' Currently, just generates 1663 sentences based on the text
+of 'Cyclops', aiming for an average paragraph length of 2.88, which is the
 actual number of sentences and average paragraph length from that chapter.
 
 A Markov length of 3 seems to work well here, according to insufficient tests
 evaluated informally.
+
+This program is licensed under the GPL v3 or, at your option, any later
+version. See the file LICENSE.md for a copy of this licence.
 """
 
 import sys

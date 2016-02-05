@@ -6,6 +6,9 @@ is the actual number of sentences and average paragraph length from that chapter
 
 A Markov length of 2 seems to work well here, according to insufficient tests
 evaluated informally.
+
+This program is licensed under the GPL v3 or, at your option, any later
+version. See the file LICENSE.md for a copy of this licence.
 """
 
 import sys

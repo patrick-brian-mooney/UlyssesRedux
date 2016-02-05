@@ -6,6 +6,9 @@ number of sentences as the corresponding section of Joyce's chapter; the text
 used as the basis for the Markov chains in each section is not just the
 corresponding section of Joyce's chapter, but also the section before and after
 (wrapping around at the beginning and end).
+
+This program is licensed under the GPL v3 or, at your option, any later
+version. See the file LICENSE.md for a copy of this licence.
 """
 
 import sys

@@ -18,6 +18,9 @@ Currently, this script performs the following actions:
       copy of my website to the server, not just the Ulysses Redux content (and
       so I sometimes say 'no' if there are other, incomplete changes in process).
       * Currently, it's probably wise to delay answering this question "yes"
+
+This program is licensed under the GPL v3 or, at your option, any later
+version. See the file LICENSE.md for a copy of this licence.
 """
 
 debugging_flag = True

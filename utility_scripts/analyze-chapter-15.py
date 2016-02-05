@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Produces a structure file to describe the 'Circe' chapter of Ulysses, plus
-   individual corpora for the script 15.py to work with."""
+individual corpora for the script 15.py to work with.
+
+This program is licensed under the GPL v3 or, at your option, any later
+version. See the file LICENSE.md for a copy of this licence.
+"""
 
 import re
 

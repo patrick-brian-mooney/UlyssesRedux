@@ -23,6 +23,9 @@ measurement in question, but seeking the closest approximation to some ideal
 value.
 
 I'll have to play with these ideas later. One thing at a time.
+
+This program is licensed under the GPL v3 or, at your option, any later
+version. See the file LICENSE.md for a copy of this licence.
 """
 
 import sys, re, glob, csv, os

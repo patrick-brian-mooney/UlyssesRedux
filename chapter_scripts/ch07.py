@@ -6,6 +6,9 @@ code/utility_scripts/get-chapter-7-stats.py, which classifies the paragraphs of
 this chapter into three categories: headlines, spoken phrases, and other; and
 aims to replicate the structure of that chapter by reproducing the same
 paragraph types, with similar lengths, in the same order.
+
+This program is licensed under the GPL v3 or, at your option, any later
+version. See the file LICENSE.md for a copy of this licence.
 """
 
 # First, set up constants

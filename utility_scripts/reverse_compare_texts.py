@@ -2,6 +2,9 @@
 """Does the same thing as compare_texts.py, but in the opposite order: for each
 /UlyssesRedux/corpora/unsorted, determines similarity ranks of each chapter of
 /Ulysses/ to that text under comparison.
+
+This program is licensed under the GPL v3 or, at your option, any later
+version. See the file LICENSE.md for a copy of this licence.
 """
 
 import sys, glob

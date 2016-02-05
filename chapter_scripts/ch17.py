@@ -7,6 +7,9 @@ this chapter into two categories: questions and answers; and aims to replicate
 the structure of that chapter by reproducing the same calling separate routines
 that produce 'questions' and 'answers' of appropriate lengths drawn from the
 separate base corpora.
+
+This program is licensed under the GPL v3 or, at your option, any later
+version. See the file LICENSE.md for a copy of this licence.
 """
 
 import sys
