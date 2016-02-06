@@ -60,10 +60,10 @@ the_title = ulysses_chapters[ which_script - 1 ].strip()
 
 recurring_tags = ['Ulysses (novel)', 'James Joyce', '1922', 'automatically generated text', 'Patrick Mooney', the_title]
 temporary_tags = [].copy()
-with open('%s/%s/temporary-tags' % (base_directory, current_run_directory)) as temp_tags_file:
+with open('%s/temporary-tags' % current_run_directory) as temp_tags_file:
     for which_tag in temp_tags_file:
         temporary_tags.append(which_tag.strip())
-the_tags = recurring_tags + temporary_tags
+the_tags = ', '.join(recurring_tags + temporary_tags)
 
 if which_script not in range(1,19):
     out_of_content_warning()
@@ -114,6 +114,6 @@ the_line = the_line + '</blockquote></li>\n'
 
 # Now record the new line to the index file.
 the_lines.append(the_line)
-index_file = open('%s/%s/index.html' % (base_directory, current_run_directory), 'w')
+index_file = open('%s/index.html' % current_run_directory, 'w')
 index_file.writelines(the_lines)
 index_file.close()
