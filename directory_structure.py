@@ -11,8 +11,8 @@ current_run_directory               = "%s/current-run" % base_directory
 
 stats_directory                     = 'stats'
 
-scripts_directory                   = "code"
-daily_scripts_directory             = "chapter_scripts"
+scripts_directory                   = "%s/code" % base_directory
+daily_scripts_directory             = "chapter_scripts"            # Note: NOT an absolute path.
 utility_scripts_directory           = 'utility_scripts'
 
 corpora_directory                   = 'corpora'
@@ -23,11 +23,11 @@ markov_generator_path               = '%s/%s/markov_sentence_generator' % (base_
 daily_script_path                   = '%s/%s/daily_script.py' % (base_directory, scripts_directory)
 postprocessing_script               = '%s/%s/%s/postprocess-set.py' % (base_directory, scripts_directory, utility_scripts_directory)
 
-toc_fragment                        = "%s/%s/index.html" % (base_directory, current_run_directory)
-current_run_data_path               = '%s/%s/data.csv' % (base_directory, current_run_directory)
-temporary_tags_file                 = '%s/%s/temporary-tags' % (base_directory, current_run_directory)
+toc_fragment                        = "%s/index.html" % current_run_directory
+current_run_data_path               = '%s/data.csv' % current_run_directory
+temporary_tags_file                 = '%s/temporary-tags' % current_run_directory
 
-git_repo_path                       = '/home/patrick/Documents/programming/python projects/UlyssesRedux/'
+git_repo_path                       = scripts_directory
 
 # Paths for things in the local copy of the website
 webpage_contents_directory          = '/~patrick/projects/UlyssesRedux/contents/'
