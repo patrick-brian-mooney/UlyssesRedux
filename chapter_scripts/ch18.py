@@ -13,7 +13,7 @@ This program is licensed under the GPL v3 or, at your option, any later
 version. See the file LICENSE.md for a copy of this licence.
 """
 
-import datetime, import sys
+import datetime, sys
 
 sys.path.append('/UlyssesRedux/code/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
@@ -27,8 +27,9 @@ sentences_per_paragraph = 1.2222222222        # On average, in this chapter
 mixin_texts_dir = '%s18' % current_run_corpus_directory
 
 def write_story():
-    return write_generic_story(chain_length, chapter_length, sentences_per_paragraph, nestor_base_text_path, mixin_texts_dir) +
-        "\n\nTrieste-Zurich-Paris 1914-1921\nSanta Barbara 2015–%s" % datetime.datetime.now().year
+    return write_generic_story(chain_length, chapter_length, sentences_per_paragraph, penelope_base_text_path, mixin_texts_dir) +"""
+
+Trieste-Zurich-Paris 1914-1921\nSanta Barbara 2015–%s""" % datetime.datetime.now().year
 
 
 if __name__ == "__main__":

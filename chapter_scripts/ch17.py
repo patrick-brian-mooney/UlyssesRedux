@@ -17,7 +17,7 @@ This program is licensed under the GPL v3 or, at your option, any later
 version. See the file LICENSE.md for a copy of this licence.
 """
 
-import sys
+import sys, glob
 sys.path.append('/UlyssesRedux/code/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 from chapter_scripts.generic_chapter import buildMapping_withMixins
@@ -39,7 +39,7 @@ log_it("INFO: Imports successful, moving on", 2)
 # Create the necessary sets of Markov chains once, at the beginning of the script's run
 
 questions_starts, questions_mapping = buildMapping(word_list(ithaca_questions_path), markov_length=questions_chain_length)
-answers_starts, answers_mapping = buildMapping_withMixins(answers_chain_length, ithaca_answers_path, mixin_texts_dir)
+answers_starts, answers_mapping = buildMapping_withMixins(answers_chain_length, [ithaca_answers_path], glob.glob('%s/*txt' %mixin_texts_dir))
 
 log_it("INFO: built mappings from both question and answer files, moving on", 2)
 

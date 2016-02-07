@@ -26,7 +26,7 @@ sentences_per_paragraph = 2.0317297851        # On average, in this chapter
 mixin_texts_dir = '%s09' % current_run_corpus_directory
 
 def write_story():
-    return write_generic_story(chain_length, chapter_length, sentences_per_paragraph, nestor_base_text_path, mixin_texts_dir)
+    return write_generic_story(chain_length, chapter_length, sentences_per_paragraph, scylla_and_charybdis_base_text_path, mixin_texts_dir)
 
 if __name__ == "__main__":
     debugging = True

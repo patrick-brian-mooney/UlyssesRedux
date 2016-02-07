@@ -159,7 +159,8 @@ final_substitutions = [     # list of lists: each [search_string, replace_string
     ['..', '.'],
     [" ' ", ''],
     ['―-', '―'],
-    ["\n' ", ''],
+    [':—', ': '],
+    ["\n' ", '\n'],           # newline--single quote--space
     ["<p>'", '<p>']
 ]
 

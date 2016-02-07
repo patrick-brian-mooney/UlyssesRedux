@@ -20,7 +20,7 @@ ulysses_corpus_directory            = 'joyce/ulysses'
 
 markov_generator_path               = '%s/markov_sentence_generator' % scripts_directory
 
-daily_script_path                   = '%s/%s/daily_script.py' % (base_directory, scripts_directory)
+daily_script_path                   = '%s/daily_script.py' % scripts_directory
 postprocessing_script               = '%s/%s/%s/postprocess-set.py' % (base_directory, scripts_directory, utility_scripts_directory)
 
 toc_fragment                        = "%s/index.html" % current_run_directory

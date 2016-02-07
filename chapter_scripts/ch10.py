@@ -11,29 +11,32 @@ This program is licensed under the GPL v3 or, at your option, any later
 version. See the file LICENSE.md for a copy of this licence.
 """
 
-import sys
+from pprint import pformat
+import sys, glob
 sys.path.append('/UlyssesRedux/code/')
-from directory_structure import *           # Gets us the listing of file and directory locations.
 
-from pprint import pprint, pformat
+from directory_structure import *           # Gets us the listing of file and directory locations.
 
 sys.path.append(markov_generator_path)
 from sentence_generator import *
+from chapter_scripts.generic_chapter import buildMapping_withMixins
 
 import patrick_logger # From https://github.com/patrick-brian-mooney/personal-library
 from patrick_logger import log_it
 
+patrick_logger.verbosity_level = 0
+
 # First, set up constants
 chain_length = 2
 sections_in_chapter = 19
+mixin_texts_dir = '%s10' % current_run_corpus_directory
 
-patrick_logger.verbosity_level = 0
-
-output_text = [].copy()
 
 def write_story():
+    output_text = [][:]
+
     # First, set up table of filenames
-    section_filenames = [].copy()
+    section_filenames = [][:]
     for which_section in range(1, 1 + sections_in_chapter):
         section_filenames.append('%s/%02d.txt' % (wandering_rocks_sections_path, which_section))
 
@@ -55,9 +58,14 @@ def write_story():
             raise IndexError("The stats file for Wandering Rocks is corrupt: section number %d encountered out of order." % sec)
         log_it("    generating based on sections %d, %d, %d." % (1 + (which_section + 17) % 19, which_section, (which_section + 1) % 19), 2)
         log_it("      asking for %d sentences with paragraph break probability of %f." % (sents, pars/sents))
-        the_word_list = word_list(section_filenames[1 + (which_section + 17) % 19 - 1]) + word_list(
-                 section_filenames[which_section - 1]) +  word_list(section_filenames[(which_section + 1) % 19 - 1])
-        starts, the_mapping = buildMapping(the_word_list, markov_length=chain_length)
+        
+        which_rocks_sections = [
+                                 section_filenames[1 + (which_section + 17) % 19 - 1],
+                                 section_filenames[which_section - 1],
+                                 section_filenames[(which_section + 1) % 19 - 1]
+                                ]
+        starts, the_mapping = buildMapping_withMixins(chain_length, which_rocks_sections, glob.glob('%s/*txt' % mixin_texts_dir))
+
         output_text.append(gen_text(the_mapping, starts, markov_length=chain_length, sentences_desired=sents,
                 paragraph_break_probability=(pars/sents)))
 

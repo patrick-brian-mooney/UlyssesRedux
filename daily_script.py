@@ -91,7 +91,7 @@ log_it(dump(the_status), 2)
 new_post_url = blog_url + "post/" + str(the_status['id'])
 
 # Assemble some text to write to the index file
-html_tags = ' | '.join([ '<a rel="me muse" href="%s">%s</a>' % (blog_url + "tagged/" + the_tag , the_tag) for the_tag in the_tags ])
+html_tags = ' | '.join([ '<a rel="me muse" href="%s">%s</a>' % (blog_url + "tagged/" + the_tag , the_tag) for the_tag in the_tags.split(', ') ])
 
 # Avoid using a really really long first sentence as a summary (a problem sometimes in tests with "Penelope").
 while len(first_sentence) > 600 or len(first_sentence.split(' ')) > 150:

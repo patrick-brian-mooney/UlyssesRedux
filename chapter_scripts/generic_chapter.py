@@ -16,16 +16,20 @@ sys.path.append(markov_generator_path)
 from sentence_generator import *
 
 def buildMapping_withMixins(chain_length,               # In words
-                            joyce_text_path,            # Path to file representing Joyce's text under consideration
-                            mixin_texts_dir,            # Loc of mixin texts
+                            joyce_text_list,            # Path to file representing Joyce's text under consideration
+                            mixin_texts_list,           # Loc of mixin texts
                             joyce_ratio=1.4):           # How much Joyce relative to mixins?
-    joyce_text_length = os.stat(joyce_text_path).st_size
-    mixin_texts_length = 0
-    for which_file in glob.glob('%s/*txt' % mixin_texts_dir):
+    joyce_text_length = mixin_texts_length = 0
+    for which_file in joyce_text_list:
+        joyce_text_length += os.stat(which_file).st_size
+    for which_file in mixin_texts_list:
         mixin_texts_length += os.stat(which_file).st_size
 
-    the_word_list = word_list(joyce_text_path) * int(round( (mixin_texts_length / joyce_text_length) * joyce_ratio ))
-    for the_file in glob.glob('%s/*txt' % mixin_texts_dir):
+    the_word_list = [][:]
+    for the_file in joyce_text_list:
+        the_word_list += word_list(the_file) 
+    the_word_list *= int(round( (mixin_texts_length / joyce_text_length) * joyce_ratio ))
+    for the_file in mixin_texts_list:
         the_word_list += word_list(the_file)
     return buildMapping(the_word_list, markov_length=chain_length)
 
@@ -36,7 +40,7 @@ def write_generic_story(chain_length,
                         joyce_text_path,
                         mixin_texts_dir,
                         joyce_ratio=1.4):
-    starts, the_mapping = buildMapping_withMixins(chain_length, joyce_text_path, mixin_texts_dir, joyce_ratio)
+    starts, the_mapping = buildMapping_withMixins(chain_length, [joyce_text_path], glob.glob('%s/*txt' % mixin_texts_dir), joyce_ratio)
     return gen_text(the_mapping, starts, markov_length=chain_length, sentences_desired=chapter_length,
                paragraph_break_probability=(1/sentences_per_paragraph))
 

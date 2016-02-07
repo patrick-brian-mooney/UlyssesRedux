@@ -38,7 +38,7 @@ def write_story():
 
     for which_corpus in glob.glob(circe_corpora_path + '*txt'):
         log_it('  INFO: processing "%s".' % which_corpus, 2)
-        starts, the_mapping = buildMapping_withMixins(chain_length, which_corpus, mixin_texts_dir)
+        starts, the_mapping = buildMapping_withMixins(chain_length, [which_corpus], glob.glob('%s/*txt' % mixin_texts_dir))
         corpus_name = os.path.basename(which_corpus)[:-4]
         corpora[corpus_name] = [starts, the_mapping]
 
@@ -66,7 +66,7 @@ def write_story():
             # Two parts: a name of a speaker (or "STAGE" if it's a paragraph of stage directions), then a series of codes for "chunks" of the paragraph.
             # A "chunk" is a number of sentences. If the number is preceded by opening parens, it's an intraparagraph stage direction.
             # Parts of the line, and chunk descriptions, are separated by vertical bars (pipe characters), hence the .psv extension.
-            log_it('INFO: Processing coded line "%s".' % the_encoded_paragraph, 2)
+            log_it('INFO: Processing coded line "%s".' % the_encoded_paragraph.strip(), 2)
             code_to_process = the_encoded_paragraph.split('|')
             speaker_name = code_to_process.pop(0)
             log_it('  speaker name is "%s".' % speaker_name, 2)
