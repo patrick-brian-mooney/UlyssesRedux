@@ -11,18 +11,13 @@ This program is licensed under the GPL v3 or, at your option, any later
 version. See the file LICENSE.md for a copy of this licence.
 """
 
-import sys
-import pprint
-import subprocess
-import datetime
-import math
-import re
-import importlib
+import sys, pprint, subprocess, datetime, math, re, importlib
 
 sys.path.append('/UlyssesRedux/code/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 
-import patrick_logger       # From https://github.com/patrick-brian-mooney/personal-library
+import patrick_logger, introspection       # From https://github.com/patrick-brian-mooney/personal-library
+from introspection import dump
 from patrick_logger import log_it
 
 import social_media         # From https://github.com/patrick-brian-mooney/personal-library
@@ -41,10 +36,6 @@ def out_of_content_warning():
     log_it("    REMINDER: make this a more prominent warning!", 2)  # For now
     sys.exit(2)
 
-def dump(obj):
-  for attr in dir(obj):
-    print("obj.%s = %s" % (attr, getattr(obj, attr)))
-
 try:
     index_file = open('%s/index.html' % current_run_directory, 'r')
     the_lines = index_file.readlines()
@@ -52,7 +43,7 @@ try:
     index_file.close()
 except FileNotFoundError:
     which_script = 1
-    the_lines = []
+    the_lines = [][:]
 
 # Post parameters
 ulysses_chapters = open('%s/chapter-titles.txt' % scripts_directory).readlines()
@@ -95,7 +86,7 @@ log_it("INFO: tags are %s." % str(recurring_tags + temporary_tags), 2)
 log_it('\nINFO: Attempting to post the content', 1)
 the_status = social_media.tumblr_text_post(ulysses_client, the_tags, the_title, the_content)
 log_it('\nINFO: the_status is: ' + pprint.pformat(the_status), 2)
-if patrick_logger.verbosity_level >= 2: dump(the_status)
+log_it(dump(the_status), 2)
 
 new_post_url = blog_url + "post/" + str(the_status['id'])
 

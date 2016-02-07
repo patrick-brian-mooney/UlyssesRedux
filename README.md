@@ -8,10 +8,6 @@ These scripts produce the content at UlyssesRedux.tumblr.com.
 
 They are available for your use under the GPL v3 or (at your choice) any later version.
 
-Project website: http://patrickbrianmooney.nfshost.com/~patrick/projects/UlyssesRedux/
+Quick links: [Project website](http://patrickbrianmooney.nfshost.com/~patrick/projects/UlyssesRedux/); [Author website](http://patrickbrianmooney.nfshost.com/~patrick/); [Contact the author](http://patrickbrianmooney.nfshost.com/~patrick/contact.html).
 
-Author website: http://patrickbrianmooney.nfshost.com/~patrick/
-
-Contact the author: http://patrickbrianmooney.nfshost.com/~patrick/contact.html
-
-More information will be available here eventually, I hope.
+More information will be available here eventually, I hope. In the meantime, I intermittently maintain a detail-oriented coding journal for this project [here](http://patrickbrianmooney.nfshost.com/~patrick/projects/UlyssesRedux/coding.html).

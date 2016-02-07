@@ -64,5 +64,5 @@ def write_story():
     return '\n*   *   *\n'.join(output_text)
 
 if __name__ == "__main__":
-    debugging = True
+    patrick_logger.verbosity_level = 3
     print(write_story())

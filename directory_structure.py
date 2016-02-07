@@ -41,7 +41,7 @@ github_branch_base_path             = 'https://github.com/patrick-brian-mooney/U
 current_run_corpus_directory        = '%s/%s/current-run/' % (base_directory, corpora_directory)    # Files in folders named 01/, 02/, etc.
 unsorted_corpus_directory           = '%s/%s/unsorted/' % (base_directory, corpora_directory)       # Files named whatever, for evaluation.
 
-ulysses_chapters_base_path          = '%s/%s/%s/' % (base_directory, corpora_directory, ulysses_corpus_directory)
+ulysses_chapters_base_path          = '%s/%s/%s' % (base_directory, corpora_directory, ulysses_corpus_directory)
 telemachus_base_text_path           = '%s/01.txt' % ulysses_chapters_base_path
 nestor_base_text_path               = '%s/02.txt' % ulysses_chapters_base_path
 proteus_base_text_path              = '%s/03.txt' % ulysses_chapters_base_path
