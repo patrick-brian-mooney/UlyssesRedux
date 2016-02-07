@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 """Script to create the text generated based on the seventeenth chapter of
-Joyce's Ulysses, 'Ithaca.' It relies on a simply formatted text file that summarizes
-an automated analysis of 'Ithaca' performed by the script at /UlyssesRedux/
-code/utility-scripts/get-chapter-17-stats.py, which classifies the paragraphs of
-this chapter into two categories: questions and answers; and aims to replicate
-the structure of that chapter by reproducing the same calling separate routines
-that produce 'questions' and 'answers' of appropriate lengths drawn from the
-separate base corpora.
+Joyce's Ulysses, 'Ithaca.' It relies on a simply formatted text file that
+summarizes an automated analysis of 'Ithaca' performed by the script at
+/UlyssesRedux/code/utility-scripts/get-chapter-17-stats.py, which classifies
+the paragraphs of this chapter into two categories: questions and answers; and
+aims to replicate the structure of that chapter by reproducing the same calling
+separate routines that produce 'questions' and 'answers' of appropriate lengths
+drawn from the separate base corpora.
+
+This script does not simply call generic_chapter.write_generic_story(), though
+it does rely on lower-level routines from that unit. Currently, mixin texts are
+only mixed in to the 'answers' sections of the text, not the 'questions'
+sections.
 
 This program is licensed under the GPL v3 or, at your option, any later
 version. See the file LICENSE.md for a copy of this licence.
@@ -15,6 +20,7 @@ version. See the file LICENSE.md for a copy of this licence.
 import sys
 sys.path.append('/UlyssesRedux/code/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
+from chapter_scripts.generic_chapter import buildMapping_withMixins
 
 sys.path.append(markov_generator_path)
 from sentence_generator import *
@@ -25,13 +31,16 @@ from patrick_logger import log_it
 # First, set up constants
 questions_chain_length = 1
 answers_chain_length = 2
+mixin_texts_dir = '%s17' % current_run_corpus_directory
 
 patrick_logger.verbosity_level = 0
 log_it("INFO: Imports successful, moving on", 2)
 
 # Create the necessary sets of Markov chains once, at the beginning of the script's run
+
 questions_starts, questions_mapping = buildMapping(word_list(ithaca_questions_path), markov_length=questions_chain_length)
-answers_starts, answers_mapping = buildMapping(word_list(ithaca_answers_path), markov_length=answers_chain_length)
+answers_starts, answers_mapping = buildMapping_withMixins(answers_chain_length, ithaca_answers_path, mixin_texts_dir)
+
 log_it("INFO: built mappings from both question and answer files, moving on", 2)
 
 # Unlike the 'Aeolus' script, this script makes no effort to enforce sticking within word-limit boundaries.
@@ -84,5 +93,5 @@ def write_story():
     return'\n'.join(chapter_paragraphs)
 
 if __name__ == "__main__":
-    debugging = True
+    patrick_logger.verbosity_level = 3
     print(write_story())

@@ -18,7 +18,7 @@ from sentence_generator import *
 def buildMapping_withMixins(chain_length,               # In words
                             joyce_text_path,            # Path to file representing Joyce's text under consideration
                             mixin_texts_dir,            # Loc of mixin texts
-                            joyce_ratio):               # How much Joyce relative to mixins?
+                            joyce_ratio=1.4):               # How much Joyce relative to mixins?
     joyce_text_length = os.stat(joyce_text_path).st_size
     mixin_texts_length = 0
     for which_file in glob.glob('%s/*txt' % mixin_texts_dir):
