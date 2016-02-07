@@ -7,6 +7,11 @@ this chapter into three categories: headlines, spoken phrases, and other; and
 aims to replicate the structure of that chapter by reproducing the same
 paragraph types, with similar lengths, in the same order.
 
+This script does NOT simply call the generic_chapter script, though it is in
+some ways very similar, and it makes me think that some refactoring of that
+would be useful. Not today (6 Feb 2016), though. Currently, mixin texts are
+used for non-headlines chunks only.
+
 This program is licensed under the GPL v3 or, at your option, any later
 version. See the file LICENSE.md for a copy of this licence.
 """
@@ -15,8 +20,9 @@ version. See the file LICENSE.md for a copy of this licence.
 headline_chain_length = 1
 nonheadline_chain_length = 2
 length_tolerance = 0.4      # e.g., 0.3 means the generated text can be up to 30% over or under the length of the requested text.
+joyce_ratio = 1.4           # Goal ratio of Joyce to non-Joyce text in the resulting chains. 
 
-import sys
+import os, glob, sys
 sys.path.append('/UlyssesRedux/code/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 
@@ -31,7 +37,17 @@ log_it("INFO: Imports successful, moving on", 2)
 
 # Create the necessary sets of Markov chains once, at the beginning of the script's run
 headlines_starts, headlines_mapping = buildMapping(word_list(aeolus_headlines_path), markov_length=headline_chain_length)
-nonheadlines_starts, nonheadlines_mapping = buildMapping(word_list(aeolus_nonheadlines_path), markov_length=nonheadline_chain_length)
+
+joyce_text_length = os.stat(aeolus_nonheadlines_path).st_size
+mixin_texts_length = 0
+for which_file in glob.glob('%s/07/*txt' % current_run_corpus_directory):
+    mixin_texts_length += os.stat(which_file).st_size
+
+the_word_list = word_list(aeolus_nonheadlines_path) * int(round( (mixin_texts_length / joyce_text_length) * joyce_ratio ))
+for the_file in glob.glob('%s/07/*txt' % current_run_corpus_directory):
+    the_word_list += word_list(the_file)
+nonheadlines_starts, nonheadlines_mapping = buildMapping(the_word_list, markov_length=nonheadline_chain_length)
+
 log_it("INFO: built mappings from both headlines and non-headlines files, moving on", 2)
 
 def getParagraph(num_sents, num_words, chain_length, mapping, starts):
@@ -40,9 +56,9 @@ def getParagraph(num_sents, num_words, chain_length, mapping, starts):
     maxl = (1 + length_tolerance) * num_words
     log_it("      getParagraph() called", 2)
     log_it("        num_sents: %d\n        num_words: %d\n        chain_length: %s" % (num_sents, num_words, chain_length), 3)
-    log_it("        looking for a sentence of %d to %d words" % (minl, maxl), 3)
+    log_it("        looking for a paragraph of %d to %d words" % (minl, maxl), 3)
     ret = ""
-    while not ( minl < len (ret.split(' ')) < maxl ):  # Keep trying until it's w/in acceptable length params
+    while not ( minl <= len (ret.split(' ')) <= maxl ):  # Keep trying until it's w/in acceptable length params
         ret = gen_text(mapping, starts, markov_length=chain_length, sentences_desired=num_sents, paragraph_break_probability=0)
         log_it("          length of generated text is %d words / %d characters" % (len(ret.split(' ')), len(ret)), 3)
         log_it("            generated sentence was '%s'." % ret, 4)
@@ -100,5 +116,5 @@ def write_story():
     return '\n'.join(chapter_paragraphs)
 
 if __name__ == "__main__":
-    debugging = True
+    patrick_logger.verbosity_level = 3
     print(write_story())

@@ -38,7 +38,7 @@ github_branch_base_path             = 'https://github.com/patrick-brian-mooney/U
 
 
 # Now, paths related to corpora and subcorpora for individual chapter scripts.
-current_run_corpus_directory        = '%s/%s/current-run/' % (base_directory, corpora_directory)    # Files named 01.txt, 02.txt, etc.
+current_run_corpus_directory        = '%s/%s/current-run/' % (base_directory, corpora_directory)    # Files in folders named 01/, 02/, etc.
 unsorted_corpus_directory           = '%s/%s/unsorted/' % (base_directory, corpora_directory)       # Files named whatever, for evaluation.
 
 ulysses_chapters_base_path          = '%s/%s/%s/' % (base_directory, corpora_directory, ulysses_corpus_directory)
