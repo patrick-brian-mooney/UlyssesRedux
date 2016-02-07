@@ -42,7 +42,6 @@ joyce_text_length = os.stat(aeolus_nonheadlines_path).st_size
 mixin_texts_length = 0
 for which_file in glob.glob('%s/07/*txt' % current_run_corpus_directory):
     mixin_texts_length += os.stat(which_file).st_size
-
 the_word_list = word_list(aeolus_nonheadlines_path) * int(round( (mixin_texts_length / joyce_text_length) * joyce_ratio ))
 for the_file in glob.glob('%s/07/*txt' % current_run_corpus_directory):
     the_word_list += word_list(the_file)

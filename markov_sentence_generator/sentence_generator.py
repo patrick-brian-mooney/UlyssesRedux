@@ -152,12 +152,13 @@ punct_with_no_space_after = r'—\-․'     # Note that last character is U+2024
 word_punct = r"'’❲❳%"                   # Punctuation marks to be considered part of a word.
 token_punct = r".,\:\-!?;—"             # These punctuation marks also count as tokens.
 
-final_substitutions = [     # list of lists: each [search_string, replace_string]
+final_substitutions = [     # list of lists: each [search_string, replace_string]. Substitutions occur in order specified.
     ['--', '—'],
     ['...', '…'],
     ['․', '.'],             # replace one-dot leader with period
     ['..', '.'],
     [" ' ", ''],
+    ['―-', '―'],
     ["\n' ", ''],
     ["<p>'", '<p>']
 ]

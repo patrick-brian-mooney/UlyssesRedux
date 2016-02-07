@@ -51,7 +51,7 @@ def get_appropriate_paragraph(structure_description):
     """Parse the coded lines in /UlyssesRedux/stats/17-stats.csv and produce an
     appropriate paragraph in response.
 
-    Currently, these lines have the following structure:
+    These lines have the following structure:
       * A one-character type code, one of:
         - '?', a question mark, indicating one of the questions in the
           question-and-answer pattern of 'Ithaca'; or
@@ -70,7 +70,7 @@ def get_appropriate_paragraph(structure_description):
     elif structure_description[0] == " ":
         return getAnswer(int(num_sents), int(num_words))
     else:
-        raise LookupError("Cannot interpret the Aeolus stats file located at %s:\n    line begins with unknown character '%s'." % (aeolus_stats_path, structure_description[0].encode()))
+        raise LookupError("Cannot interpret the 'Ithaca' stats file located at %s:\n    line begins with unknown character '%s'." % (ithaca_stats_path, structure_description[0].encode()))
 
 def write_story():
     chapter_paragraphs = []
