@@ -5,10 +5,7 @@ This program is licensed under the GPL v3 or, at your option, any later
 version. See the file LICENSE.md for a copy of this licence.
 """
 
-import os
-import glob
-import csv
-import subprocess
+import os, glob, csv, subprocess
 
 import sys
 sys.path.append('/UlyssesRedux/code/')
@@ -88,6 +85,11 @@ while not is_done:
         else: new_temporary_tags.append(the_input + '\n')
     is_done = (input('Are you satisfied with this group of tags? ') or "yes").lower()[0] == 'y'
 
-open(temporary_tags_file, 'w').writelines(new_temporary_tags)
+with open(temporary_tags_file, 'w') as temp_tags_file:
+    temp_tags_file.writelines(new_temporary_tags)
+
+print('\n')
+if (input('Remove all backup files ending in ~ from the entire "%s" directory? ' % base_directory) or "no").lower()[0] == 'y':
+    subprocess.call(['find %s -iname "*~" -print0 | xargs -0 rm' % base_directory])
 
 print("\n\nOK, we're done!")
