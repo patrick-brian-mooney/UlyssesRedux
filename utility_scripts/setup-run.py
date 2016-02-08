@@ -50,9 +50,6 @@ try:
     os.chdir(git_repo_path)
     current_git_branch = subprocess.check_output(['git symbolic-ref --short HEAD'], shell=True).decode().split('\n')[0]
     if (input('Current Git branch is "%s". Commit changes, push to remote, and switch to master branch? ' % current_git_branch) or "yes").lower()[0] == 'y':
-        if (input('Sync code from working directory first? ') or "yes").lower()[0] == 'y':
-            subprocess.check_call(['/UlyssesRedux/code/utility_scripts/sync-code.sh'], shell=True)
-            print('\n\nINFO: OK, synced.')
         subprocess.check_call(['git add -u'], shell=True)
         subprocess.call(['git commit'], shell=True)
         subprocess.check_call(['git push origin %s' % current_git_branch], shell=True)
