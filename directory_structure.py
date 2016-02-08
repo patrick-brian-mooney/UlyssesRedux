@@ -12,8 +12,8 @@ current_run_directory               = "%s/current-run" % base_directory
 stats_directory                     = 'stats'
 
 scripts_directory                   = "%s/code" % base_directory
-daily_scripts_directory             = "chapter_scripts"            # Note: NOT an absolute path.
-utility_scripts_directory           = 'utility_scripts'
+daily_scripts_directory             = "chapter_scripts"            # Note: NOT an absolute path. Intentionally so.
+utility_scripts_directory           = '%s/utility_scripts' % scripts_directory
 
 corpora_directory                   = 'corpora'
 ulysses_corpus_directory            = 'joyce/ulysses'
@@ -21,7 +21,7 @@ ulysses_corpus_directory            = 'joyce/ulysses'
 markov_generator_path               = '%s/markov_sentence_generator' % scripts_directory
 
 daily_script_path                   = '%s/daily_script.py' % scripts_directory
-postprocessing_script               = '%s/%s/%s/postprocess-set.py' % (base_directory, scripts_directory, utility_scripts_directory)
+postprocessing_script               = '%s/postprocess-set.py' % utility_scripts_directory
 
 toc_fragment                        = "%s/index.html" % current_run_directory
 current_run_data_path               = '%s/data.csv' % current_run_directory

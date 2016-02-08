@@ -15,13 +15,13 @@ version. See the file LICENSE.md for a copy of this licence.
 
 import glob, os, sys, pprint
 
-from generic_chapter import buildMapping_withMixins
+sys.path.append('/UlyssesRedux/code/')
+from directory_structure import *           # Gets us the listing of file and directory locations.
+
+from chapter_scripts.generic_chapter import buildMapping_withMixins
 
 import patrick_logger
 from patrick_logger import log_it
-
-sys.path.append('/UlyssesRedux/code/')
-from directory_structure import *           # Gets us the listing of file and directory locations.
 
 sys.path.append(markov_generator_path)
 from sentence_generator import *
