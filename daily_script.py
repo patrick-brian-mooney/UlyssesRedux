@@ -15,7 +15,7 @@ import sys, pprint, subprocess, datetime, math, re, importlib, html
 
 sys.path.append('/UlyssesRedux/code/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
-import utility_scripts.gen_utils as gu
+import utility_scripts.current_run_data_utils as cr_data
 
 import patrick_logger, introspection       # From https://github.com/patrick-brian-mooney/personal-library
 from introspection import dump
@@ -36,7 +36,7 @@ def out_of_content_warning():
     log_it("    REMINDER: make this a more prominent warning!", 2)  # For now
     sys.exit(2)
 
-current_run_data = gu.read_current_run_parameters()
+current_run_data = cr_data.read_current_run_parameters()
 
 try:
     index_file = open('%s/index.html' % current_run_directory, 'r')
@@ -60,7 +60,7 @@ current_chapter_temporary_tags = current_run_data['ch%02dtags' % which_script]
 with open('%s/temporary-tags' % current_run_directory) as temp_tags_file:
     for which_tag in temp_tags_file:                # One tag per line
         temporary_tags.append(which_tag.strip())
-the_tags = ', '.join(recurring_tags + temporary_tags + current_chapter_temporary_tags)
+the_tags = ', '.join(recurring_tags + temporary_tags) + ', ' + current_chapter_temporary_tags
 
 script_path = '%s.ch%02d' % (daily_scripts_directory, which_script)
 
@@ -101,10 +101,11 @@ while len(first_sentence) > 600 or len(first_sentence.split(' ')) > 150:
     first_sentence = ' '.join(first_sentence.split(' ')[0 : math.floor(len(first_sentence.split(' ')) * 0.75)]) + '…'   # Lop off the last quarter and try again.
 
 the_line = '<li><a rel="me muse" href="%s">%s</a>' %(new_post_url, the_title)
-the_line = the_line + ' (%s):' %  datetime.date.today().strftime("%d %B %Y")
-the_line = the_line + '<blockquote><p>%s</p>' % first_sentence
-the_line = the_line + '<p><small>tags: ' + html_tags + '</small></p>'
-the_line = the_line + '</blockquote></li>\n'
+the_line += ' (%s), ' %  datetime.date.today().strftime("%d %B %Y")
+the_line += current_run_data[ 'ch%02ddesc' % which_script ]
+the_line += ': <blockquote><p>%s</p>' % first_sentence
+the_line += '<p><small>tags: ' + html_tags + '</small></p>'
+the_line += '</blockquote></li>\n'
 
 # Now record the new line to the index file.
 the_lines.append(the_line)
