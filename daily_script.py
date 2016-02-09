@@ -11,10 +11,11 @@ This program is licensed under the GPL v3 or, at your option, any later
 version. See the file LICENSE.md for a copy of this licence.
 """
 
-import sys, pprint, subprocess, datetime, math, re, importlib
+import sys, pprint, subprocess, datetime, math, re, importlib, html
 
 sys.path.append('/UlyssesRedux/code/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
+import utility_scripts.gen_utils as gu
 
 import patrick_logger, introspection       # From https://github.com/patrick-brian-mooney/personal-library
 from introspection import dump
@@ -29,12 +30,13 @@ patrick_logger.verbosity_level = 3
 blog_url = 'http://ulyssesredux.tumblr.com/'
 
 # Some utility routines
-
 def out_of_content_warning():
     """Remind me that we're out of content."""
     log_it("WARNING: There's work to be done! You have to reset the blog state on ulyssesredux.tumblr.com to get it working again! A full Ulysses project is done and needs to be cleared!")
     log_it("    REMINDER: make this a more prominent warning!", 2)  # For now
     sys.exit(2)
+
+current_run_data = gu.read_current_run_parameters()
 
 try:
     index_file = open('%s/index.html' % current_run_directory, 'r')
@@ -45,19 +47,20 @@ except FileNotFoundError:
     which_script = 1
     the_lines = [][:]
 
+if which_script not in range(1,19):
+    out_of_content_warning()
+
 # Post parameters
 ulysses_chapters = open(ulysses_chapter_titles_file).readlines()
 the_title = ulysses_chapters[ which_script - 1 ].strip()
 
 recurring_tags = ['Ulysses (novel)', 'James Joyce', '1922', 'automatically generated text', 'Patrick Mooney', the_title]
-temporary_tags = [].copy()
+temporary_tags = [][:]
+current_chapter_temporary_tags = current_run_data['ch%02dtags' % which_script]
 with open('%s/temporary-tags' % current_run_directory) as temp_tags_file:
-    for which_tag in temp_tags_file:
+    for which_tag in temp_tags_file:                # One tag per line
         temporary_tags.append(which_tag.strip())
-the_tags = ', '.join(recurring_tags + temporary_tags)
-
-if which_script not in range(1,19):
-    out_of_content_warning()
+the_tags = ', '.join(recurring_tags + temporary_tags + current_chapter_temporary_tags)
 
 script_path = '%s.ch%02d' % (daily_scripts_directory, which_script)
 
@@ -91,11 +94,11 @@ log_it(dump(the_status), 2)
 new_post_url = blog_url + "post/" + str(the_status['id'])
 
 # Assemble some text to write to the index file
-html_tags = ' | '.join([ '<a rel="me muse" href="%s">%s</a>' % (blog_url + "tagged/" + the_tag , the_tag) for the_tag in the_tags.split(', ') ])
+html_tags = ' | '.join([ '<a rel="me muse" href="%s">%s</a>' % (html.escape(blog_url + "tagged/" + the_tag), the_tag) for the_tag in the_tags.split(', ') ])
 
 # Avoid using a really really long first sentence as a summary (a problem sometimes in tests with "Penelope").
 while len(first_sentence) > 600 or len(first_sentence.split(' ')) > 150:
-    first_sentence = first_sentence.split(' ')[math.floor(len(first_sentence.split(' ')) * 0.75)] + '…'   # Lop off the last quarter and try again.
+    first_sentence = ' '.join(first_sentence.split(' ')[0 : math.floor(len(first_sentence.split(' ')) * 0.75)]) + '…'   # Lop off the last quarter and try again.
 
 the_line = '<li><a rel="me muse" href="%s">%s</a>' %(new_post_url, the_title)
 the_line = the_line + ' (%s):' %  datetime.date.today().strftime("%d %B %Y")

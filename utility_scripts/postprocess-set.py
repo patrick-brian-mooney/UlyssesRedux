@@ -68,24 +68,24 @@ expected_keys =    {"current-run-name": "What is the title of the novel that has
                     'ch16desc': "What short description should be used for chapter 16?",
                     'ch17desc': "What short description should be used for chapter 17?",
                     'ch18desc': "What short description should be used for chapter 18?",
-                    'ch01tags': "What tags should be used for chapter 1?",
-                    'ch02tags': "What tags should be used for chapter 2?",
-                    'ch03tags': "What tags should be used for chapter 3?",
-                    'ch04tags': "What tags should be used for chapter 4?",
-                    'ch05tags': "What tags should be used for chapter 5?",
-                    'ch06tags': "What tags should be used for chapter 6?",
-                    'ch07tags': "What tags should be used for chapter 7?",
-                    'ch08tags': "What tags should be used for chapter 8?",
-                    'ch09tags': "What tags should be used for chapter 9?",
-                    'ch10tags': "What tags should be used for chapter 10?",
-                    'ch11tags': "What tags should be used for chapter 11?",
-                    'ch12tags': "What tags should be used for chapter 12?",
-                    'ch13tags': "What tags should be used for chapter 13?",
-                    'ch14tags': "What tags should be used for chapter 14?",
-                    'ch15tags': "What tags should be used for chapter 15?",
-                    'ch16tags': "What tags should be used for chapter 16?",
-                    'ch17tags': "What tags should be used for chapter 17?",
-                    'ch18tags': "What tags should be used for chapter 18?"
+                    'ch01tags': "What (comma-separated list of) tags should be used for chapter 1?",
+                    'ch02tags': "What (comma-separated list of) tags should be used for chapter 2?",
+                    'ch03tags': "What (comma-separated list of) tags should be used for chapter 3?",
+                    'ch04tags': "What (comma-separated list of) tags should be used for chapter 4?",
+                    'ch05tags': "What (comma-separated list of) tags should be used for chapter 5?",
+                    'ch06tags': "What (comma-separated list of) tags should be used for chapter 6?",
+                    'ch07tags': "What (comma-separated list of) tags should be used for chapter 7?",
+                    'ch08tags': "What (comma-separated list of) tags should be used for chapter 8?",
+                    'ch09tags': "What (comma-separated list of) tags should be used for chapter 9?",
+                    'ch10tags': "What (comma-separated list of) tags should be used for chapter 10?",
+                    'ch11tags': "What (comma-separated list of) tags should be used for chapter 11?",
+                    'ch12tags': "What (comma-separated list of) tags should be used for chapter 12?",
+                    'ch13tags': "What (comma-separated list of) tags should be used for chapter 13?",
+                    'ch14tags': "What (comma-separated list of) tags should be used for chapter 14?",
+                    'ch15tags': "What (comma-separated list of) tags should be used for chapter 15?",
+                    'ch16tags': "What (comma-separated list of) tags should be used for chapter 16?",
+                    'ch17tags': "What (comma-separated list of) tags should be used for chapter 17?",
+                    'ch18tags': "What (comma-separated list of) tags should be used for chapter 18?"
                     }
 
 changed_keys = False
@@ -96,7 +96,9 @@ for which_key in list(expected_keys.keys()):
     if changed_keys:
         if (input("Write changed dictionary back into data file? ") or "yes"):
             with open(current_run_data_path, 'w') as current_run_data_file:
-                
+                writer = csv.writer(current_run_data_file)
+                for which_key in current_run_data:
+                    writer.writerow([which_key, current_run_data[which_key]])
 
 if debugging_flag: print("INFO: constants set up; .csv dictionary has been read.")
 
