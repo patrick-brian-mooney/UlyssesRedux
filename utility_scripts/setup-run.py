@@ -15,6 +15,8 @@ from directory_structure import *           # Gets us the listing of file and di
 if os.path.isfile(toc_fragment):
     if (input('Delete existing table of contents from last run? ') or "no").lower()[0] == 'y':
         os.remove(toc_fragment)
+    else:
+        print('WARNING: daily_script.py will not run, and no new chapters will be produced, until this file is removed.')
 
 # Set up the data dictionary, using the last run's dictionary keys as a template for this one's
 last_run_data = {}.copy()
@@ -25,7 +27,7 @@ with open(current_run_data_path, mode='r') as last_run_data_file:
 is_done = False
 while not is_done:
     print("\n\nOK, let's set up the parameters for the next run.")
-    print("You can type SAME at any prompt to re-use the last run's answer to that question.\n")
+    print("You can type (all-caps) SAME at any prompt to re-use the last run's answer to that question.\n")
     current_run_data = {}.copy()
     for which_key in last_run_data:
         answer = input('%s (previously "%s") ---|  ' % (which_key, last_run_data[which_key]))
@@ -71,10 +73,10 @@ print('Temporary tags used in last run were:')
 with open(temporary_tags_file) as old_tags_file:
     print(old_tags_file.read())
 
-new_temporary_tags = [].copy()
+new_temporary_tags = [][:]
 is_done = False
 while not is_done:
-    print('\nEnter new tags, one per line. Hit ENTER on an empty line when finished.')
+    print('\nEnter tags to be associated with this run, one per line. Hit ENTER on an empty line when finished.')
     empty_line = False
     while not empty_line:
         the_input = input('---| ')
@@ -87,6 +89,6 @@ with open(temporary_tags_file, 'w') as temp_tags_file:
 
 print('\n')
 if (input('Remove all backup files ending in ~ from the entire "%s" directory? ' % base_directory) or "no").lower()[0] == 'y':
-    subprocess.call(['find %s -iname "*~" -print0 | xargs -0 rm' % base_directory])
+    subprocess.call(['find %s -iname "*~" -print0 | xargs -0 rm' % base_directory], shell=True)
 
 print("\n\nOK, we're done!")

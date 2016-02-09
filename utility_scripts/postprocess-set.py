@@ -42,18 +42,61 @@ if debugging_flag: print("INFO: imports successful.")
 current_episode_number =  1 + int(sorted(glob.glob('%s???.html' % webpage_contents_directory ))[-1][-8:-5])
 
 # All right, let's read the expected data from the data file
-with open(current_run_data_path, mode='r') as current_run_data_file:
+with open(current_run_data_path) as current_run_data_file:
     reader = csv.reader(current_run_data_file)
     current_run_data = {rows[0]:rows[1] for rows in reader}
 
 # Now let's make sure that the expected data actually IS in the dictionary we've read. Prompt for missing stuff.
 # Format of this dictionary is: keyname that should be in current_run_data -> question to ask if that keyname is missing
 expected_keys =    {"current-run-name": "What is the title of the novel that has just been written?",
-                    "summary": "Enter a summary description for the current novel:"}
+                    "summary": "Enter a summary description for the current novel:",
+                    "ch01desc": "What short description should be used for chapter 1?",
+                    "ch02desc": "What short description should be used for chapter 2?",
+                    "ch03desc": "What short description should be used for chapter 3?",
+                    'ch04desc': "What short description should be used for chapter 4?",
+                    'ch05desc': "What short description should be used for chapter 5?",
+                    'ch06desc': "What short description should be used for chapter 6?",
+                    'ch07desc': "What short description should be used for chapter 7?",
+                    'ch08desc': "What short description should be used for chapter 8?",
+                    'ch09desc': "What short description should be used for chapter 9?",
+                    'ch10desc': "What short description should be used for chapter 10?",
+                    'ch11desc': "What short description should be used for chapter 11?",
+                    'ch12desc': "What short description should be used for chapter 12?",
+                    'ch13desc': "What short description should be used for chapter 13?",
+                    'ch14desc': "What short description should be used for chapter 14?",
+                    'ch15desc': "What short description should be used for chapter 15?",
+                    'ch16desc': "What short description should be used for chapter 16?",
+                    'ch17desc': "What short description should be used for chapter 17?",
+                    'ch18desc': "What short description should be used for chapter 18?",
+                    'ch01tags': "What tags should be used for chapter 1?",
+                    'ch02tags': "What tags should be used for chapter 2?",
+                    'ch03tags': "What tags should be used for chapter 3?",
+                    'ch04tags': "What tags should be used for chapter 4?",
+                    'ch05tags': "What tags should be used for chapter 5?",
+                    'ch06tags': "What tags should be used for chapter 6?",
+                    'ch07tags': "What tags should be used for chapter 7?",
+                    'ch08tags': "What tags should be used for chapter 8?",
+                    'ch09tags': "What tags should be used for chapter 9?",
+                    'ch10tags': "What tags should be used for chapter 10?",
+                    'ch11tags': "What tags should be used for chapter 11?",
+                    'ch12tags': "What tags should be used for chapter 12?",
+                    'ch13tags': "What tags should be used for chapter 13?",
+                    'ch14tags': "What tags should be used for chapter 14?",
+                    'ch15tags': "What tags should be used for chapter 15?",
+                    'ch16tags': "What tags should be used for chapter 16?",
+                    'ch17tags': "What tags should be used for chapter 17?",
+                    'ch18tags': "What tags should be used for chapter 18?"
+                    }
 
+changed_keys = False
 for which_key in list(expected_keys.keys()):
     if which_key not in current_run_data.keys():
         current_run_data[which_key] = input(expected_keys[which_key] + " ")
+        changed_keys = True     # Even if it's blank, the key has been added to the dictionary.
+    if changed_keys:
+        if (input("Write changed dictionary back into data file? ") or "yes"):
+            with open(current_run_data_path, 'w') as current_run_data_file:
+                
 
 if debugging_flag: print("INFO: constants set up; .csv dictionary has been read.")
 
@@ -110,9 +153,9 @@ html_header = html_header + """  <link rel="start" href="001.html" />
   <link rel="next" href="%03d.html" />
 
   <title>Ulysses Redux #%03d</title>
-  <meta name="generator" content="Bluefish 2.2.5" />
+  <meta name="generator" content="Bluefish 2.2.8" />
   <meta name="author" content="Patrick Mooney" />
-  <meta name="dcterms.rights" content="Copyright © 2015 Patrick Mooney" />
+  <meta name="dcterms.rights" content="Copyright © 2015&ndash;16 Patrick Mooney" />
   <meta name="description" content="Table of contents for Ulysses Redux #%03d" />
   <meta name="rating" content="general" />
   <meta name="revisit-after" content="10 days" />

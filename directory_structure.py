@@ -7,7 +7,9 @@ version. See the file LICENSE.md for a copy of this licence.
 
 # Basic local filesystem parameters ...
 base_directory                      = "/UlyssesRedux"
-current_run_directory               = "%s/current-run" % base_directory
+ulysses_chapter_titles_file         = '%s/chapter-titles.txt' % scripts_directory
+
+current_run_directory               = '%s/current-run' % base_directory
 
 stats_directory                     = 'stats'
 

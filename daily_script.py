@@ -46,7 +46,7 @@ except FileNotFoundError:
     the_lines = [][:]
 
 # Post parameters
-ulysses_chapters = open('%s/chapter-titles.txt' % scripts_directory).readlines()
+ulysses_chapters = open(ulysses_chapter_titles_file).readlines()
 the_title = ulysses_chapters[ which_script - 1 ].strip()
 
 recurring_tags = ['Ulysses (novel)', 'James Joyce', '1922', 'automatically generated text', 'Patrick Mooney', the_title]
