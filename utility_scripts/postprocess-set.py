@@ -129,7 +129,7 @@ html_header = html_header + """content="%s" />
 </head>
 """ % (time.strftime("%Y-%m-%dT%H:%M:%S"), current_episode_number, current_episode_number, current_episode_number, current_episode_number, current_episode_number)
 
-html_file = html_header + """<body lang="en-US" xml:lang="en-US">
+html_file = html_header + """<body lang="en-US" xml:lang="en-US"><div class="container">
 
 <!--Begin navigation and tracking code-->
 <header id="main-nav">
@@ -157,7 +157,6 @@ html_file = html_header + """<body lang="en-US" xml:lang="en-US">
 </header>
 <!--end navigation and tracking code -->
 
-<div class="body-wrapper container main-content">
 <h1>Ulysses Redux #%03d: %s</h1>
 """ % (current_episode_number, current_run_data['current-run-name'])
 
