@@ -53,7 +53,7 @@ expected_keys =    {"current-run-name": "What is the title of the novel that has
                     }
 
 def validate_data():
-    current_run_data = read_current_run_data()
+    current_run_data = read_current_run_parameters()
     # Now let's make sure that the expected data actually IS in the dictionary we've read. Prompt for missing stuff.
     changed_keys = False
     for which_key in list(expected_keys.keys()):

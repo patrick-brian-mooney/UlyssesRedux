@@ -6,7 +6,7 @@ This program is licensed under the GPL v3 or, at your option, any later
 version. See the file LICENSE.md for a copy of this licence.
 """
 
-import glob, sys, csv, os, shutil
+import glob, sys, csv, os, shutil, zipfile
 
 import compare_texts, reverse_compare_texts
 sys.path.append('/UlyssesRedux/code/')
@@ -19,6 +19,16 @@ debugging = True
 joyce_list = glob.glob('%s/%s/%s/??.txt' % (base_directory, corpora_directory, ulysses_corpus_directory))
 compare_list = glob.glob('%s/*txt' % unsorted_corpus_directory)
 
+def zip_folder(path, outfile):
+    """Produce a zipped file of the previous run's mix-in texts.
+    """
+    if debugging: print('Outfile is %s' % outfile)
+    with zipfile.ZipFile(outfile, 'w', compression=zipfile.ZIP_DEFLATED) as zipf:
+        if debugging: print('zipf is %s' % zipf)
+        for root, dirs, files in os.walk(path):
+            for which_file in files:
+                if debugging: print('   archiving %s.' % os.path.join(root, which_file))
+                zipf.write(os.path.join(root, which_file))
 
 def get_mappings_dict(files_list, markov_length):
     """Get a dictionary of the Markov chains for each file in the list. The dictionary
@@ -71,12 +81,32 @@ def give_matches(data):
         which_joyce_chapter = data[which_row].index(max(data[which_row]))
 
 if __name__ == "__main__":
-    """
-    print("\nWARNING: About to clear out the \"%s\" directory.\nPlease manual remove any files you'd like to keep." % current_run_corpus_directory)
-    if input("Hit ENTER when ready ..."):
-        pass
-    """
+    print("\nWARNING: About to clear out the \"%s\" directory." % current_run_corpus_directory)
+    if input("Want to compress the mix-in text set? ").lower()[0] == 'y':
+        oldpath = os.getcwd()
+        os.chdir(git_repo_path)
+        try:
+            archive_set_name = subprocess.check_output(['git symbolic-ref --short HEAD'], shell=True).decode().split('\n')[0]
+            if input ("Do you want to use the suggested name '%s.zip'? " % archive_set_name).lower()[0] != 'y':
+                archive_set_name = input("What name do you want to use for the archive? ")
+        except:
+            archive_set_name = input("What name do you want to use for the archive? ")
+        os.chdir(oldpath)
+        if not archive_set_name.lower().endswith('.zip'): archive_set_name = archive_set_name + '.zip'
+        zip_folder(current_run_corpus_directory, current_run_corpus_directory + archive_set_name)
     
+    if input('\nHit ENTER when ready to delete the "%s" directory ' % current_run_corpus_directory): pass
+    try:
+        shutil.rmtree(current_run_corpus_directory)
+    except: pass
+    try:
+        if not os.path.exists(current_run_corpus_directory):
+            os.makedirs(current_run_corpus_directory)
+        for which_chap in range(1, 19): os.mkdir('%s%02d' % (current_run_corpus_directory, which_chap))
+    except: pass
+    
+    if debugging: print("Directory cleared out, moving on ...")
+
     markov_length = 2
     
     ulysses_chains = get_mappings_dict(joyce_list, markov_length)
