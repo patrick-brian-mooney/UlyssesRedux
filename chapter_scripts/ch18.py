@@ -13,7 +13,7 @@ This program is licensed under the GPL v3 or, at your option, any later
 version. See the file LICENSE.md for a copy of this licence.
 """
 
-import datetime, sys
+import datetime, sys, math, random
 
 sys.path.append('/UlyssesRedux/code/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
@@ -22,14 +22,19 @@ from chapter_scripts.generic_chapter import write_generic_story
 
 # First, set up constants
 chain_length = 2
-chapter_length = 9                            # Measured in sentences.
-sentences_per_paragraph = 1.2222222222        # On average, in this chapter
+chapter_length = 9                              # Measured in sentences.
+sentences_per_paragraph = 6                     # On average, in this chapter. Note this doesn't model the Joyce chapter in this regard.
 mixin_texts_dir = '%s18' % current_run_corpus_directory
 
-def write_story():
-    return write_generic_story(chain_length, chapter_length, sentences_per_paragraph, penelope_base_text_path, mixin_texts_dir) +"""
+def end_prob(length):
+    """Calculate the probability of ending given the current story length"""
+    return 1 - math.e ** (length * -1.5e-05)
 
-Trieste-Zurich-Paris 1914-1921\nSanta Barbara 2015–%s""" % datetime.datetime.now().year
+def write_story():
+    the_text = ''
+    while random.random() >= end_prob(len(the_text)):
+        the_text = the_text + " " + write_generic_story(chain_length, chapter_length, sentences_per_paragraph, penelope_base_text_path, mixin_texts_dir)
+    return the_text + """\n\nTrieste-Zurich-Paris 1914–1921\nSanta Barbara 2015–%s""" % datetime.datetime.now().year
 
 
 if __name__ == "__main__":
