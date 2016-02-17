@@ -35,8 +35,9 @@ import csv, time, glob, subprocess, os, sys
 
 sys.path.append('/UlyssesRedux/code/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
-
 import utility_scripts.current_run_data_utils as cr_data
+
+import social_media, social_media_auth      # https://github.com/patrick-brian-mooney/personal-library/blob/master/social_media.py                    
 
 if debugging_flag: print("INFO: imports successful.")
 
@@ -228,6 +229,14 @@ if input('Update meta-TOC on local copy of website? ').lower()[0] == 'y':
 if input('Sync web page to main site? ').lower()[0] == 'y':
     # This script lives on my hard drive at ~/.scripts/sync-website.sh
     subprocess.check_call(['sync-website.sh'], shell=True)
+
+if input("Want to tweet about the new edition that's out? ").lower()[0] == 'y':
+    the_tweet = 'Ulysses Redux # %03d (%s) is out: %s%03d' % (current_episode_number, current_run_data['current-run-name'], remote_webpage_contents, current_episode_number)
+    if input("Want to use the suggested tweet '%s'? " % the_tweet).lower()[0] != 'y':
+        the_tweet = "X" * 200
+        while len(the_tweet) > 117:     # 117 seems to be the maximum length of a tweet not counting a single URL that it contains.
+            the_tweet = input("OK, Shakespeare, write a tweet of 117 characters or less yourself: ")
+    social_media.post_tweet(social_media_auth.personalTwitter_client, the_tweet)
 
 print('\n\n')
 if input("We're done here. Want to set up the next run? ").lower()[0] == 'y':

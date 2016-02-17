@@ -35,6 +35,7 @@ git_repo_path                       = scripts_directory
 # Paths for things in the local copy of the website
 webpage_contents_directory          = '/~patrick/projects/UlyssesRedux/contents/'
 meta_TOC_path                       = '%s/index.html' % webpage_contents_directory
+remote_webpage_contents             = 'http://patrickbrianmooney.nfshost.com%s' % webpage_contents_directory
 
 # Paths on other systems
 github_branch_base_path             = 'https://github.com/patrick-brian-mooney/UlyssesRedux/tree/'
