@@ -161,7 +161,8 @@ final_substitutions = [     # list of lists: each [search_string, replace_string
     ['―-', '―'],
     [':—', ': '],
     ["\n' ", '\n'],           # newline--single quote--space
-    ["<p>'", '<p>']
+    ["<p>'", '<p>'],
+    ['- ', '-']
 ]
 
 # Schwartz's version stored mappings globally to save copying time, but this
