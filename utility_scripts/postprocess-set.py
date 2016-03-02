@@ -63,7 +63,7 @@ try:
         current_git_status = subprocess.check_output(['git status'], shell=True)
         print("Current git status is\n  " + current_git_status.decode())
         if input('GIVEN THIS STATUS, do you want to commit? ').lower()[0] == 'y':
-            subprocess.check_call(['git commit'], shell=True)
+            subprocess.call(['git commit'], shell=True)
             if input('Push branch %s to remote server? ' % current_git_branch).lower()[0] == 'y':
                 subprocess.check_call(['git push origin %s' % current_git_branch], shell=True)
                 if input('Switch to master branch and merge these changes? ').lower()[0] == 'y':
@@ -103,7 +103,7 @@ html_header = html_header + """  <link rel="start" href="001.html" />
   <link rel="next" href="%03d.html" />
 
   <title>Ulysses Redux #%03d</title>
-  <meta name="generator" content="Bluefish 2.2.8" />
+  <meta name="generator" content="Bluefish 2.2.2" />
   <meta name="author" content="Patrick Mooney" />
   <meta name="dcterms.rights" content="Copyright © 2015&ndash;16 Patrick Mooney" />
   <meta name="description" content="Table of contents for Ulysses Redux #%03d" />
