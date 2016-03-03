@@ -67,9 +67,10 @@ try:
             if input('Push branch %s to remote server? ' % current_git_branch).lower()[0] == 'y':
                 subprocess.check_call(['git push origin %s' % current_git_branch], shell=True)
                 if input('Switch to master branch and merge these changes? ').lower()[0] == 'y':
+                    print('\n')
                     subprocess.check_call(['git checkout master'], shell=True)
                     subprocess.check_call(['git merge %s' % current_git_branch], shell=True)
-                    print("WARNING: THE MASTER BRANCH IS NOW THE CURRENT BRANCH")
+                    print("\nWARNING: THE MASTER BRANCH IS NOW THE CURRENT BRANCH\n")
                     if input('Push master branch to remote server? ').lower()[0] == 'y':
                         subprocess.check_call(['git push origin master'], shell=True)
 finally:
