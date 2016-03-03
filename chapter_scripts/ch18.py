@@ -28,7 +28,7 @@ mixin_texts_dir = '%s18' % current_run_corpus_directory
 
 def end_prob(length):
     """Calculate the probability of ending given the current story length"""
-    return 1 - math.e ** (length * -1.5e-05)
+    return 1 - math.e ** (length * -1.5e-06)
 
 def write_story():
     the_text = ''
