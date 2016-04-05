@@ -28,13 +28,13 @@ mixin_texts_dir = '%s18' % current_run_corpus_directory
 
 def end_prob(length):
     """Calculate the probability of ending given the current story length"""
-    return 1 - math.e ** (length * -1.5e-06)
+    return 1 - math.e ** (length * -3.5e-07)
 
 def write_story():
     the_text = ''
     while random.random() >= end_prob(len(the_text)):
         the_text = the_text + " " + write_generic_story(chain_length, chapter_length, sentences_per_paragraph, penelope_base_text_path, mixin_texts_dir)
-    return the_text + """\n\nTrieste-Zurich-Paris 1914–1921\nSanta Barbara 2015–%s""" % datetime.datetime.now().year
+    return the_text + """\n\nTrieste-Zurich-Paris 1914—1921\nSanta Barbara 2015—%s""" % datetime.datetime.now().year
 
 
 if __name__ == "__main__":
