@@ -21,6 +21,8 @@ from chapter_scripts.generic_chapter import write_generic_story
 
 
 # First, set up constants
+debugging = False
+
 chain_length = 2
 chapter_length = 9                              # Measured in sentences.
 sentences_per_paragraph = 6                     # On average, in this chapter. Note this doesn't model the Joyce chapter in this regard.
