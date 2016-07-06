@@ -22,7 +22,7 @@ from sentence_generator import *
 def buildMapping_withMixins(chain_length,               # In words
                             joyce_text_list,            # Path to file representing Joyce's text under consideration
                             mixin_texts_list,           # Loc of mixin texts
-                            joyce_ratio=1.4):           # How much Joyce relative to mixins?
+                            joyce_ratio=1.2):           # How much Joyce relative to mixins?
     if debugging: print("buildMapping_withMixins() called; parameters are ...\n\n" + pprint.pformat(locals()))
  
     joyce_text_length = mixin_texts_length = 0
@@ -34,7 +34,7 @@ def buildMapping_withMixins(chain_length,               # In words
     joyce_word_list = [][:]
     for the_file in joyce_text_list:
         joyce_word_list += word_list(the_file)
-    joyce_scale_factor = max(int(round( (mixin_texts_length / joyce_text_length) * joyce_ratio )), 1)   # At least 1, or the Joyce drops out!
+    joyce_scale_factor = max(int(round( (mixin_texts_length / joyce_text_length) * joyce_ratio )), 1)   # This ratio must be at least 1, or the Joyce drops out!
     joyce_word_list *= joyce_scale_factor
     
     the_word_list = joyce_word_list.copy()
@@ -58,7 +58,7 @@ def write_generic_story(chain_length,
                         sentences_per_paragraph,    # On average
                         joyce_text_path,
                         mixin_texts_dir,
-                        joyce_ratio=1.4):
+                        joyce_ratio=1.2):
     starts, the_mapping = buildMapping_withMixins(chain_length, [joyce_text_path], glob.glob('%s/*txt' % mixin_texts_dir), joyce_ratio)
     return gen_text(the_mapping, starts, markov_length=chain_length, sentences_desired=chapter_length,
                paragraph_break_probability=(1/sentences_per_paragraph))
