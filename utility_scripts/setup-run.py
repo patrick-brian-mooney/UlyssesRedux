@@ -61,7 +61,7 @@ try:
             subprocess.check_call(['git merge %s' % current_git_branch], shell=True)
     if (input('Create and switch to new Git branch? ') or "yes").lower()[0] == 'y':
         current_episode_number =  1 + int(sorted(glob.glob('%s???.html' % webpage_contents_directory ))[-1][-8:-5])
-        branch_name = "%03d" % current_episode_number + current_run_data['current-run-name'].replace(" ", "")
+        branch_name = "%03d%s" % (current_episode_number, ''.join([the_word.capitalize() for the_word in current_run_data['current-run-name'].split()]) )
         if (input('  use suggested branch name "%s"? ' % branch_name) or "yes").lower()[0] != 'y':
             branch_name = input('What branch name would you like to use? ')
         subprocess.check_call(['git checkout -b %s' % branch_name], shell=True)
