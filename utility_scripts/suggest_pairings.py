@@ -22,7 +22,9 @@ compare_list = glob.glob('%s/*txt' % unsorted_corpus_directory)
 def zip_folder(path, outfile):
     """Produce a zipped file of the previous run's mix-in texts.
     """
-    if debugging: print('Outfile is %s' % outfile)
+    if debugging:
+    	print('DEBUGGING: zip_folder() called')
+    	print('Outfile is %s' % outfile)
     with zipfile.ZipFile(outfile, 'w', compression=zipfile.ZIP_DEFLATED) as zipf:
         if debugging: print('zipf is %s' % zipf)
         for root, dirs, files in os.walk(path):
@@ -33,18 +35,27 @@ def zip_folder(path, outfile):
 def get_mappings_dict(files_list, markov_length):
     """Get a dictionary of the Markov chains for each file in the list. The dictionary
     maps filenames to dictionaries of chains."""
+    if debugging:
+    	print("DEBUGGING: get_mappings_dict() called")
+    	print("  files_list is:  %s" % files_list)
+    	print("  markov_length is:  %d" % markov_length)
     ret={}
     for which_text in files_list:
-        if debugging: print("Getting mappings for %s." % which_text)
+        if debugging: print("    Getting mappings for %s." % which_text)
         _, ret[which_text] = sg.buildMapping(sg.word_list(which_text), markov_length)
     return ret
 
 def calculate_overlap(one, two):
     """return the percentage of chains in dictionary ONE that are also in
     dictionary TWO."""
+    if debugging:
+    	print("DEBUGGING: calculate_overlap() called")
     overlap_count = 0
     for which_chain in one.keys():
         if which_chain in two: overlap_count += 1
+    if debugging:
+    	print("  overlap_count is:  %d" % overlap_count)
+    	print("  ratio is:  %s" % (overlap_count / len(one)))
     return overlap_count / len(one)
 
 def assign_matches(data):
@@ -53,6 +64,8 @@ def assign_matches(data):
     its preferred match from the list of remaining match texts, until each chapter
     has been assigned one companion text. 
     """
+    if debugging:
+    	print("DEBUGGING: assign_matches() called.")
     best_matches = {}
     for which_column in range(1, len(data[0])):
         the_column= [ row[which_column] for row in data ][1:]
@@ -71,6 +84,7 @@ def give_matches(data):
     """Taking the matrix in DATA, just put each companion text in the folder of the
     chapter that it has the most in common with. Makes no attempt to distribute
     companion texts equally."""
+    if debugging: print("DEBUGGING: give_matches() called")
     del(data[0])    # We're clearing the list. Start by dropping the header row.
     while len(data) > 0:
         which_joyce_chapter = data[0].index(max(data[0][1:]))
