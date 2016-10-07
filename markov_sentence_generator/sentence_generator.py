@@ -143,14 +143,14 @@ from patrick_logger import log_it
 
 # Set up some constants
 patrick_logger.verbosity_level = 0  # Bump above zero to get more verbose messages about processing and to skip the
-# "are we running on a webserver?" check.
+                                    # "are we running on a webserver?" check.
 
 punct_with_space_after = r'.,\:!?;'
 sentence_ending_punct = r'.!?'
 punct_with_no_space_before = r'.,!?;—․\-\:\/'
-punct_with_no_space_after = r'—\-\/․'   # Note that last character is U+2024, "one-dot leader".
-word_punct = r"'’❲❳%°"                   # Punctuation marks to be considered part of a word.
-token_punct = r".,\:\-!?;—\/"           # These punctuation marks also count as tokens.
+punct_with_no_space_after = r'—\-\/․'           # Note that last character is U+2024, "one-dot leader".
+word_punct = r"'’❲❳%°"                          # Punctuation marks to be considered part of a word.
+token_punct = r".,\:\-!?;—\/"                   # These punctuation marks also count as tokens.
 
 final_substitutions = [     # list of lists: each [search_string, replace_string]. Substitutions occur in order specified.
     ['--', '—'],
@@ -243,7 +243,7 @@ def addItemToTempMapping(history, word, the_temp_mapping):
         history = history[1:]
 
 def buildMapping(word_list, markov_length):
-    """Building and normalizing the_mapping."""
+    """Build and normalize the_mapping."""
     the_temp_mapping = {}
     the_mapping = {}
     starts = []
