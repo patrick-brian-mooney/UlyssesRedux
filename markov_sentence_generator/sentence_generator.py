@@ -228,8 +228,10 @@ def addItemToTempMapping(history, word, the_temp_mapping):
     '''Self-explanatory -- adds "word" to the "the_temp_mapping" dict under "history".
     the_temp_mapping (and the_mapping) both match each word to a list of possible next
     words.
+    
     Given history = ["the", "rain", "in"] and word = "Spain", we add "Spain" to
-    the entries for ["the", "rain", "in"], ["rain", "in"], and ["in"].'''
+    the entries for ["the", "rain", "in"], ["rain", "in"], and ["in"].
+    '''
     while len(history) > 0:
         first = to_hash_key(history)
         if first in the_temp_mapping:
