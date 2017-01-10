@@ -138,8 +138,9 @@ version. See the file LICENSE.md for a copy of this licence.
 
 import re, random, sys, pickle, getopt, pprint
 
-import patrick_logger  # From https://github.com/patrick-brian-mooney/personal-library
+import patrick_logger       # From https://github.com/patrick-brian-mooney/personal-library
 from patrick_logger import log_it
+import text_handling as th  # https://github.com/patrick-brian-mooney/python-personal-library/blob/master/text_handling.py
 
 # Set up some constants
 patrick_logger.verbosity_level = 0  # Bump above zero to get more verbose messages about processing and to skip the
@@ -160,9 +161,10 @@ final_substitutions = [     # list of lists: each [search_string, replace_string
     [" ' ", ''],
     ['―-', '―'],
     [':—', ': '],
-    ["\n' ", '\n'],           # newline--single quote--space
+    ["\n' ", '\n'],         # newline--single quote--space
     ["<p>'", '<p>'],
-    ['- ', '-']
+    ['- ', '-'],
+    ['—-', '—'],            # em dash-hyphen to em dash 
 ]
 
 # Schwartz's version stored mappings globally to save copying time, but this
@@ -203,7 +205,7 @@ def fix_caps(word):
         word = word.lower()
         # Ex: "LaTeX" => "Latex"
     elif word[0].isupper():
-        word = word.lower().capitalize()
+        word = th.capitalize(word.lower())
         # Ex: "wOOt" -> "woot"
     else:
         word = word.lower()
@@ -295,7 +297,7 @@ def genSentence(markov_length, the_mapping, starts):
     log_it("        the_mapping = %s." % the_mapping, 5)
     log_it("        starts = %s." % starts, 5)
     curr = random.choice(starts)
-    sent = curr.capitalize()
+    sent = th.capitalize(curr)
     prevList = [curr]
     # Keep adding words until we hit a period, exclamation point, or question mark
     while curr not in sentence_ending_punct:
