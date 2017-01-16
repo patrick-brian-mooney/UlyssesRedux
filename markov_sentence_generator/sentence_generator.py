@@ -186,6 +186,16 @@ final_substitutions = [     # list of lists: each [search_string, replace_string
 # starts: a list of words that can begin sentences. Initially an empty list, []
 # Contains the set of words that can start sentences
 
+
+def process_acronyms(text):
+    """Takes TEXT and looks through it for acronyms. If it finds any, it takes each
+    and converts their periods to one-dot leaders to make the Markov parser treat
+    it as a single word.
+
+    At least, that's what it will do. Right now, it does nothing.
+    """
+    return text
+
 def print_usage():
     """Print a usage message to the terminal"""
     patrick_logger.log_it("INFO: print_usage() was called", 2)
