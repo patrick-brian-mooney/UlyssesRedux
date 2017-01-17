@@ -153,7 +153,7 @@ punct_with_no_space_after = r'—\-\/․'           # Note that last character i
 word_punct = r"'’❲❳%°#․"                        # Punctuation marks to be considered part of a word.
 token_punct = r".,\:\-!?;—\/"                   # These punctuation marks also count as tokens.
 
-final_substitutions = [     # list of lists: each [search_string, replace_string]. Substitutions occur in order specified.
+final_substitutions = [     # list of lists: each [search_regex, replace_regex]. Substitutions occur in order specified.
     ['--', '—'],
     ['...', '…'],
     ['․', '.'],             # replace one-dot leader with period
@@ -165,6 +165,7 @@ final_substitutions = [     # list of lists: each [search_string, replace_string
     ["<p>'", '<p>'],
     ['- ', '-'],
     ['—-', '—'],            # em dash-hyphen to em dash
+    ["(\d+),\s+(\d+)", "\1,\2"],  # Remove spaces after commas when commas are between numbers.
 ]
 
 # Schwartz's version stored mappings globally to save copying time, but this
@@ -191,17 +192,35 @@ final_substitutions = [     # list of lists: each [search_string, replace_string
 def process_acronyms(text):
     """Takes TEXT and looks through it for acronyms. If it finds any, it takes each
     and converts their periods to one-dot leaders to make the Markov parser treat
-    it as a single word.
+    the acronym as a single word.
 
     This function is NEVER called directly by any other routine in this file;
     it's a convenience function for code that calls this code.
 
-    #FIXME: current problem: sentence-ending acronyms are not identified as acronyms.
     """
     remaining_to_process = text[:]
     ret = ""
+
+    # First, search for and deal with sentence-ending acronyms. Doing this requires replacing their dots with a
+    # one-dot leader, and then adding a sentence-ending period so the chain parser knows that there's sentence-ending
+    # punctuation in the text.
     while remaining_to_process:
-        match = re.search(r'(?:(?<=\.|\s)[A-Z]\.)+', remaining_to_process)
+        match = re.search(r'([A-Z]\.){2,}\s[A-Z]', remaining_to_process, re.UNICODE) # Find acronym-whitespace-capital letter
+        if match:
+            ret += remaining_to_process[:match.start()]
+            last_period = remaining_to_process[match.start() : match.end()].rfind('.')
+            ret += remaining_to_process[match.start() : 1 + match.start() + last_period].replace('.', '․')
+            ret += '.'
+            ret += remaining_to_process[1 + match.start()+last_period : match.end()]
+            remaining_to_process = remaining_to_process[match.end():]
+        else:
+            ret += remaining_to_process
+            remaining_to_process = ""
+
+    # Now, deal with any remaining unprocessed acronyms.
+    remaining_to_process, ret = ret, ""
+    while remaining_to_process:
+        match = re.search(r'(?:(?<=\.|\s)[A-Z]\.)+', remaining_to_process, re.UNICODE)
         if match:
             ret += remaining_to_process[:match.start()]
             ret += remaining_to_process[match.start():match.end()].replace('.', '․')        # Replace periods with one-dot leaders
