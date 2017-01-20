@@ -62,7 +62,7 @@ def assign_matches(data):
     """Determine which chapters currently have the worst match percentages, and give
     those texts their preferred matches. Go through this list, assigning each text
     its preferred match from the list of remaining match texts, until each chapter
-    has been assigned one companion text. 
+    has been assigned one companion text.
     """
     if debugging:
     	print("DEBUGGING: assign_matches() called.")
@@ -71,7 +71,7 @@ def assign_matches(data):
         the_column= [ row[which_column] for row in data ][1:]
         column_max = max(the_column)
         best_matches[which_column] = [column_max, data[1 + the_column.index(column_max)][0]]
-    
+
     assignment_order = sorted(best_matches, key=lambda key:best_matches[key][0])
     for which_chapter in assignment_order:
         joyce_matches = [ row[which_chapter] for row in data ]
@@ -108,7 +108,7 @@ if __name__ == "__main__":
         os.chdir(oldpath)
         if not archive_set_name.lower().endswith('.zip'): archive_set_name = archive_set_name + '.zip'
         zip_folder(current_run_corpus_directory, current_run_corpus_directory + archive_set_name)
-    
+
     if input('\nHit ENTER when ready to delete the "%s" directory ' % current_run_corpus_directory): pass
     try:
         shutil.rmtree(current_run_corpus_directory)
@@ -117,15 +117,15 @@ if __name__ == "__main__":
         if not os.path.exists(current_run_corpus_directory):
             os.makedirs(current_run_corpus_directory)
         for which_chap in range(1, 19): os.mkdir('%s%02d' % (current_run_corpus_directory, which_chap))
-    except: pass
-    
+    except Exception: pass
+
     if debugging: print("Directory cleared out, moving on ...")
 
     markov_length = 2
-    
+
     ulysses_chains = get_mappings_dict(joyce_list, markov_length)
     compare_texts_chains = get_mappings_dict(compare_list, markov_length)
-    
+
     if debugging: print("Chains calculated for all texts, moving on ...")
 
     overlap_dict = {}
@@ -135,25 +135,25 @@ if __name__ == "__main__":
             if debugging: print ("Calculating similarity for %s and %s ..." % (which_joyce, which_compare))
             overlap_dict[which_joyce][which_compare] = calculate_overlap(ulysses_chains[which_joyce], compare_texts_chains[which_compare]) * \
                 calculate_overlap(compare_texts_chains[which_compare], ulysses_chains[which_joyce])
-    
+
     with open('%s%d.csv' % (unsorted_corpus_directory, markov_length), "w") as the_stats_file:
         data = [ [' '] ]                                # First row starts with an empty cell ...
         the_writer = csv.writer(the_stats_file)
         for which_joyce in sorted(list(joyce_list)):
             data[0].append(os.path.basename(which_joyce))
-        
+
         for which_compare in compare_list:
             this_row = [ os.path.basename(which_compare) ]
             for which_joyce in sorted(list(joyce_list)):
                 this_row.append(overlap_dict[which_joyce][which_compare])
             data.append(this_row)
-        
+
         the_writer.writerows(data)
-    
+
     print("\n\nOK, let's give each chapter of Ulysses its preferred text, starting with the one")
     print("having the lowest top match and working up to the one having the best top match.\n")
     assign_matches(data)
-    
+
     print("OK, each chapter from Ulysses has one matched companion text.\n\n")
     while len(data) > 0:
         answer = ""
@@ -170,6 +170,6 @@ if __name__ == "__main__":
             elif answer.upper() == "QUIT":
                 sys.exit(0)
             else:
-                print("Sorry, %s is not a valid option." % answer.upper())    
+                print("Sorry, %s is not a valid option." % answer.upper())
 
     if debugging: print(ulysses_chains is compare_texts_chains)
