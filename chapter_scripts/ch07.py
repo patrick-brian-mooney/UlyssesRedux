@@ -2,7 +2,7 @@
 """Script to create the text generated based on the seventh chapter of Joyce's
 Ulysses, 'Aeolus.' It relies on a simply formatted text file that summarizes
 an automated analysis of 'Aeolus' performed by the script at /UlyssesRedux/
-code/utility_scripts/get-chapter-7-stats.py, which classifies the paragraphs of
+scripts/utility_scripts/get-chapter-7-stats.py, which classifies the paragraphs of
 this chapter into three categories: headlines, spoken phrases, and other; and
 aims to replicate the structure of that chapter by reproducing the same
 paragraph types, with similar lengths, in the same order.
@@ -23,7 +23,7 @@ length_tolerance = 0.4      # e.g., 0.3 means the generated text can be up to 30
 joyce_ratio = 1.4           # Goal ratio of Joyce to non-Joyce text in the resulting chains. 
 
 import os, glob, sys
-sys.path.append('/UlyssesRedux/code/')
+sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 
 sys.path.append(markov_generator_path)

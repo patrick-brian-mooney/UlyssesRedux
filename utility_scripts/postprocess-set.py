@@ -33,7 +33,7 @@ debugging_flag = True
 
 import csv, time, glob, subprocess, os, sys
 
-sys.path.append('/UlyssesRedux/code/')
+sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 import utility_scripts.current_run_data_utils as cr_data
 
@@ -104,7 +104,7 @@ html_header = html_header + """  <link rel="start" href="001.html" />
   <link rel="next" href="%03d.html" />
 
   <title>Ulysses Redux #%03d</title>
-  <meta name="generator" content="Bluefish 2.2.2" />
+  <meta name="generator" content="Bluefish 2.2.6" />
   <meta name="author" content="Patrick Mooney" />
   <meta name="dcterms.rights" content="Copyright © 2015&ndash;16 Patrick Mooney" />
   <meta name="description" content="Table of contents for Ulysses Redux #%03d" />
@@ -241,4 +241,4 @@ if input("Want to tweet about the new edition that's out? ").lower()[0] == 'y':
 
 print('\n\n')
 if input("We're done here. Want to set up the next run? ").lower()[0] == 'y':
-    subprocess.check_call(['/UlyssesRedux/code/utility_scripts/setup-run.py'], shell=True)
+    subprocess.check_call(['/UlyssesRedux/scripts/utility_scripts/setup-run.py'], shell=True)

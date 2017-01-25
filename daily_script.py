@@ -13,7 +13,7 @@ version. See the file LICENSE.md for a copy of this licence.
 
 import sys, pprint, subprocess, datetime, math, re, importlib, html
 
-sys.path.append('/UlyssesRedux/code/')
+sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 import utility_scripts.current_run_data_utils as cr_data
 

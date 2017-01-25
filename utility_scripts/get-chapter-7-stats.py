@@ -14,7 +14,7 @@ version. See the file LICENSE.md for a copy of this licence.
 """
 import sys, os, re
 
-sys.path.append('/UlyssesRedux/code/')
+sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations. 
 
 ch7_text = open(aeolus_base_text_path).readlines()

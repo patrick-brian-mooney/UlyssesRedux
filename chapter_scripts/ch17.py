@@ -2,7 +2,7 @@
 """Script to create the text generated based on the seventeenth chapter of
 Joyce's Ulysses, 'Ithaca.' It relies on a simply formatted text file that
 summarizes an automated analysis of 'Ithaca' performed by the script at
-/UlyssesRedux/code/utility-scripts/get-chapter-17-stats.py, which classifies
+/UlyssesRedux/scripts/utility-scripts/get-chapter-17-stats.py, which classifies
 the paragraphs of this chapter into two categories: questions and answers; and
 aims to replicate the structure of that chapter by reproducing the same calling
 separate routines that produce 'questions' and 'answers' of appropriate lengths
@@ -18,7 +18,7 @@ version. See the file LICENSE.md for a copy of this licence.
 """
 
 import sys, glob
-sys.path.append('/UlyssesRedux/code/')
+sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 from chapter_scripts.generic_chapter import buildMapping_withMixins
 

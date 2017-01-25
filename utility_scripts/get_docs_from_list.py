@@ -18,7 +18,7 @@ import html2text        # http://www.aaronsw.com/2002/html2text/
 
 from bs4 import BeautifulSoup
 
-sys.path.append('/UlyssesRedux/code/')
+sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 
 if __name__ == "__main__":

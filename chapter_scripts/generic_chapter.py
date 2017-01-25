@@ -13,7 +13,7 @@ import sys, glob, os
 
 if debugging: import pprint
 
-sys.path.append('/UlyssesRedux/code/')
+sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 
 sys.path.append(markov_generator_path)

@@ -3,7 +3,7 @@
 
 import sys, csv
 
-sys.path.append('/UlyssesRedux/code/')
+sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 
 def read_current_run_parameters():

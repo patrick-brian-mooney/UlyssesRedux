@@ -12,7 +12,7 @@ current_run_directory               = '%s/current-run' % base_directory
 
 stats_directory                     = 'stats'
 
-scripts_directory                   = "%s/code" % base_directory
+scripts_directory                   = "%s/scripts" % base_directory
 daily_scripts_directory             = "chapter_scripts"            # Note: NOT an absolute path. Intentionally so.
 utility_scripts_directory           = '%s/utility_scripts' % scripts_directory
 

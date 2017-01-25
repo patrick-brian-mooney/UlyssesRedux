@@ -8,7 +8,7 @@ version. See the file LICENSE.md for a copy of this licence.
 import os, glob, csv, subprocess
 
 import sys
-sys.path.append('/UlyssesRedux/code/')
+sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations. 
 
 # First, remove the old index file

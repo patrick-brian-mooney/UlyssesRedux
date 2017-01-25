@@ -9,7 +9,7 @@ version. See the file LICENSE.md for a copy of this licence.
 import glob, sys, csv, os, shutil, zipfile
 
 import compare_texts, reverse_compare_texts
-sys.path.append('/UlyssesRedux/code/')
+sys.path.append('/UlyssesRedux/scripts/')
 
 from directory_structure import *                           # Gets us the listing of file and directory locations.
 import markov_sentence_generator.sentence_generator as sg
