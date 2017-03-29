@@ -31,7 +31,7 @@ version. See the file LICENSE.md for a copy of this licence.
 
 debugging_flag = True
 
-import csv, time, glob, subprocess, os, sys
+import csv, time, glob, subprocess, os, sys, datetime
 
 sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
@@ -215,8 +215,83 @@ if debugging_flag: print("\n\nINFO: Tidying done.")
 print('\n')
 if input('Update coding journal on website? ').lower()[0] == 'y':
     subprocess.call(["pandoc -f markdown -s -t html5 -o '/~patrick/projects/UlyssesRedux/coding.html' '/UlyssesRedux/coding thoughts.md'"], shell=True)
-    subprocess.call(['patch /~patrick/projects/UlyssesRedux/coding.html /UlyssesRedux/coding\ thoughts.patch'], shell=True)
-    subprocess.call(['rm /~patrick/projects/UlyssesRedux/coding.html.bak'], shell=True)
+    with open('/~patrick/projects/UlyssesRedux/coding.html') as coding_journal:
+        text = coding_journal.read().split('<body>')
+    html_content = """
+<!doctype html>
+<html prefix="og: http://ogp.me/ns#" xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml">
+  <meta charset="utf-8" />
+  <link rel="stylesheet" type="text/css" href="/~patrick/css/skeleton-normalize.css" />
+  <link rel="stylesheet" type="text/css" href="/~patrick/css/skeleton.css" />
+  <link rel="stylesheet" type="text/css" href="/~patrick/css/content-skel.css" />
+  <link rel="meta" type="application/rdf+xml" title="FOAF" href="/~patrick/foaf.rdf" />
+  <meta name="foaf:maker" content="foaf:mbox_sha1sum '48a3091d919c5e75a5b21d2f18164eb4d38ef2cd'" />
+  <link rel="profile" href="http://gmpg.org/xfn/11" />
+  <link rel="pgpkey" type="application/pgp-keys" href="/~patrick/505AB18E-public.asc" />
+  <link rel="author" href="http://plus.google.com/109251121115002208129?rel=author" />
+  <link rel="home" href="/~patrick/projects/UlyssesRedux" title="Home page" />
+  <link rel="icon" type="image/x-icon" href="/~patrick/icons/favicon.ico" />
+  <link href="/~patrick/feeds/updates.xml" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed" />
+
+  <title>Ulysses Redux Coding Notes</title>
+  <meta name="generator" content="Bluefish 2.2.6" />
+  <meta name="author" content="Patrick Mooney" />
+  <meta name="dcterms.rights" content="Copyright © 2015–%s Patrick Mooney" />
+  <meta name="description" content="Coding notes for Ulysses Redux, blog of auto-generated text based on Joyce's Ulysses" />
+  <meta name="rating" content="general" />
+  <meta name="revisit-after" content="10 days" />
+  <meta name="date" content="2017-03-29T05:02:22-0700" />
+  <meta property="fb:admins" content="100006098197123" />
+  <meta property="og:url" content="http://patrickbrianmooney.nfshost.com/~patrick/projects/UlyssesRedux/coding.html" />
+  <meta property="og:title" content="Ulysses Redux Coding Notes" />
+  <meta property="og:description" content="Coding notes for Ulysses Redux, blog of auto-generated text based on Joyce's Ulysses" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:site_name" content="Patrick Mooney's web site" />
+  <meta property="og:image" content="http://patrickbrianmooney.nfshost.com/~patrick/icons/gear-large.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@patrick_mooney" />
+  <meta name="twitter:creator" content="@patrick_mooney" />
+  <meta name="twitter:title" content="Ulysses Redux Coding Notes" />
+  <meta name="twitter:description" content="Coding notes for Ulysses Redux, blog of auto-generated text based on Joyce's Ulysses" />
+  <meta name="twitter:image:src" content="http://patrickbrianmooney.nfshost.com/~patrick/icons/gear-large.png" />
+ </head>
+
+<body lang="en-US" xml:lang="en-US">
+
+<!--Begin navigation and tracking code-->
+<header id="main-nav">
+  <script type="text/javascript" src="/~patrick/nav.js"></script>
+  <noscript>
+    <p class="simpleNav"><a rel="me home" href="index.html">Go home</a></p>
+    <p class="simpleNav">If you had JavaScript turned on, you'd have more navigation options.</p>
+  </noscript>
+
+  <script type="text/javascript">
+
+     var _gaq = _gaq || [];
+     _gaq.push(['_setAccount', 'UA-37778547-1']);
+     gaq.push(['_setDomainName', 'nfshost.com']);
+     gaq.push(['_setAllowLinker', true]);
+     gaq.push(['_trackPageview']);
+
+     (function() {
+       var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+       var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+     })();
+
+  </script>
+</header>
+<!--end navigation and tracking code -->
+
+<div class="body-wrapper container main-content">
+%s
+</div>
+</body>
+</html>
+""" % (datetime.datetime.now().year, datetime.datetime.now().isoformat(), text[1])
+    with open('/~patrick/projects/UlyssesRedux/coding.html', mode='w') as html_file:
+        html_file.write(html_content)
     subprocess.call(['tidy -m -i -w 0 -utf8 --doctype html5 --fix-uri true --new-blocklevel-tags footer --quote-nbsp true --preserve-entities yes /~patrick/projects/UlyssesRedux/coding.html'], shell=True)
 
 if input('Update meta-TOC on local copy of website? ').lower()[0] == 'y':
