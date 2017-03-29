@@ -29,7 +29,7 @@ while not is_done:
     print("\n\nOK, let's set up the parameters for the next run.")
     print("You can type (all-caps) SAME at any prompt to re-use the last run's answer to that question.\n")
     current_run_data = {}.copy()
-    for which_key in last_run_data:
+    for which_key in sorted(last_run_data.items()):
         answer = input('%s (previously "%s") ---|  ' % (which_key, last_run_data[which_key]))
         if answer == "SAME":
             current_run_data[which_key] = last_run_data[which_key]
