@@ -37,7 +37,7 @@ sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 import utility_scripts.current_run_data_utils as cr_data
 
-import social_media, social_media_auth      # https://github.com/patrick-brian-mooney/personal-library/blob/master/social_media.py                    
+import social_media, social_media_auth      # https://github.com/patrick-brian-mooney/personal-library/blob/master/social_media.py
 
 if debugging_flag: print("INFO: imports successful.")
 
@@ -240,7 +240,7 @@ if input('Update coding journal on website? ').lower()[0] == 'y':
   <meta name="description" content="Coding notes for Ulysses Redux, blog of auto-generated text based on Joyce's Ulysses" />
   <meta name="rating" content="general" />
   <meta name="revisit-after" content="10 days" />
-  <meta name="date" content="2017-03-29T05:02:22-0700" />
+  <meta name="date" content="%s" />
   <meta property="fb:admins" content="100006098197123" />
   <meta property="og:url" content="http://patrickbrianmooney.nfshost.com/~patrick/projects/UlyssesRedux/coding.html" />
   <meta property="og:title" content="Ulysses Redux Coding Notes" />
