@@ -18,7 +18,7 @@ from directory_structure import *           # Gets us the listing of file and di
 import utility_scripts.current_run_data_utils as cr_data
 
 import patrick_logger, introspection       # From https://github.com/patrick-brian-mooney/personal-library
-from introspection import dump
+from introspection import dump_str
 from patrick_logger import log_it
 
 import social_media         # From https://github.com/patrick-brian-mooney/personal-library
@@ -89,7 +89,7 @@ log_it("INFO: tags are %s." % str(recurring_tags + temporary_tags), 2)
 log_it('\nINFO: Attempting to post the content', 1)
 the_status = social_media.tumblr_text_post(ulysses_client, the_tags, the_title, the_content)
 log_it('\nINFO: the_status is: ' + pprint.pformat(the_status), 2)
-log_it(dump(the_status), 2)
+log_it(dump_str(the_status), 2)
 
 new_post_url = blog_url + "post/" + str(the_status['id'])
 
