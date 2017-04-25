@@ -18,13 +18,13 @@ import glob, os, sys, pprint
 sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 
-from chapter_scripts.generic_chapter import buildMapping_withMixins
+from chapter_scripts.generic_chapter import train_with_mixins
 
 import patrick_logger
 from patrick_logger import log_it
 
 sys.path.append(markov_generator_path)
-from sentence_generator import *
+import sentence_generator as sg
 
 # First, set up constants
 chain_length = 2
@@ -36,13 +36,14 @@ def write_story():
 
     log_it("INFO: about to start processing corpora.")
 
-    for which_corpus in glob.glob(circe_corpora_path + '*txt'):
+    for which_corpus in sorted(glob.glob(circe_corpora_path + '*txt')):
         log_it('  INFO: processing "%s".' % which_corpus, 2)
-        starts, the_mapping = buildMapping_withMixins(chain_length, [which_corpus], glob.glob('%s/*txt' % mixin_texts_dir))
         corpus_name = os.path.basename(which_corpus)[:-4]
-        corpora[corpus_name] = [starts, the_mapping]
+        genny = sg.TextGenerator(name="%s generator" % corpus_name)
+        train_with_mixins(genny, chain_length, [which_corpus], glob.glob('%s/*txt' % mixin_texts_dir))
+        corpora[corpus_name] = genny
 
-    log_it("DEBUGGING: Corpora are: \n" + pprint.pformat(corpora), 6)           # pprint.pformat() for the WHOLE DICTIONARY takes FOREVER
+    log_it("DEBUGGING: Corpora are: \n" + pprint.pformat(corpora), 3)
 
     the_chapter = [][:]
 
@@ -53,8 +54,7 @@ def write_story():
             which_index = 'STAGE DIRECTIONS'
         else:
             which_index = 'MINOR CHARACTERS'
-        starts, the_mapping = tuple(corpora[which_index])
-        return gen_text(the_mapping, starts, markov_length=chain_length, sentences_desired=num_sentences, paragraph_break_probability = 0)
+        return corpora[which_index].gen_text(sentences_desired=num_sentences, paragraph_break_probability = 0)
 
     log_it("INFO: About to process stats file.")
 
@@ -63,16 +63,17 @@ def write_story():
             # Process each line, using it as a map of the corresponding paragraph in 'Circe'.
             # Structure of these lines is defined in /UlyssesRedux/scripts/utility_scripts/analyze-chapter-15.py.
             # But here's a quick reminder:
-            # Two parts: a name of a speaker (or "STAGE" if it's a paragraph of stage directions), then a series of codes for "chunks" of the paragraph.
+            # Two parts: first, the name of a speaker (or "STAGE" if it's a paragraph of stage directions)
+            # Then, a series of codes for "chunks" of the paragraph.
             # A "chunk" is a number of sentences. If the number is preceded by opening parens, it's an intraparagraph stage direction.
             # Parts of the line, and chunk descriptions, are separated by vertical bars (pipe characters), hence the .psv extension.
             log_it('INFO: Processing coded line "%s".' % the_encoded_paragraph.strip(), 2)
             code_to_process = the_encoded_paragraph.split('|')
             speaker_name = code_to_process.pop(0)
             log_it('  speaker name is "%s".' % speaker_name, 2)
-            if speaker_name != 'STAGE':                                     # Unless the name is 'STAGE', add it to the beginning of this paragraph
+            if speaker_name != 'STAGE':                         # Unless the name is 'STAGE', add it to the beginning of this paragraph
                 this_paragraph = '%s: ' % speaker_name
-            else:                                                           # In which case, begin with an opening parenthesis.
+            else:                                               # In which case, begin with an opening parenthesis.
                 this_paragraph = '('
             while len(code_to_process) > 0:
                 chunk_descriptor = code_to_process.pop(0)

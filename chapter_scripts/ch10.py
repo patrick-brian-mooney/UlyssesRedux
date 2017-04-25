@@ -18,8 +18,8 @@ sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 
 sys.path.append(markov_generator_path)
-from sentence_generator import *
-from chapter_scripts.generic_chapter import buildMapping_withMixins
+import sentence_generator as sg
+from chapter_scripts.generic_chapter import train_with_mixins
 
 import patrick_logger # From https://github.com/patrick-brian-mooney/personal-library
 from patrick_logger import log_it
@@ -58,18 +58,18 @@ def write_story():
             raise IndexError("The stats file for Wandering Rocks is corrupt: section number %d encountered out of order." % sec)
         log_it("    generating based on sections %d, %d, %d." % (1 + (which_section + 17) % 19, which_section, (which_section + 1) % 19), 2)
         log_it("      asking for %d sentences with paragraph break probability of %f." % (sents, pars/sents))
-        
+
         which_rocks_sections = [
                                  section_filenames[1 + (which_section + 17) % 19 - 1],
                                  section_filenames[which_section - 1],
                                  section_filenames[(which_section + 1) % 19 - 1]
                                 ]
-        starts, the_mapping = buildMapping_withMixins(chain_length, which_rocks_sections, glob.glob('%s/*txt' % mixin_texts_dir))
 
-        output_text.append(gen_text(the_mapping, starts, markov_length=chain_length, sentences_desired=sents,
-                paragraph_break_probability=(pars/sents)))
+        section_genny = sg.TextGenerator(name="Wandering Rocks generator for section %d" % which_section)
+        train_with_mixins(section_genny, chain_length, which_rocks_sections, glob.glob('%s/*txt' % mixin_texts_dir))
+        output_text.append(section_genny.gen_text(sentences_desired=sents, paragraph_break_probability=(pars/sents)))
 
-    return '\n*   *   *\n'.join(output_text)
+    return '\n<center>*   *   *</center>\n'.join(output_text)
 
 if __name__ == "__main__":
     patrick_logger.verbosity_level = 3

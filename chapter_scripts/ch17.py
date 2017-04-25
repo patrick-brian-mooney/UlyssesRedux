@@ -20,10 +20,10 @@ version. See the file LICENSE.md for a copy of this licence.
 import sys, glob
 sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
-from chapter_scripts.generic_chapter import buildMapping_withMixins
+from chapter_scripts.generic_chapter import train_with_mixins
 
 sys.path.append(markov_generator_path)
-from sentence_generator import *
+import sentence_generator as sg
 
 import patrick_logger                 # From https://github.com/patrick-brian-mooney/personal-library
 from patrick_logger import log_it
@@ -38,10 +38,17 @@ log_it("INFO: Imports successful, moving on", 2)
 
 # Create the necessary sets of Markov chains once, at the beginning of the script's run
 
-questions_starts, questions_mapping = buildMapping(word_list(ithaca_questions_path), markov_length=questions_chain_length)
-answers_starts, answers_mapping = buildMapping_withMixins(answers_chain_length, [ithaca_answers_path], glob.glob('%s/*txt' %mixin_texts_dir))
+questions_genny = sg.TextGenerator(name="Ithaca questions generator")
+questions_genny.train([ithaca_questions_path], markov_length=questions_chain_length)
 
-log_it("INFO: built mappings from both question and answer files, moving on", 2)
+answers_genny = sg.TextGenerator(name="Ithaca answers generator")
+train_with_mixins(answers_genny, joyce_text_list=[ithaca_answers_path], mixin_texts_list=glob.glob('%s/*txt' %
+                  mixin_texts_dir), chain_length=answers_chain_length)
+
+
+
+
+log_it("INFO: trained generators for both questions and answers; moving on ...", 2)
 
 # Unlike the 'Aeolus' script, this script makes no effort to enforce sticking within word-limit boundaries.
 # You can see that in the next two routines, which just call sentence_generator.gen_text() directly.
@@ -49,12 +56,12 @@ log_it("INFO: built mappings from both question and answer files, moving on", 2)
 def getQuestion(num_sents, num_words):
     log_it("    getQuestion() called", 2)
     log_it("      num_sents: %d; num_words: %d" % (num_sents, num_words), 3)
-    return gen_text(questions_mapping, questions_starts, markov_length=questions_chain_length, sentences_desired=num_sents, paragraph_break_probability=0)
+    return questions_genny.gen_text(sentences_desired=num_sents, paragraph_break_probability=0)
 
 def getAnswer(num_sents, num_words):
     log_it("    getAnswer() called", 2)
     log_it("      num_sents: %d; num_words: %d" % (num_sents, num_words), 3)
-    return gen_text(answers_mapping, answers_starts, markov_length=answers_chain_length, sentences_desired=num_sents, paragraph_break_probability=0)
+    return answers_genny.gen_text(sentences_desired=num_sents, paragraph_break_probability=0)
 
 def get_appropriate_paragraph(structure_description):
     """Parse the coded lines in /UlyssesRedux/stats/17-stats.csv and produce an

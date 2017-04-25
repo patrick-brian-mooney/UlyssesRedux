@@ -20,14 +20,14 @@ version. See the file LICENSE.md for a copy of this licence.
 headline_chain_length = 1
 nonheadline_chain_length = 2
 length_tolerance = 0.4      # e.g., 0.3 means the generated text can be up to 30% over or under the length of the requested text.
-joyce_ratio = 1.4           # Goal ratio of Joyce to non-Joyce text in the resulting chains. 
+joyce_ratio = 1.4           # Goal ratio of Joyce to non-Joyce text in the resulting chains.
 
 import os, glob, sys
 sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 
 sys.path.append(markov_generator_path)
-from sentence_generator import *
+import sentence_generator as sg
 
 import patrick_logger    # From https://github.com/patrick-brian-mooney/personal-library
 from patrick_logger import log_it
@@ -36,41 +36,43 @@ patrick_logger.verbosity_level = 0
 log_it("INFO: Imports successful, moving on", 2)
 
 # Create the necessary sets of Markov chains once, at the beginning of the script's run
-headlines_starts, headlines_mapping = buildMapping(word_list(aeolus_headlines_path), markov_length=headline_chain_length)
+headlines_genny = sg.TextGenerator(name="Aeolus headlines generator")
+headlines_genny.train(the_files=[aeolus_headlines_path], markov_length=headline_chain_length)
 
 joyce_text_length = os.stat(aeolus_nonheadlines_path).st_size
 mixin_texts_length = 0
-for which_file in glob.glob('%s/07/*txt' % current_run_corpus_directory):
+articles_files = glob.glob('%s/07/*txt' % current_run_corpus_directory)
+for which_file in articles_files:
     mixin_texts_length += os.stat(which_file).st_size
-the_word_list = word_list(aeolus_nonheadlines_path) * int(round( (mixin_texts_length / joyce_text_length) * joyce_ratio ))
-for the_file in glob.glob('%s/07/*txt' % current_run_corpus_directory):
-    the_word_list += word_list(the_file)
-nonheadlines_starts, nonheadlines_mapping = buildMapping(the_word_list, markov_length=nonheadline_chain_length)
+ratio = int(round( (mixin_texts_length / joyce_text_length) * joyce_ratio ))
+articles_files = [aeolus_nonheadlines_path] * ratio + articles_files
+articles_genny = sg.TextGenerator(name="Aeolus articles generator")
+articles_genny.train(the_files=articles_files, markov_length=nonheadline_chain_length)
 
-log_it("INFO: built mappings from both headlines and non-headlines files, moving on", 2)
+log_it("INFO: trained generators for both headlines and non-headlines files, moving on", 2)
 
-def getParagraph(num_sents, num_words, chain_length, mapping, starts):
+def getParagraph(genny, num_sents, num_words):
     "Generic text-generation routine that all other text-generation routines call internally."
     minl = (1 - length_tolerance) * num_words
     maxl = (1 + length_tolerance) * num_words
     log_it("      getParagraph() called", 2)
-    log_it("        num_sents: %d\n        num_words: %d\n        chain_length: %s" % (num_sents, num_words, chain_length), 3)
+    log_it("        num_sents: %d\n        num_words: %d\n        chain_length: %s" % (num_sents, num_words, genny.chains.markov_length), 3)
     log_it("        looking for a paragraph of %d to %d words" % (minl, maxl), 3)
     ret = ""
-    while not ( minl <= len (ret.split(' ')) <= maxl ):  # Keep trying until it's w/in acceptable length params
-        ret = gen_text(mapping, starts, markov_length=chain_length, sentences_desired=num_sents, paragraph_break_probability=0)
+    while not ( minl <= len (ret.split(' ')) <= maxl ):  # Keep trying until it's within acceptable length params
+        ret = genny.gen_text(sentences_desired=num_sents, paragraph_break_probability=0)
         log_it("          length of generated text is %d words / %d characters" % (len(ret.split(' ')), len(ret)), 3)
         log_it("            generated sentence was '%s'." % ret, 4)
     return ret
 
 def getHeadline(num_sents, num_words):
     log_it("    getHeadline() called", 2)
-    ret = getParagraph(num_sents, num_words, headline_chain_length, headlines_mapping, headlines_starts).upper()
+    ret = getParagraph(headlines_genny, num_sents=num_sents, num_words=num_words).upper()
     return ret
 
 def getNonQuoteParagraph(num_sents, num_words):
     log_it("    getNonQuoteParagraph() called", 2)
-    return getParagraph(num_sents, num_words, nonheadline_chain_length, nonheadlines_mapping, nonheadlines_starts)
+    return getParagraph(articles_genny, num_sents=num_sents, num_words=num_words)
 
 def getQuoteParagraph(num_sents, num_words):
     log_it("    getQuoteParagraph() called", 2)
@@ -92,7 +94,8 @@ def get_appropriate_paragraph(structure_description):
       * Then there is another base-10, non-zero-padded number, which is the total
         number of words in those sentences.
 
-    This function just parses the lines and delegates to other functions.
+    This function just parses the lines in the stats file and delegates the actual
+    processing to other functions.
     """
     num_sents, num_words = tuple(structure_description[1:].split(','))
     if structure_description[0] == "H":

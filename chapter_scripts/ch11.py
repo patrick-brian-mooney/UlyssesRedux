@@ -4,7 +4,7 @@ Ulysses, 'Sirens.' Currently, just generates 2597 sentences based on the text of
 'Sirens', aiming for an average paragraph length of 4.045, which is the actual
 number of sentences and average paragraph length from that chapter.
 
-A Markov length of 3 seems to work well here, according to insufficient tests
+A Markov length of 2 seems to work well here, according to insufficient tests
 evaluated informally.
 
 This program is licensed under the GPL v3 or, at your option, any later
