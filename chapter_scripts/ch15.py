@@ -79,7 +79,7 @@ def write_story():
                 chunk_descriptor = code_to_process.pop(0)
                 log_it('    processing chunk "%s".' % chunk_descriptor.strip(), 2)
                 if chunk_descriptor[0] == '(':
-                    this_paragraph = this_paragraph + '(%s) ' % (get_speaker_text('STAGE', int(chunk_descriptor[1:])))
+                    this_paragraph = this_paragraph + '(%s) ' % get_speaker_text('STAGE', int(chunk_descriptor[1:])).strip()
                 else:
                     this_paragraph = this_paragraph + '%s ' % (get_speaker_text(speaker_name, int(chunk_descriptor)))
                 log_it('      current paragraph length is now %d.' % len(this_paragraph), 3)
