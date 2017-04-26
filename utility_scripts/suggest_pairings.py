@@ -96,7 +96,7 @@ def give_matches(data):
 
 if __name__ == "__main__":
     print("\nWARNING: About to clear out the \"%s\" directory." % current_run_corpus_directory)
-    if input("Want to compress the mix-in text set? ").lower()[0] == 'y':
+    if input("Want to compress the mix-in text set? ").lower().strip()[0] == 'y':
         oldpath = os.getcwd()
         os.chdir(git_repo_path)
         try:

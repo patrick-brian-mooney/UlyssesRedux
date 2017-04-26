@@ -46,7 +46,7 @@ import patrick_logger               # From  https://github.com/patrick-brian-moo
 from patrick_logger import log_it
 
 # Set up some constants
-patrick_logger.verbosity_level = 1  # Bump above zero to get more verbose messages about processing and to skip the
+patrick_logger.verbosity_level = 0  # Bump above zero to get more verbose messages about processing and to skip the
                                     # "are we running on a webserver?" check.
 
 force_test = False                  # IF we need to fake command-line arguments in an IDE for testing ...
@@ -56,7 +56,7 @@ sentence_ending_punct = r'.!?'
 punct_with_no_space_before = r'.,!?;—․-:/'
 punct_with_no_space_after = r'—-/․'             # Note: that last character is U+2024, "one-dot leader".
 word_punct = r"'’❲❳%°#․$"                       # Punctuation marks to be considered part of a word.
-token_punct = r".,\:\-!?;—\/&…"                 # These punctuation marks also count as tokens.
+token_punct = r".,:\-!?;—/&…⸻"                # These punctuation marks also count as tokens.
 
 final_substitutions = [                 # list of lists. each sublist:[search_regex, replace_regex]. Subs performed in order specified.
     ['--', '—'],
