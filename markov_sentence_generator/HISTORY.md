@@ -75,7 +75,7 @@ v2.0, 20 April 2017
 24 Apr 2017
 -----------
 * All of the automatic text blogs are using it now except for *Ulysses Redux*, which will require a little more effort to rework.
-  * Well, *Ulysses Redux* is a bit more complicated a project.
+  * Well, *Ulysses Redux* is a bit more complicated a project, after all.
   * Several minor bugs have been fixed, both in the text generator and in some of the blogs using it.
 * Some *Ulysses Redux* scripts have been rewritten, as of today:
   * `ch07.py` ("Aeolus") -- seems to be working
@@ -97,3 +97,4 @@ v2.0, 20 April 2017
     * `ch11.py`
     * `ch12.py`
     * `ch13.py`
+* Fixed the documentation. It should be more or less up to date now. I think.
