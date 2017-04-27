@@ -27,7 +27,7 @@ sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 
 sys.path.append(markov_generator_path)
-import sentence_generator as sg
+import text_generator as tg
 
 import patrick_logger    # From https://github.com/patrick-brian-mooney/personal-library
 from patrick_logger import log_it
@@ -36,7 +36,7 @@ patrick_logger.verbosity_level = 0
 log_it("INFO: Imports successful, moving on", 2)
 
 # Create the necessary sets of Markov chains once, at the beginning of the script's run
-headlines_genny = sg.TextGenerator(name="Aeolus headlines generator")
+headlines_genny = tg.TextGenerator(name="Aeolus headlines generator")
 headlines_genny.train(the_files=[aeolus_headlines_path], markov_length=headline_chain_length)
 
 joyce_text_length = os.stat(aeolus_nonheadlines_path).st_size
@@ -46,7 +46,7 @@ for which_file in articles_files:
     mixin_texts_length += os.stat(which_file).st_size
 ratio = int(round( (mixin_texts_length / joyce_text_length) * joyce_ratio ))
 articles_files = [aeolus_nonheadlines_path] * ratio + articles_files
-articles_genny = sg.TextGenerator(name="Aeolus articles generator")
+articles_genny = tg.TextGenerator(name="Aeolus articles generator")
 articles_genny.train(the_files=articles_files, markov_length=nonheadline_chain_length)
 
 log_it("INFO: trained generators for both headlines and non-headlines files, moving on", 2)

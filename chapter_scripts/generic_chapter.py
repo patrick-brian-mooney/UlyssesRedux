@@ -17,9 +17,9 @@ sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 
 sys.path.append(markov_generator_path)
-import sentence_generator as sg
+import text_generator as tg
 
-def train_with_mixins(genny,                         # An object of type sg.TextGenerator(), which this procudure will train
+def train_with_mixins(genny,                         # An object of type tg.TextGenerator(), which this procudure will train
                       chain_length,                  # In words
                       joyce_text_list,               # List of files representing Joyce's text under consideration
                       mixin_texts_list,              # List of mixin texts
@@ -52,7 +52,7 @@ def write_generic_story(chain_length,
                         joyce_text_path,            # A list
                         mixin_texts_dir,            # Full path
                         joyce_ratio=1.2):
-    genny = sg.TextGenerator()
+    genny = tg.TextGenerator()
     train_with_mixins(genny, chain_length, [joyce_text_path], glob.glob('%s/*txt' % mixin_texts_dir), joyce_ratio)
     return genny.gen_text(sentences_desired=chapter_length, paragraph_break_probability=(1/sentences_per_paragraph))
 

@@ -18,7 +18,7 @@ sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 
 sys.path.append(markov_generator_path)
-import sentence_generator as sg
+import text_generator as tg
 from chapter_scripts.generic_chapter import train_with_mixins
 
 import patrick_logger # From https://github.com/patrick-brian-mooney/personal-library
@@ -65,7 +65,7 @@ def write_story():
                                  section_filenames[(which_section + 1) % 19 - 1]
                                 ]
 
-        section_genny = sg.TextGenerator(name="Wandering Rocks generator for section %d" % which_section)
+        section_genny = tg.TextGenerator(name="Wandering Rocks generator for section %d" % which_section)
         train_with_mixins(section_genny, chain_length, which_rocks_sections, glob.glob('%s/*txt' % mixin_texts_dir))
         output_text.append(section_genny.gen_text(sentences_desired=sents, paragraph_break_probability=(pars/sents)))
 

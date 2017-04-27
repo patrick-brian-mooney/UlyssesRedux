@@ -163,7 +163,7 @@ html_file = html_header + """<body lang="en-US" xml:lang="en-US"><div class="con
 """ % (current_episode_number, current_run_data['current-run-name'])
 
 # OK, get a summary fragment and turn it into valid HTML, if it isn't already. Assumption: if the fragment as a whole is bracketed <p> ... </p>,
-# then assume that it's a pre-formatted HTML fragment; otherwise, split it into lines and bracket those lines <p> ... </p>.
+# then assume that it's a pre-formatted HTML fragment; otherwise, split it into lines and bracket those lines with <p> ... </p>.
 
 if current_run_data['summary'].startswith('<p>') and current_run_data['summary'].endswith('</p>'):
     summary_text = current_run_data['summary']
@@ -240,7 +240,7 @@ if input('Update coding journal on website? ').lower()[0] == 'y':
   <meta name="description" content="Coding notes for Ulysses Redux, blog of auto-generated text based on Joyce's Ulysses" />
   <meta name="rating" content="general" />
   <meta name="revisit-after" content="10 days" />
-  <meta name="date" content="%s" />
+  <meta name="date" content="2017-04-26T15:16:33-0700" />
   <meta property="fb:admins" content="100006098197123" />
   <meta property="og:url" content="http://patrickbrianmooney.nfshost.com/~patrick/projects/UlyssesRedux/coding.html" />
   <meta property="og:title" content="Ulysses Redux Coding Notes" />
@@ -256,7 +256,7 @@ if input('Update coding journal on website? ').lower()[0] == 'y':
   <meta name="twitter:image:src" content="http://patrickbrianmooney.nfshost.com/~patrick/icons/gear-large.png" />
  </head>
 
-<body lang="en-US" xml:lang="en-US">
+<body lang="en-US" xml:lang="en-US"><div class="body-wrapper container main-content">
 
 <!--Begin navigation and tracking code-->
 <header id="main-nav">
@@ -284,7 +284,6 @@ if input('Update coding journal on website? ').lower()[0] == 'y':
 </header>
 <!--end navigation and tracking code -->
 
-<div class="body-wrapper container main-content">
 %s
 </div>
 </body>

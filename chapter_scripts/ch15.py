@@ -24,7 +24,7 @@ import patrick_logger
 from patrick_logger import log_it
 
 sys.path.append(markov_generator_path)
-import sentence_generator as sg
+import text_generator as tg
 
 # First, set up constants
 chain_length = 2
@@ -39,7 +39,7 @@ def write_story():
     for which_corpus in sorted(glob.glob(circe_corpora_path + '*txt')):
         log_it('  INFO: processing "%s".' % which_corpus, 2)
         corpus_name = os.path.basename(which_corpus)[:-4]
-        genny = sg.TextGenerator(name="%s generator" % corpus_name)
+        genny = tg.TextGenerator(name="%s generator" % corpus_name)
         train_with_mixins(genny, chain_length, [which_corpus], glob.glob('%s/*txt' % mixin_texts_dir))
         corpora[corpus_name] = genny
 

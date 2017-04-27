@@ -23,7 +23,7 @@ from directory_structure import *           # Gets us the listing of file and di
 from chapter_scripts.generic_chapter import train_with_mixins
 
 sys.path.append(markov_generator_path)
-import sentence_generator as sg
+import text_generator as tg
 
 import patrick_logger                 # From https://github.com/patrick-brian-mooney/personal-library
 from patrick_logger import log_it
@@ -38,10 +38,10 @@ log_it("INFO: Imports successful, moving on", 2)
 
 # Create the necessary sets of Markov chains once, at the beginning of the script's run
 
-questions_genny = sg.TextGenerator(name="Ithaca questions generator")
+questions_genny = tg.TextGenerator(name="Ithaca questions generator")
 questions_genny.train([ithaca_questions_path], markov_length=questions_chain_length)
 
-answers_genny = sg.TextGenerator(name="Ithaca answers generator")
+answers_genny = tg.TextGenerator(name="Ithaca answers generator")
 train_with_mixins(answers_genny, joyce_text_list=[ithaca_answers_path], mixin_texts_list=glob.glob('%s/*txt' %
                   mixin_texts_dir), chain_length=answers_chain_length)
 
