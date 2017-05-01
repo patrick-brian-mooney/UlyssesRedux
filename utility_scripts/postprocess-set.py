@@ -240,7 +240,7 @@ if input('Update coding journal on website? ').lower()[0] == 'y':
   <meta name="description" content="Coding notes for Ulysses Redux, blog of auto-generated text based on Joyce's Ulysses" />
   <meta name="rating" content="general" />
   <meta name="revisit-after" content="10 days" />
-  <meta name="date" content="2017-04-26T15:16:33-0700" />
+  <meta name="date" content="%s" />
   <meta property="fb:admins" content="100006098197123" />
   <meta property="og:url" content="http://patrickbrianmooney.nfshost.com/~patrick/projects/UlyssesRedux/coding.html" />
   <meta property="og:title" content="Ulysses Redux Coding Notes" />
