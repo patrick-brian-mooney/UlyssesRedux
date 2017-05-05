@@ -32,7 +32,7 @@ import sys, re, glob, csv, os
 
 sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
-import markov_sentence_generator.sentence_generator as sg
+import markov_sentence_generator.text_generator as tg
 
 def count_words(the_filename):
     """Return a dictionary: WORD -> instances of WORD in the file.
@@ -41,7 +41,7 @@ def count_words(the_filename):
     this_file_dict = {}.copy()
     with open(the_filename) as the_file:
         for which_line in the_file:
-            for the_word in [w for w in re.findall(r"[\w%s]+|[%s]" % (sg.word_punct, sg.token_punct), which_line)]:
+            for the_word in [w for w in re.findall(r"[\w%s]+|[%s]" % (tg.word_punct, tg.token_punct), which_line)]:
                 try:
                     this_file_dict[the_word] += 1
                 except KeyError:
