@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""Patrick Mooney's Markov sentence generator, %s.
+"""This is Patrick Mooney's Markov sentence generator. It is licensed under the
+GNU GPL,either version 3, or (at your option) any later version. See the files
+README.md and LICENSE.md for more details.
 
-This script is available at
-https://github.com/patrick-brian-mooney/markov-sentence-generator. See the
-files README.md and LICENSE.md for more details.
+Find it at https://github.com/patrick-brian-mooney/markov-sentence-generator.
 
 USAGE:
 
@@ -34,7 +34,7 @@ might be something like:
 """
 
 __author__ = "Patrick Mooney, http://patrickbrianmooney.nfshost.com/~patrick/"
-__version__ = "$v2.0 $"
+__version__ = "$v2.1 $"
 __date__ = "$Date: 2017/04/24 16:16:00 $"
 __copyright__ = "Copyright (c) 2015-17 Patrick Mooney"
 __license__ = "GPL v3, or, at your option, any later version"
@@ -75,7 +75,7 @@ def print_html_docs():
 <p>Code is available <a rel="muse" href="https://github.com/patrick-brian-mooney/markov-sentence-generator">here</a>.</p>
 <pre>%s</pre>
 </body>
-</html>"""% __doc__)
+</html>""" % __doc__)
     sys.exit(0)
 
 
@@ -263,7 +263,8 @@ See the file LICENSE.md for details.
 def to_hash_key(lst):
     """Tuples can be hashed; lists can't.  We need hashable values for dict keys.
     This looks like a hack (and it is, a little) but in practice it doesn't
-    affect processing time too negatively."""
+    affect processing time too negatively.
+    """
     return tuple(lst)
 
 def apply_defaults(defaultargs, args):
@@ -280,15 +281,15 @@ def apply_defaults(defaultargs, args):
     return ret
 
 def fix_caps(word):
-    """HRS initially said:
-    "We want to be able to compare words independent of their capitalization."
-
-    I disagree, though, so I'm commenting out this routine to see how that plays
-    out.
-
-    Schwartz further said:
-    # Ex: "FOO" -> "foo"
-    if word.isupper() and word != "I":
+    """This is Harry Schwartz's token comparison function, allowing words (other than
+    "I") to be compared regardless of capitalization. I don't tend to use it, but
+    if you want to, set the comparison_form attribute to point to it: something
+    like 
+    
+        genny.comparison_function = fix_caps
+    """
+    
+    if word.isupper() and word != "I":      # I suspect this doesn't work the way Schwartz thinks it does, but haven't tested it.
         word = word.lower()
         # Ex: "LaTeX" => "Latex"
     elif word[0].isupper():
@@ -296,7 +297,6 @@ def fix_caps(word):
         # Ex: "wOOt" -> "woot"
     else:
         word = word.lower()
-    """
     return word
 
 
@@ -359,6 +359,17 @@ class TextGenerator(object):
                 return '< class %s, named "%s", UNTRAINED >' % (self.__class__, self.name)
             else:
                 return '< class %s (unnamed instance), UNTRAINED >' % self.__class__
+    
+    @staticmethod
+    def comparison_form(word):
+        """This function is called to normalize the words for the purpose of storing
+        them in the list of Markov chains, and for looking at previous words when
+        deciding what the next word in the sequence should be. By default, this
+        function performs no processing at all; override it if any preprocessing
+        should be done for comparison purposes -- for instance, if case needs to be
+        normalized.  
+        """
+        return word
 
     def __init__(self, name=None, training_texts=None, **kwargs):
         """Create a new instance. NAME is entirely optional, and is mentioned for 
@@ -446,13 +457,13 @@ class TextGenerator(object):
 
     @staticmethod
     def addItemToTempMapping(history, word, the_temp_mapping):
-        '''Self-explanatory -- adds "word" to the "the_temp_mapping" dict under "history".
+        """Self-explanatory -- adds "word" to the "the_temp_mapping" dict under "history".
         the_temp_mapping (and the_mapping) both match each word to a list of possible next
         words.
 
         Given history = ["the", "rain", "in"] and word = "Spain", we add "Spain" to
         the entries for ["the", "rain", "in"], ["rain", "in"], and ["in"].
-        '''
+        """
         while len(history) > 0:
             first = to_hash_key(history)
             if first in the_temp_mapping:
@@ -465,23 +476,21 @@ class TextGenerator(object):
                 the_temp_mapping[first][word] = 1.0
             history = history[1:]
 
-    @staticmethod
-    def next(prevList, the_mapping):
+    def next(self, prevList, the_mapping):
         """Returns the next word in the sentence (chosen randomly),
         given the previous ones.
         """
+        prevList = [ self.comparison_form(p) for p in prevList ]        # Use the canonical comparison form
         sum = 0.0
         retval = ""
         index = random.random()
         # Shorten prevList until it's in the_mapping
         try:
             while to_hash_key(prevList) not in the_mapping:
-                prevList.pop(0)
-        except IndexError:  # If we somehow wind up with an empty list (shouldn't happen), then just end the sentence to
-            # force us to start a new sentence.
-            retval = "."
-        # Get a random word from the_mapping, given prevList, if prevList isn't empty
-        else:
+                prevList.pop(0)         # Just drop the earliest list element & try again if the list isn't in the_mapping
+        except IndexError:  # If we somehow wind up with an empty list (shouldn't happen), then just end the sentence; 
+            retval = "."    # this will force the generator to start a new one.
+        else:               # Otherwise, get a random word from the_mapping, given prevList, if prevList isn't empty
             for k, v in the_mapping[to_hash_key(prevList)].items():
                 sum += v
                 if sum >= index and retval == "":
@@ -516,8 +525,7 @@ class TextGenerator(object):
         self.chains.markov_length = markov_length
         self.chains.character_tokens = character_tokens
 
-    @staticmethod
-    def _token_list(the_string, character_tokens=False):
+    def _token_list(self, the_string, character_tokens=False):
         """Converts a string into a set of tokens so that the text generator can
         process, and therefore be trained by, it.
         ."""
@@ -525,7 +533,7 @@ class TextGenerator(object):
             tokens = list(the_string)
         else:
             tokens = re.findall(r"[\w%s]+|[%s]" % (word_punct, token_punct), the_string)
-        return [fix_caps(w) for w in tokens]
+        return [self.comparison_form(w) for w in tokens]
 
     def is_trained(self):
         """Detect whether this model is trained or not."""
@@ -615,27 +623,32 @@ class TextGenerator(object):
         the_text = self._produce_text(sentences_desired, paragraph_break_probability)
         return '\n\n'.join(['<p>%s</p>' % p.strip() for p in the_text])
 
+    def _printer(self, what, columns=-1):
+        """Print WHAT in an appropriate way, wrapping to the specified number of
+        COLUMNS. Override this function to change its behavior.
+        """
+        if columns == 0:  # Wrapping is totally disabled. Print exactly as generated.
+            log_it("INFO: COLUMNS is zero; not wrapping text at all", 2)
+            print(what)
+        else:
+            if columns == -1:  # Wrap to best guess for terminal width
+                log_it("INFO: COLUMNS is -1; wrapping text to best-guess column width", 2)
+                padding = 0
+            else:  # Wrap to specified width (unless current terminal width is odd, in which case we're off by 1)
+                padding = max((th.terminal_width() - columns) // 2, 0)
+                log_it("INFO: COLUMNS is %s; padding text with %s spaces on each side" % (columns, padding), 2)
+                log_it("NOTE: terminal width is %s" % th.terminal_width())
+            what = th.multi_replace(what, [['\n\n', '\n'], ])       # Last chance to postprocess text is right here
+            for the_paragraph in what.split('\n'):
+                if the_paragraph:                   # Skip any empty paragraphs that may pop up
+                    th.print_indented(the_paragraph, each_side=padding)
+                    print()
+
     def print_text(self, sentences_desired, paragraph_break_probability=0.25, pause=0, columns=-1):
         """Prints generated text directly to stdout."""
         for t in self._produce_text(sentences_desired, paragraph_break_probability):
             time_now = time.time()
-
-            if columns == 0:  # Wrapping is totally disabled. Print exactly as generated.
-                log_it("INFO: COLUMNS is zero; not wrapping text at all", 2)
-                print(t)
-            else:
-                if columns == -1:  # Wrap to best guess for terminal width
-                    log_it("INFO: COLUMNS is -1; wrapping text to best-guess column width", 2)
-                    padding = 0
-                else:  # Wrap to specified width (unless current terminal width is odd, in which case we're off by 1)
-                    padding = max((th.terminal_width() - columns) // 2, 0)
-                    log_it("INFO: COLUMNS is %s; padding text with %s spaces on each side" % (columns, padding), 2)
-                    log_it("NOTE: terminal width is %s" % th.terminal_width())
-                t = th.multi_replace(t, [['\n\n', '\n'], ])     # Last chance to postprocess text is right here
-                for the_paragraph in t.split('\n'):
-                    if the_paragraph:                   # Skip any empty paragraphs that may pop up
-                        th.print_indented(the_paragraph, each_side=padding)
-                        print()
+            self._printer(t, columns=columns)
             time.sleep(max(pause - (time.time() - time_now), 0))    # Pause until it's time for a new paragraph.
 
 
