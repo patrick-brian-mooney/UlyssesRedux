@@ -664,7 +664,7 @@ default_args = {'chars': False,
                 'quiet': 0,
                 'verbose': 0}
 
-def main(**kwargs):
+def main(generator_class=TextGenerator, **kwargs):
     """Handle the main program loop and generate some text.
 
     By default, this routine can simply be called as main(), with no arguments; this
@@ -674,6 +674,12 @@ def main(**kwargs):
     the command line would be parsed, i.e. with something like
 
         main(markov_length=2, input=['Song of Solomon.txt'], count=20, chars=True)
+        
+    To allow this code to be reused to create command-line interfaces in modules
+    that subclass TextGenerator(), it is also possible to specify the class of the
+    text generator that's created. By default, of course, it's just the basic 
+    TextGenerator class, but see poetry_generator for a sample of how this can be
+    done. 
     """
     if (not sys.stdout.isatty()) and (patrick_logger.verbosity_level < 1):  # Assume we're running on a web server. ...
         print_html_docs()
@@ -706,7 +712,7 @@ def main(**kwargs):
 
     # Now instantiate and train the model, and save the compiled chains, if that's what the user wants
     print()                     # Cough up a blank line at the beginning.
-    genny = TextGenerator()
+    genny = generator_class()
     if opts['load']:
         genny.chains.read_chains(filename=opts['load'])
     else:
