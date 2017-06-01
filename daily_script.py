@@ -87,15 +87,10 @@ log_it("INFO: tags are %s." % str(recurring_tags + temporary_tags), 2)
 
 # All right, post this content
 log_it('\nINFO: Attempting to post the content', 1)
-<<<<<<< HEAD
 the_status, the_tumblr_data = social_media.tumblr_text_post(ulysses_client, the_tags, the_title, the_content)
 log_it('\nINFO: the_status is: ' + dump_str(the_status), 2)
 log_it('\nINFO: the_tumblr_data is: ' + dump_str(the_tumblr_data), 2)
-=======
-the_status, _ = social_media.tumblr_text_post(ulysses_client, the_tags, the_title, the_content)
-log_it('\nINFO: the_status is: ' + pprint.pformat(the_status), 2)
-log_it(dump_str(the_status), 2)
->>>>>>> 052BloomsFirstJourneyThroughTheDreamlands
+
 
 new_post_url = blog_url + "post/" + str(the_status['id'])
 
