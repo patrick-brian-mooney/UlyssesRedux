@@ -41,7 +41,7 @@ The `TextGenerator` object is intentionally designed to be easily controllable b
   <dd>A function that normalizes tokens for comparison purposes. The default function makes no changes at all (i.e., tokens are compared with no preprocessing). But tokens could in theory be compared in any number of ways, including by normalizing capitalization; there's an included <code>fix_caps</code> token comparison function that was written by Harry R. Schwartz in his older version of the Markov-based text generator; I myself have never used it (and suspect it might not quite do what he thinks it does; see comments in the code for more details), but it's there if you want it.</dd>
   
   <dt><code>TextGenerator._printer()</code></dt>
-  <dd>A function responsible for printing generated text directly to the console. Override this function to change the details of how text is printed. An overridden version of this function will need to take the same arguments as this function does (or at least consume them, e.g. by using a <code>*pargs</code>/<code>**kwargs</code> argument-consuming syntax).</dd>
+  <dd>A function responsible for printing generated text directly to the console. Override this function to change the details of how text is printed. An overridden version of this function will need to take the same arguments as this function does (or at least consume them, e.g. by =using a <code>*pargs</code>/<code>**kwargs</code> argument-consuming syntax).</dd>
 </dl>
   
 You can (of course!) use `help(tg)` or `dir(tg)` to explore the built-in documentation for the module.
