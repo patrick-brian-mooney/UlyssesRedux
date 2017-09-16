@@ -20,7 +20,7 @@ version. See the file LICENSE.md for a copy of this licence.
 headline_chain_length = 1
 nonheadline_chain_length = 2
 length_tolerance = 0.4      # e.g., 0.3 means the generated text can be up to 30% over or under the length of the requested text.
-joyce_ratio = 1.4           # Goal ratio of Joyce to non-Joyce text in the resulting chains.
+joyce_ratio = 1.2           # Goal ratio of Joyce to non-Joyce text in the resulting chains.
 
 import os, glob, sys
 sys.path.append('/UlyssesRedux/scripts/')

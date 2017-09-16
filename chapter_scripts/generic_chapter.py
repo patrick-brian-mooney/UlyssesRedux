@@ -23,7 +23,7 @@ def train_with_mixins(genny,                         # An object of type tg.Text
                       chain_length,                  # In words
                       joyce_text_list,               # List of files representing Joyce's text under consideration
                       mixin_texts_list,              # List of mixin texts
-                      joyce_ratio=1.2):              # How much Joyce relative to mixin textss?
+                      joyce_ratio=1.1):              # How much Joyce relative to mixin textss?
     if debugging: print("train_withMixins() called; parameters are ...\n\n" + pprint.pformat(locals()))
  
     joyce_text_length, mixin_texts_length = 0, 0
