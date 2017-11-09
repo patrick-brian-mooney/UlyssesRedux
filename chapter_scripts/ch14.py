@@ -5,7 +5,7 @@ based on the text of 'Oxen', aiming for an average paragraph length of 13.69,
 which is the actual number of sentences and average paragraph length from that
 chapter.
 
-A Markov length of 3 seems to work well here, according to insufficient tests
+A Markov length of 2 seems to work well here, according to insufficient tests
 evaluated informally.
 
 This program is licensed under the GPL v3 or, at your option, any later
