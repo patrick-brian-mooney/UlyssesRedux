@@ -82,9 +82,8 @@ html_header = """<!doctype html>
 <html prefix="og: http://ogp.me/ns#" xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <link rel="stylesheet" type="text/css" href="/~patrick/css/skeleton-normalize.css" />
-  <link rel="stylesheet" type="text/css" href="/~patrick/css/skeleton.css" />
-  <link rel="stylesheet" type="text/css" href="/~patrick/css/content-skel.css" />
+  <link rel="stylesheet" type="text/css" href="/~patrick/css/min.css" />
+  <link rel="stylesheet" type="text/css" href="/~patrick/css/content.css" />
   <link rel="meta" type="application/rdf+xml" title="FOAF" href="/~patrick/foaf.rdf" />
   <meta name="foaf:maker" content="foaf:mbox_sha1sum '48a3091d919c5e75a5b21d2f18164eb4d38ef2cd'" />
   <link rel="profile" href="http://microformats.org/profile/hcard" />
@@ -104,7 +103,7 @@ html_header = html_header + """  <link rel="start" href="001.html" />
   <link rel="next" href="%03d.html" />
 
   <title>Ulysses Redux #%03d</title>
-  <meta name="generator" content="Bluefish 2.2.6" />
+  <meta name="generator" content="Bluefish 2.2.9" />
   <meta name="author" content="Patrick Mooney" />
   <meta name="dcterms.rights" content="Copyright © 2015&ndash;16 Patrick Mooney" />
   <meta name="description" content="Table of contents for Ulysses Redux #%03d" />
@@ -221,9 +220,8 @@ if input('Update coding journal on website? ').lower()[0] == 'y':
 <!doctype html>
 <html prefix="og: http://ogp.me/ns#" xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml">
   <meta charset="utf-8" />
-  <link rel="stylesheet" type="text/css" href="/~patrick/css/skeleton-normalize.css" />
-  <link rel="stylesheet" type="text/css" href="/~patrick/css/skeleton.css" />
-  <link rel="stylesheet" type="text/css" href="/~patrick/css/content-skel.css" />
+  <link rel="stylesheet" type="text/css" href="/~patrick/css/min.css" />
+  <link rel="stylesheet" type="text/css" href="/~patrick/css/content.css" />
   <link rel="meta" type="application/rdf+xml" title="FOAF" href="/~patrick/foaf.rdf" />
   <meta name="foaf:maker" content="foaf:mbox_sha1sum '48a3091d919c5e75a5b21d2f18164eb4d38ef2cd'" />
   <link rel="profile" href="http://gmpg.org/xfn/11" />
@@ -234,13 +232,13 @@ if input('Update coding journal on website? ').lower()[0] == 'y':
   <link href="/~patrick/feeds/updates.xml" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed" />
 
   <title>Ulysses Redux Coding Notes</title>
-  <meta name="generator" content="Bluefish 2.2.6" />
+  <meta name="generator" content="Bluefish 2.2.9" />
   <meta name="author" content="Patrick Mooney" />
   <meta name="dcterms.rights" content="Copyright © 2015–%s Patrick Mooney" />
   <meta name="description" content="Coding notes for Ulysses Redux, blog of auto-generated text based on Joyce's Ulysses" />
   <meta name="rating" content="general" />
   <meta name="revisit-after" content="10 days" />
-  <meta name="date" content="%s" />
+  <meta name="date" content="2017-11-20T10:04:53-0700" />
   <meta property="fb:admins" content="100006098197123" />
   <meta property="og:url" content="http://patrickbrianmooney.nfshost.com/~patrick/projects/UlyssesRedux/coding.html" />
   <meta property="og:title" content="Ulysses Redux Coding Notes" />
@@ -256,7 +254,7 @@ if input('Update coding journal on website? ').lower()[0] == 'y':
   <meta name="twitter:image:src" content="http://patrickbrianmooney.nfshost.com/~patrick/icons/gear-large.png" />
  </head>
 
-<body lang="en-US" xml:lang="en-US"><div class="body-wrapper container main-content">
+<body lang="en-US" xml:lang="en-US"><div class="container">
 
 <!--Begin navigation and tracking code-->
 <header id="main-nav">
