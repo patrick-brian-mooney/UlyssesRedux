@@ -103,7 +103,7 @@ html_header = html_header + """  <link rel="start" href="001.html" />
   <link rel="next" href="%03d.html" />
 
   <title>Ulysses Redux #%03d</title>
-  <meta name="generator" content="Bluefish 2.2.9" />
+  <meta name="generator" content="Bluefish 2.2.7" />
   <meta name="author" content="Patrick Mooney" />
   <meta name="dcterms.rights" content="Copyright © 2015&ndash;16 Patrick Mooney" />
   <meta name="description" content="Table of contents for Ulysses Redux #%03d" />
@@ -232,13 +232,13 @@ if input('Update coding journal on website? ').lower()[0] == 'y':
   <link href="/~patrick/feeds/updates.xml" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed" />
 
   <title>Ulysses Redux Coding Notes</title>
-  <meta name="generator" content="Bluefish 2.2.9" />
+  <meta name="generator" content="Bluefish 2.2.7" />
   <meta name="author" content="Patrick Mooney" />
   <meta name="dcterms.rights" content="Copyright © 2015–%s Patrick Mooney" />
   <meta name="description" content="Coding notes for Ulysses Redux, blog of auto-generated text based on Joyce's Ulysses" />
   <meta name="rating" content="general" />
   <meta name="revisit-after" content="10 days" />
-  <meta name="date" content="2017-11-20T10:04:53-0700" />
+  <meta name="date" content="2017-12-01T05:04:45-0700" />
   <meta property="fb:admins" content="100006098197123" />
   <meta property="og:url" content="http://patrickbrianmooney.nfshost.com/~patrick/projects/UlyssesRedux/coding.html" />
   <meta property="og:title" content="Ulysses Redux Coding Notes" />
