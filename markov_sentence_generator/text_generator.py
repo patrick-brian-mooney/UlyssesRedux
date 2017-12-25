@@ -49,7 +49,7 @@ from patrick_logger import log_it
 patrick_logger.verbosity_level = 1  # Bump above zero to get more verbose messages about processing and to skip the
                                     # "are we running on a webserver?" check.
 
-force_test = False                  # IF we need to fake command-line arguments in an IDE for testing ...
+force_test = False                  # If we need to fake command-line arguments in an IDE for testing ...
 
 punct_with_space_after = r'.,\:!?;'
 sentence_ending_punct = r'.!?'
