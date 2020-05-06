@@ -1,57 +1,43 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.5
 # -*- coding: utf-8 -*-
+"""This is the actual code implementing the Patrick Mooney's Markov chain-based
+text generator, separated into a separate module so that it can easily be
+compiled with Cython.
 
-"""This is Patrick Mooney's Markov sentence generator. It is licensed under the
-GNU GPL,either version 3, or (at your option) any later version. See the files
-README.md and LICENSE.md for more details.
-
-Find it at https://github.com/patrick-brian-mooney/markov-sentence-generator.
-
-USAGE:
-
-  ./text_generator.py [options] -i FILENAME [-i FILENAME ] | -l FILENAME
-
-text_generator.py needs existing text to use as the basis for the text that
-it generates. You must either use -l to specify a file containing compiled
-probability data, saved with -o on a previous run, or else must specify at
-least one plain-text file (with -i or --input) for this purpose.
-
-For the full list of options, run
-
-  ./text_generator.py --help
-
-in a terminal.
-
-It can also be imported by a Python 3 script. A typical, fairly simple use
-might be something like:
-
-  #!/usr/bin/env python3
-  import text_generator as tg
-  genny = tg.TextGenerator()
-  genny.train('/path/to/a/text/file', markov_length=3)
-  genny.print_text(sentences_desired=8)
-
+This module is licensed under the GNU GPL,either version 3, or (at your option)
+any later version. See the files README.md and LICENSE.md for more details.
 """
 
-__author__ = "Patrick Mooney, http://patrickbrianmooney.nfshost.com/~patrick/"
-__version__ = "$v2.2 $"
-__date__ = "$Date: 2017/04/24 16:16:00 $"
-__copyright__ = "Copyright (c) 2015-17 Patrick Mooney"
-__license__ = "GPL v3, or, at your option, any later version"
 
+import pickle
+import re
+import random
+import time
+import typing
 
-import argparse, collections, pickle, pprint, re, random, sys, time
+from pathlib import Path
 
 import text_handling as th          # https://github.com/patrick-brian-mooney/personal-library
 import patrick_logger               # https://github.com/patrick-brian-mooney/personal-library
 from patrick_logger import log_it
 
+cython = None
 
-# Set up some constants
+try:
+    import cython
+except Exception as errrr:
+    print("Unable to import cython! The system said: {}".format(errrr))
+
+
+__author__ = "Patrick Mooney, http://patrickbrianmooney.nfshost.com/~patrick/"
+__version__ = "$v2.3 $"
+__date__ = "$Date: 2020/05/05 23:16:00 $"
+__copyright__ = "Copyright (c) 2015-20 Patrick Mooney"
+__license__ = "GPL v3, or, at your option, any later version"
+
+
 patrick_logger.verbosity_level = 1  # Bump above zero to get more verbose messages about processing and to skip the
                                     # "are we running on a webserver?" check.
-
-force_test = False                  # If we need to fake command-line arguments in an IDE for testing ...
 
 punct_with_space_after = r'.,\:!?;'
 sentence_ending_punct = r'.!?'
@@ -61,30 +47,18 @@ word_punct = r"'’❲❳%°#․$"                       # Punctuation marks to 
 token_punct = r".,:\-!?;—/&…⸻"                # These punctuation marks also count as tokens.
 
 
-def print_usage():
-    """Print a usage message to the terminal."""
-    patrick_logger.log_it("INFO: print_usage() was called", 2)
-    print('\n\n')
-    print(__doc__ % __version__.strip('$').strip())
-
-def print_html_docs():
-    print('Content-type: text/html\n\n')                                # ... print HTTP headers, then documentation.
-    print("""<!doctype html><html>
-<head><title>Patrick Mooney's Markov chain–based text generator</title>
-<link rel="profile" href="http://gmpg.org/xfn/11" /></head>
-<body>
-<h1>Patrick Mooney's Markov chain–based text generator</h1>
-<p>Code is available <a rel="muse" href="https://github.com/patrick-brian-mooney/markov-sentence-generator">here</a>.</p>
-<pre>%s</pre>
-</body>
-</html>""" % __doc__)
-    sys.exit(0)
+# First, some utility functions.
+def _is_cythonized() -> bool:
+    if cython:
+        return cython.compiled
+    else:
+        return False
 
 
-def process_acronyms(text):
+def process_acronyms(text: str) -> str:
     """Takes TEXT and looks through it for acronyms. If it finds any, it takes each
     and converts their periods to one-dot leaders to make the Markov parser treat
-    the acronym as a single word.
+    the acronym as a single word. Returns the modified string.
 
     This function is NEVER called directly by any other routine in this file;
     it's a convenience function for code that uses this module. This may change
@@ -124,152 +98,17 @@ def process_acronyms(text):
     return ret
 
 
-def process_command_line():
-    """Parse the command line; return a dictionary of selected options, accounting
-    for defaults.
-    """
-
-    help_epilogue = """OPTIONS
-
--m N, --markov-length N
-    Length (in words; or, if -r is in effect, in characters) of the Markov
-    chains used by the program. Longer chains generate text "more like the
-    original text" in many ways, (often) including perceived grammatical
-    correctness; but using longer chains also means that the sentences generated
-    "are less random," take longer to generate and work with, and take more
-    memory (and disk space) to store. Optimal values depend on the source text
-    and its characteristics, but you might reasonably experiment with numbers
-    from 1 to 4 to see what you get. Larger numbers will increasingly result in
-    the script just coughing up whole sentences from the original source texts,
-    which may or may not be what you want. The default Markov chain length, if
-    not overridden with this parameter, is one.
-
--i FILE, --input FILE
-    Specify an input file to use as the basis of the generated text. You can
-    specify this parameter more than once; all of the files specified will be
-    treated as if they were one long file containing all of the text in all of
-    the input files.
-
--o FILE, --output FILE
-    Specify a file into which the generated probability data (the "chains")
-    should be saved. If you're going to be using the same data repeatedly,
-    saving the data with -o and then re-loading it with the -l option is faster
-    than re-generating the data on every run by specifying the same input files
-    with -i. However, the generated chains saved with -o are notably larger than
-    the source files.
-
--l FILE, --load FILE
-    Load probability data ("chains") that was generated a previous run and
-    saved with -o or --output.  Loading the data this way is faster than
-    re-generating it, so if you're going to be using the same data a lot, you
-    can save time by generating the data only once, then re-loading it this way
-    on subsequent runs.
-
--c N, --count N
-    Specify how many sentences the script should generate. (If unspecified, the
-    default number of sentences to generate is one.)
-
--r, --chars
-    By default, the individual tokens in the chains generated by this program
-    are whole words; chances are that this is what most people using a Markov
-    chain-based text generator want most of the time, anyway. However, if you
-    specify -h or --chars, the tokens in the generated Markov chains will be
-    individual characters, rather than words, and these individual characters
-    will be recombined to form random words (and, thereby, random sentences),
-    instead of whole words being recombined to form random sentences. Doing this
-    will certainly increase the degree to which the generated text seems
-    "gibberishy," especially if you don't also bump up the chain length with -m
-    or --markov-length.
-
--w N, --columns N
-    Wrap the output to N columns. If N is -1 (or not specified), the sentence
-    generator does its best to wrap to the width of the current terminal. If N
-    is 0, no wrapping at all is performed: words may be split between lines.
-
--p N, --pause N
-    Pause approximately NUM seconds after each paragraph is printed. The actual
-    pause may not be quite exactly NUM seconds, though the program tries to get
-    this right to the greatest extent possible.
-
---html
-    Wrap paragraphs of text output by the program with HTML paragraph tags. This
-    does NOT generate a complete, formally valid HTML document (which would
-    involve generating a heading and title, among other things), but rather
-    generates an HTML fragment that you can insert into another HTML document,
-    as you wish.
-
--v, --verbose
-    Increase the verbosity of the script, i.e. get more output. Can be specified
-    multiple times to make the script more and more verbose. Current verbosity
-    levels are subject to change in future versions of the script.
-
--q, --quiet
-    Decrease the verbosity of the script. You can mix -v and -q, but really,
-    don't you have better things to do with your life?
-
-
-NOTES AND CAVEATS
-
-Some options are incompatible with each other. Caveats for long options also
-apply to the short versions of the same options.
-
-  --input   ONLY understands PLAIN TEXT files. (Not HTML. Not markdown. Not MS
-            Word. Not mailbox files. Not RTF. Just plain text.) Trying to feed
-            it anything else will either fail or produce unpredictable results.
-
-  --load    is quite convenient for multiple runs with the same data, but
-            prevents changing the basic parameters for the model, because the
-            encoded chains don't retain all of the data that was used to create
-            them. If you're re-loading compiled data with this option, you cannot
-            also use any of the following options:
-
-            -m/--markov-length
-            -i/--input
-            -r/--chars (nor can you turn it off if the previously generated
-                        chains were generated with it)
-
-  --html    cannot be used with --columns/-w. (Rendered HTML ignores newlines
-            anyway, so combining these two options will rarely or never make
-            sense.)
-
-            It also cannot be used with -p/--pause, because HTML output is not
-            intended to be printed directly to the terminal; and there's rarely
-            any point in artificially slowing down content production intended
-            for a web server, is there?
-
-  --output  does NOT specify an output file into which the generated text is
-            saved. To do that, use shell redirection, e.g. by doing something
-            like:
-
-                ./text_generator -i somefile.txt > outputfile.txt
-
-This program is licensed under the GPL v3 or, at your option, any later version.
-See the file LICENSE.md for details.
-
-"""
-    parser = argparse.ArgumentParser(description="This program generates random (but often intelligible) text based on a frequency\nanalysis of one or more existing texts. It is based on Harry R. Schwartz's\nMarkov sentence generator, but is intended to be more flexible for use in my own\nvarious text-generation projects.", epilog=help_epilogue, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('-m', '--markov-length', type=int, default="1")
-    parser.add_argument('-i', '--input', action="append")
-    parser.add_argument('-o', '--output')
-    parser.add_argument('-l', '--load')
-    parser.add_argument('-c', '--count', type=int, default="1")
-    parser.add_argument('-r', '--chars', action='store_true')
-    parser.add_argument('-w', '--columns', type=int, default="-1")
-    parser.add_argument('-p', '--pause', type=int, default="0")
-    parser.add_argument('--html', action='store_true')
-    parser.add_argument('-v', '--verbose', action='count', default=0)
-    parser.add_argument('-q', '--quiet', action='count', default=0)
-    parser.add_argument('--version', action='version', version='text_generator.py %s' % __version__.strip('$').strip())
-    return vars(parser.parse_args())
-
-def to_hash_key(lst):
+def to_hash_key(lst: list) -> tuple:
     """Tuples can be hashed; lists can't.  We need hashable values for dict keys.
     This looks like a hack (and it is, a little) but in practice it doesn't
     affect processing time too negatively.
+
+    This is no longer used -- tuple() is now called directly to spare a function
+    call -- but it's been allowed to stay here because of historical affection.
     """
     return tuple(lst)
 
-def apply_defaults(defaultargs, args):
+def apply_defaults(defaultargs: dict, args: dict) -> dict:
     """Takes two dictionaries, ARGS and DEFAULTARGS, on the assumption that these are
     argument dictionaries for the **kwargs call syntax. Returns a new dictionary that
     consists of the elements of ARGS, plus those elements of DEFAULTARGS whose key
@@ -282,7 +121,7 @@ def apply_defaults(defaultargs, args):
     ret.update(args)
     return ret
 
-def fix_caps(word):
+def fix_caps(word: str) -> str:
     """This is Harry Schwartz's token comparison function, allowing words (other than
     "I") to be compared regardless of capitalization. I don't tend to use it, but
     if you want to, set the comparison_form attribute to point to it: something
@@ -297,7 +136,7 @@ def fix_caps(word):
         word = word.lower()                 # isupper() looks at whether the WHOLE STRING IS CAPITALIZED, not whether it HAS CAPS IN IT.
         # Ex: "LaTeX" => "Latex"            # So this example doesn't actually describe what's going on.
     elif word[0].isupper():
-        word = th.capitalize(word.lower())
+        word = th.capitalize(word.lower())  # I keep meaning to report this as a bug. #FIXME
         # Ex: "wOOt" -> "woot"
     else:
         word = word.lower()
@@ -313,7 +152,7 @@ class MarkovChainTextModel(object):
         self.the_mapping = None         # Dictionary representing the Markov chains.
         self.character_tokens = False   # True if the chains are characters, False if they are words.
 
-    def store_chains(self, filename):
+    def store_chains(self, filename: typing.Union[str, Path]):
         """Shove the relevant chain-based data into a dictionary, then pickle it and
         store it in the designated file.
         """
@@ -330,7 +169,7 @@ class MarkovChainTextModel(object):
         except pickle.PickleError as e:
             log_it("ERROR: Can't write chains to %s because a pickling error occurred; the system said '%s'." % (filename, str(e)), 0)
 
-    def read_chains(self, filename):
+    def read_chains(self, filename: typing.Union[str, Path]):
         """Read the pickled chain-based data from FILENAME."""
         default_chains = { 'character_tokens': False,       # We need only assign defaults for keys added in v2.0 and later.
                           }                                 # the_starts, the_mapping, and markov_length have been around since 1.0.
@@ -352,30 +191,7 @@ class TextGenerator(object):
     """A general-purpose text generator. To use it, instantiate it, train it, and
     then have it generate text.
     """
-    def __str__(self):
-        if self.is_trained():
-            if self.name:
-                return '< class %s, named "%s", with Markov length %d >' % (self.__class__, self.name, self.chains.markov_length)
-            else:
-                return '< class %s (unnamed instance), with Markov length %d >' % (self.__class__, self.chains.markov_length)
-        else:
-            if self.name:
-                return '< class %s, named "%s", UNTRAINED >' % (self.__class__, self.name)
-            else:
-                return '< class %s (unnamed instance), UNTRAINED >' % self.__class__
-
-    @staticmethod
-    def comparison_form(word):
-        """This function is called to normalize the words for the purpose of storing
-        them in the list of Markov chains, and for looking at previous words when
-        deciding what the next word in the sequence should be. By default, this
-        function performs no processing at all; override it if any preprocessing
-        should be done for comparison purposes -- for instance, if case needs to be
-        normalized.
-        """
-        return word
-
-    def __init__(self, name=None, training_texts=None, **kwargs):
+    def __init__(self, name: typing.Optional[str]=None, training_texts: typing.Optional[list]=None, **kwargs):
         """Create a new instance. NAME is entirely optional, and is mentioned for
         convenience (if it exists) any time a string representation is generated.
         If TRAINING_TEXTS is not None, it should be a *list* of one or more
@@ -394,31 +210,54 @@ class TextGenerator(object):
 
         # This next is the default list of substitutions that happen after text is produced.
         # List of lists. each sublist:[search_regex, replace_regex]. Subs performed in order specified.
-        self.final_substitutions = [
-            ['--', '—'],
-            ['\.\.\.', '…'],
-            ['․', '.'],                         # replace one-dot leader with period
-            ['\.\.', '.'],
-            [" ' ", ''],
-            ['――', '―'],                        # Two horizontal bars to one horizontal bar
-            ['―-', '―'],                        # Horizontal bar-hyphen to single horizontal bar
-            [':—', ': '],
-            ["\n' ", '\n'],                     # newline--single quote--space
-            ["<p>'", '<p>'],
-            ["<p> ", '<p>'],                    # <p>-space to <p> (without space)
-            ["<p></p>", ''],                    # <p></p> to nothing
-            ['- ', '-'],                        # hyphen-space to hyphen
-            ['—-', '—'],                        # em dash-hyphen to em dash
-            ['——', '—'],                        # two em dashes to one em dash
-            ['([0-9]),\s([0-9])', r'\1,\2'],    # Remove spaces after commas when commas are between numbers.
-            ['([0-9]):\s([0-9])', r'\1:\2'],    # Remove spaces after colons when colons are between numbers.
-            ['…—', '… —'],                      # put space in between ellipsis-em dash, if they occur together.
-        ]
         if training_texts:
             self.train(training_texts, **kwargs)
 
+    final_substitutions = [
+        ['--', '—'],
+        ['\.\.\.', '…'],
+        ['․', '.'],  # replace one-dot leader with period
+        ['\.\.', '.'],
+        [" ' ", ''],
+        ['――', '―'],  # Two horizontal bars to one horizontal bar
+        ['―-', '―'],  # Horizontal bar-hyphen to single horizontal bar
+        [':—', ': '],
+        ["\n' ", '\n'],  # newline--single quote--space
+        ["<p>'", '<p>'],
+        ["<p> ", '<p>'],  # <p>-space to <p> (without space)
+        ["<p></p>", ''],  # <p></p> to nothing
+        ['- ', '-'],  # hyphen-space to hyphen
+        ['—-', '—'],  # em dash-hyphen to em dash
+        ['——', '—'],  # two em dashes to one em dash
+        ['([0-9]),\s([0-9])', r'\1,\2'],  # Remove spaces after commas when commas are between numbers.
+        ['([0-9]):\s([0-9])', r'\1:\2'],  # Remove spaces after colons when colons are between numbers.
+        ['…—', '… —'],  # put space in between ellipsis-em dash, if they occur together.
+    ]
 
-    def add_final_substitution(self, substitution, position=-1):
+    def __str__(self):
+        if self.is_trained():
+            if self.name:
+                return '< class %s, named "%s", with Markov length %d >' % (self.__class__, self.name, self.chains.markov_length)
+            else:
+                return '< class %s (unnamed instance), with Markov length %d >' % (self.__class__, self.chains.markov_length)
+        else:
+            if self.name:
+                return '< class %s, named "%s", UNTRAINED >' % (self.__class__, self.name)
+            else:
+                return '< class %s (unnamed instance), UNTRAINED >' % self.__class__
+
+    @staticmethod
+    def comparison_form(word: str) -> str:
+        """This function is called to normalize the words for the purpose of storing
+        them in the list of Markov chains, and for looking at previous words when
+        deciding what the next word in the sequence should be. By default, this
+        function performs no processing at all; override it if any preprocessing
+        should be done for comparison purposes -- for instance, if case needs to be
+        normalized.
+        """
+        return word
+
+    def add_final_substitution(self, substitution: str, position: int=-1):
         """Add another substitution to the list of substitutions performed after text is
         generated. Since the final substitutions are performed in the order they're
         listed, position matters; the POSITION parameter indicates what position in the
@@ -430,7 +269,7 @@ class TextGenerator(object):
         if position == -1: position = len(self.final_substitutions)
         self.final_substitutions.insert(position, substitution)
 
-    def remove_final_substitution(self, substitution):
+    def remove_final_substitution(self, substitution: str):
         """Remove SUBSTITUTION from the list of final substitutions performed after text
         is generated. You must pass in *exactly* the substitution you want to remove.
         If you try to remove something that's not there, this routine will let the error
@@ -441,14 +280,14 @@ class TextGenerator(object):
         assert len(substitution) == 2, "ERROR: the substitution you pass in must be two items long."
         self.final_substitutions.remove(substitution)
 
-    def get_final_substitutions(self):
+    def get_final_substitutions(self) -> typing.List[str]:          #FIXME: check annotation
         """Returns the list of final substitutions that are performed by the text generator
         before returning the text. Just a quick index into a variable in the object
         namespace.
         """
         return self.final_substitutions
 
-    def set_final_substitutions(self, substitutions):
+    def set_final_substitutions(self, substitutions: typing.List[str]):     # FIXME: check annotation
         """Set the list of final substitutions that are performed on generated text before
         it's returned. SUBSTITUTIONS must be a list of two-item lists, of the form
         [regex to search for, replacement], as in the default list in the __init__()
@@ -460,7 +299,9 @@ class TextGenerator(object):
         self.final_substitutions = substitutions
 
     @staticmethod
-    def addItemToTempMapping(history, word, the_temp_mapping):
+    def addItemToTempMapping(history: typing.List[str],             #FIXME: check annotations
+                             word: str,
+                             the_temp_mapping: typing.Dict[tuple, str]) -> None:
         """Self-explanatory -- adds "word" to the "the_temp_mapping" dict under "history".
         the_temp_mapping (and the_mapping) both match each word to a list of possible next
         words.
@@ -469,7 +310,7 @@ class TextGenerator(object):
         the entries for ["the", "rain", "in"], ["rain", "in"], and ["in"].
         """
         while len(history) > 0:
-            first = to_hash_key(history)
+            first = tuple(history)
             if first in the_temp_mapping:
                 if word in the_temp_mapping[first]:
                     the_temp_mapping[first][word] += 1.0
@@ -480,7 +321,8 @@ class TextGenerator(object):
                 the_temp_mapping[first][word] = 1.0
             history = history[1:]
 
-    def next(self, prevList, the_mapping):
+    def next(self, prevList: typing.List,                           #FIXME: check annotations
+             the_mapping: typing.Dict) -> str:
         """Returns the next word in the sentence (chosen randomly),
         given the previous ones.
         """
@@ -490,19 +332,21 @@ class TextGenerator(object):
         index = random.random()
         # Shorten prevList until it's in the_mapping
         try:
-            while to_hash_key(prevList) not in the_mapping:
+            while tuple(prevList) not in the_mapping:
                 prevList.pop(0)         # Just drop the earliest list element & try again if the list isn't in the_mapping
         except IndexError:  # If we somehow wind up with an empty list (shouldn't happen), then just end the sentence;
             retval = "."    # this will force the generator to start a new one.
         else:               # Otherwise, get a random word from the_mapping, given prevList, if prevList isn't empty
-            for k, v in the_mapping[to_hash_key(prevList)].items():
+            for k, v in the_mapping[tuple(prevList)].items():
                 sum += v
                 if sum >= index and retval == "":
                     retval = k
                     break
         return retval
 
-    def _build_mapping(self, token_list, markov_length, character_tokens=False):
+    def _build_mapping(self, token_list: typing.List[str],          #FIXME: check annotations
+                       markov_length: int,
+                       character_tokens: bool=False):
         """Create the actual Markov chain-based training data for the model, based on an
         ordered list of tokens passed in.
         """
@@ -530,14 +374,15 @@ class TextGenerator(object):
         self.chains.character_tokens = character_tokens
 
     @staticmethod
-    def _tokenize_string(the_string):
+    def _tokenize_string(the_string: str) -> typing.List[str]:
         """Split a string into tokens, which more or less correspond to words. More aware
         than a naive str.split() because it takes punctuation into account to some
         extent.
         """
         return re.findall(r"[\w%s]+|[%s]" % (word_punct, token_punct), the_string)
 
-    def _token_list(self, the_string, character_tokens=False):
+    def _token_list(self, the_string: str,                                  #FIXME: check annotations
+                    character_tokens: bool=False) -> typing.List[str]:
         """Converts a string into a set of tokens so that the text generator can
         process, and therefore be trained by, it.
         """
@@ -547,20 +392,24 @@ class TextGenerator(object):
             tokens = self._tokenize_string(the_string)
         return [self.comparison_form(w) for w in tokens]
 
-    def is_trained(self):
+    def is_trained(self) -> bool:
         """Detect whether this model is trained or not."""
         return (self.chains.the_starts and self.chains.the_mapping and self.chains.markov_length)
 
-    def _train_from_text(self, the_text, markov_length=1, character_tokens=False):
+    def _train_from_text(self, the_text: str,
+                         markov_length: int=1,
+                         character_tokens: bool=False):
         """Train the model by getting it to analyze a text passed in."""
         self._build_mapping(self._token_list(the_text, character_tokens=character_tokens),
                             markov_length=markov_length, character_tokens=character_tokens)
 
-    def train(self, the_files, markov_length=1, character_tokens=False):
+    def train(self, the_files: typing.Union[str, bytes, Path, typing.List],
+              markov_length: int=1,
+              character_tokens: bool=False):
         """Train the model from a text file, or a list of text files supplied,
          as THE_FILES.
          """
-        if isinstance(the_files, (str, bytes)): the_files = [ the_files ]
+        if isinstance(the_files, (str, bytes, Path)): the_files = [ the_files ]
         assert isinstance(the_files, (list, tuple)), "ERROR: you cannot pass an object of type %s to %s.train" % (type(the_files), self)
         assert len(the_files) > 0, "ERROR: empty file list passed to %s.train()" % self
         the_text = ""
@@ -569,7 +418,7 @@ class TextGenerator(object):
                 the_text = the_text + '\n' + the_file.read()
         self._train_from_text(the_text=the_text, markov_length=markov_length, character_tokens=character_tokens)
 
-    def _gen_sentence(self):
+    def _gen_sentence(self) -> str:
         """Build a sentence, starting with a random 'starting word.' Returns a string,
         which is the generated sentence.
         """
@@ -600,7 +449,8 @@ class TextGenerator(object):
                     sent = self._gen_sentence()    # Retry, recursively.
         return th.capitalize(sent)
 
-    def _produce_text(self, sentences_desired=1, paragraph_break_probability=0.25):
+    def _produce_text(self, sentences_desired: int=1,
+                      paragraph_break_probability: float=0.25) -> str:
         """Actually generate some text. This is a generator function that produces (yields)
         one paragraph at a time. If you just need all the text at once, you might want
         to use the convenience wrapper gen_text() instead.
@@ -625,21 +475,24 @@ class TextGenerator(object):
                     return
                 the_text = ""
 
-    def gen_text(self, sentences_desired=1, paragraph_break_probability=0.25):
+    def gen_text(self, sentences_desired: int=1,
+                 paragraph_break_probability: float=0.25) -> str:
         """Generate the full amount of text required. This is just a convenience wrapper
         for _produce_text().
         """
         return '\n'.join(self._produce_text(sentences_desired, paragraph_break_probability))
 
-    def gen_html_frag(self, sentences_desired=1, paragraph_break_probability=0.25):
+    def gen_html_frag(self, sentences_desired: int=1,
+                      paragraph_break_probability: float=0.25):
         """Produce the same text that _produce_text would, but wrapped in HTML <p></p> tags."""
         log_it("We're generating an HTML fragment.", 3)
         the_text = self._produce_text(sentences_desired, paragraph_break_probability)
         return '\n\n'.join(['<p>%s</p>' % p.strip() for p in the_text])
 
-    def _printer(self, what, columns=-1):
+    def _printer(self, what: str,
+                 columns: int=-1):
         """Print WHAT in an appropriate way, wrapping to the specified number of
-        COLUMNS. Override this function to change its behavior.
+        COLUMNS. If COLUMNS is -1, take a whack at guessing what it should be.
         """
         if columns == 0:  # Wrapping is totally disabled. Print exactly as generated.
             log_it("INFO: COLUMNS is zero; not wrapping text at all", 2)
@@ -658,7 +511,10 @@ class TextGenerator(object):
                     th.print_indented(the_paragraph, each_side=padding)
                     print()
 
-    def print_text(self, sentences_desired, paragraph_break_probability=0.25, pause=0, columns=-1):
+    def print_text(self, sentences_desired: int,
+                   paragraph_break_probability: float=0.25,
+                   pause: float=0,
+                   columns: int=-1):
         """Prints generated text directly to stdout."""
         for t in self._produce_text(sentences_desired, paragraph_break_probability):
             time_now = time.time()
@@ -666,84 +522,3 @@ class TextGenerator(object):
             time.sleep(max(pause - (time.time() - time_now), 0))    # Pause until it's time for a new paragraph.
 
 
-default_args = {'chars': False,
-                'columns': -1,
-                'count': 1,
-                'html': False,
-                'input': [],
-                'load': None,
-                'markov_length': 1,
-                'output': None,
-                'pause': 0,
-                'quiet': 0,
-                'verbose': 0}
-
-def main(generator_class=TextGenerator, **kwargs):
-    """Handle the main program loop and generate some text.
-
-    By default, this routine can simply be called as main(), with no arguments; this
-    is what happens when the script is called from the command line. In this case,
-    it parses the arguments passed on the command line. However, for testing
-    purposes, it can also be called with keyword arguments in the same format that
-    the command line would be parsed, i.e. with something like
-
-        main(markov_length=2, input=['Song of Solomon.txt'], count=20, chars=True)
-
-    To allow this code to be reused to create command-line interfaces in modules
-    that subclass TextGenerator(), it is also possible to specify the class of the
-    text generator that's created. By default, of course, it's just the basic
-    TextGenerator class, but see poetry_generator for a sample of how this can be
-    overridden.
-    """
-    if (not sys.stdout.isatty()) and (patrick_logger.verbosity_level < 1):  # Assume we're running on a web server. ...
-        print_html_docs()
-
-    if len(kwargs):     # If keyword arguments are passed in, trust them to be the options.
-        opts = apply_defaults(defaultargs=default_args, args=kwargs)
-    else:               # Otherwise, parse the command line.
-        opts = process_command_line()
-
-    # OK, check the parameters for inconsistencies.
-    if not opts['load'] and not opts['input']:
-        log_it('ERROR: You must specify input data using either -i/--input or -l/--load.')
-        sys.exit(2)
-    if opts['load']:
-        if opts['input']:
-            log_it('ERROR: You cannot both use --input/-i and --load/-l. Use one or the other.')
-            sys.exit(2)
-        if opts['markov_length'] > 1:
-            log_it('ERROR: You cannot specify a Markov chain length if you load previously compiled chains with -l/--load.')
-            sys.exit(2)
-    if opts['html']:
-        if opts['pause'] or opts['columns'] > 0:
-            log_it('ERROR: Specifying --html is not compatible with using a --pause/-p value or specifying a column width.')
-            sys.exit(2)
-
-    # Now set up logging parameters
-    log_it('INFO: Command-line options parsed; parameters are: %s' % pprint.pformat(opts), 2)
-    patrick_logger.verbosity_level = opts['verbose'] - opts['quiet']
-    log_it('DEBUGGING: verbosity_level after parsing command line is %d.' % patrick_logger.verbosity_level, 2)
-
-    # Now instantiate and train the model, and save the compiled chains, if that's what the user wants
-    print()                     # Cough up a blank line at the beginning.
-    genny = generator_class()
-    if opts['load']:
-        genny.chains.read_chains(filename=opts['load'])
-    else:
-        genny.train(the_files=opts['input'], markov_length=opts['markov_length'], character_tokens=opts['chars'])
-    if opts['output']:
-        genny.chains.store_chains(filename=opts['output'])
-
-    # And generate some text.
-    if opts['html']:
-        the_text = genny.gen_html_frag(sentences_desired=opts['count'])
-        print(the_text)
-    else:
-        genny.print_text(sentences_desired=opts['count'], pause=opts['pause'], columns=opts['columns'])
-
-
-if __name__ == "__main__":
-    if force_test:
-        main(count=20, load='/lovecraft/corpora/previous/Beyond the Wall of Sleep.2.pkl', html=False, pause=1)
-    else:
-        main()

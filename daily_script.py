@@ -33,7 +33,7 @@ blog_url = 'http://ulyssesredux.tumblr.com/'
 def out_of_content_warning():
     """Remind me that we're out of content."""
     log_it("WARNING: There's work to be done! You have to reset the blog state on ulyssesredux.tumblr.com to get it working again! A full Ulysses project is done and needs to be cleared!")
-    log_it("    REMINDER: make this a more prominent warning!", 2)  # For now
+    log_it("    REMINDER: make this a more prominent warning!", 2)  # FIXME
     sys.exit(2)
 
 current_run_data = cr_data.read_current_run_parameters()
