@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.5
 # -*- coding: utf-8 -*-
 """Script to call modules that generate the blog's content, then posts that
 content to the ulyssesredux.tumblr.com.
@@ -14,6 +14,7 @@ version. See the file LICENSE.md for a copy of this licence.
 import datetime
 import html
 import importlib
+import json
 import math
 import re
 
@@ -28,7 +29,10 @@ from introspection import dump_str
 from patrick_logger import log_it
 
 import social_media         # From https://github.com/patrick-brian-mooney/personal-library
-from social_media_auth import ulysses_client
+
+
+with open('/social_media_auth.json', encoding='utf-8') as auth_file:
+    ulysses_client = social_media.Tumblpy_from_dict(json.loads(auth_file.read())['ulysses_client'])
 
 
 recurring_tags = ['Ulysses (novel)', 'James Joyce', '1922', 'automatically generated text', 'Patrick Mooney']
