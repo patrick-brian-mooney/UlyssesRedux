@@ -301,7 +301,7 @@ if input('Update meta-TOC on local copy of website? ').lower()[0] == 'y':
 
 if input('Sync web page to main site? ').lower()[0] == 'y':
     # This script lives on my hard drive at ~/.scripts/sync-website.sh
-    subprocess.check_call(['sync-website.sh'], shell=True)
+    subprocess.check_call(['sync-to-nfs.sh'], shell=True)
 
 if input("Want to tweet about the new edition that's out? ").lower()[0] == 'y':
     the_tweet = 'Ulysses Redux # %03d (%s) is out: %s%03d' % (current_episode_number, current_run_data['current-run-name'], remote_webpage_contents, current_episode_number)
