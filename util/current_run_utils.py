@@ -21,7 +21,11 @@ def confirm(prompt: str) -> bool:
     """Asks the question in PROMPT, and returns whether the answer begins
     (case-insensitively) with a Y.
     """
-    return input(prompt.rstrip() + ' ').strip().lower()[0] == 'y'
+    ret = input(prompt.rstrip() + ' ').strip().casefold()
+    if not ret:
+        return False
+
+    return ret[0] == 'y'
 
 
 def get_current_git_branch() -> str:

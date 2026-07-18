@@ -7,7 +7,6 @@ version. See the file LICENSE.md for a copy of this licence.
 
 
 import csv
-import glob
 import os
 import subprocess
 import sys
@@ -24,7 +23,7 @@ def do_setup_run() -> None:
         if cru.confirm('Delete existing table of contents from last run? '):
             toc_fragment.unlink()
         else:
-            print('WARNING: daily_script will not run & no new chapters will be posted until that file is removed.')
+            print('WARNING: daily script will not run & no new chapters will be posted until that file is removed.')
 
     # Set up the data dictionary, using the last run's dictionary keys as a template for this one's
     with open(current_run_data_path, mode='r') as last_run_data_file:
@@ -107,3 +106,7 @@ def do_setup_run() -> None:
         subprocess.call([f'find {base_directory} -iname "*~" -print0 | xargs -0 rm'], shell=True)
 
     print("\n\nOK, we're done!")
+
+
+if __name__ == "__main__":
+    do_setup_run()

@@ -40,9 +40,10 @@ import time
 from typing import Optional
 from pathlib import Path
 
-from util.current_run_utils import confirm
-
 sys.path.append('/UlyssesRedux/scripts/')
+from util.current_run_utils import confirm
+import util.setup_run as sr
+
 from directory_structure import *           # Gets us the listing of file and directory locations.
 import util.current_run_utils as cru
 
@@ -94,7 +95,7 @@ def set_up_git() -> None:
         if not confirm('Push master branch to remote server? '):
             return
 
-        subprocess.check_call(['git push origin master'], shell=True)
+        subprocess.check_call(['git', 'push', 'origin', 'master'])
 
     finally:
         os.chdir(oldpath)
@@ -329,7 +330,7 @@ if __name__ == "__main__":
 
     subprocess.call(['tidy', '-m', '-i', '-w', '0', '-utf8', '--doctype', 'html5', '--fix-uri', 'true',
                      '--new-blocklevel-tags', 'footer', '--quote-nbsp', 'true', '--preserve-entities',
-                     'yes', str(Path(webpage_contents_directory) / f'{CURRENT_EPISODE_NUMBER:03}')])
+                     'yes', str(Path(webpage_contents_directory) / f'{CURRENT_EPISODE_NUMBER:03}.html')])
     if debugging:
         print("\n\nINFO: Tidying done.")
 
@@ -344,5 +345,5 @@ if __name__ == "__main__":
 
     print('\n\n')
     if confirm("We're done here. Want to set up the next run? "):
-        subprocess.check_call(['/UlyssesRedux/scripts/util/setup_run.py'])
+        sr.do_setup_run()
 
