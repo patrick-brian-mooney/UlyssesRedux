@@ -28,34 +28,53 @@ This program is licensed under the GPL v3 or, at your option, any later
 version. See the file LICENSE.md for a copy of this licence.
 """
 
-import sys, re, glob, csv, os
+
+import collections
+import csv
+import glob
+import os
+import re
+import sys
+
+from pathlib import Path
+from typing import Dict, Iterable
+
 
 sys.path.append('/UlyssesRedux/scripts/')
-from directory_structure import *           # Gets us the listing of file and directory locations.
+from directory_structure import *           # file and directory locations.
+import util.current_run_utils as cru
 import markov_sentence_generator.text_generator as tg
 
-def count_words(the_filename):
+
+def count_words(f_name: Path) -> Dict[str, int]:
     """Return a dictionary: WORD -> instances of WORD in the file.
 
-    Calling it a WORD is oversimplifying: in fact, it's a token."""
-    this_file_dict = {}.copy()
-    with open(the_filename) as the_file:
+    Calling it a WORD is oversimplifying: in fact, it's a token.
+    """
+    assert isinstance(f_name, Path)
+    ret = collections.defaultdict(int)
+
+    with open(f_name) as the_file:
         for which_line in the_file:
             for the_word in [w for w in re.findall(r"[\w%s]+|[%s]" % (tg.word_punct, tg.token_punct), which_line)]:
-                try:
-                    this_file_dict[the_word] += 1
-                except KeyError:
-                    this_file_dict[the_word] = 1
-    return this_file_dict
+                ret[the_word] += 1
 
-def get_all_word_counts(list_of_files):
-    """Return a dictionary: FILENAME -> count_words() dictionary for FILENAME"""
-    dict_of_dicts = {}.copy()
+    return dict(ret)
+
+
+def get_all_word_counts(list_of_files: Iterable[Path]) -> Dict[Path, Dict[str, int]]:
+    """Return a dictionary: FILENAME -> count_words() dictionary for FILENAME.
+    """
+    dict_of_dicts = dict()
+
     for which_file in list_of_files:
         dict_of_dicts[which_file] = count_words(which_file)
+
     return dict_of_dicts
 
-def calculate_vocab_overlap(text_one, text_two):
+
+def calculate_vocab_overlap(text_one: dict,
+                            text_two: dict) -> float:
     """Return the fraction of the words in (dict) TEXT_ONE which are also present
     in TEXT_TWO. Note that this is not (generally) reversible:
 
@@ -67,37 +86,49 @@ def calculate_vocab_overlap(text_one, text_two):
     the dictionary keyphrase mappings; it looks only at the keys themselves.
     """
     overlap_count = 0
+
     for which_word in text_one.keys():
         if which_word in text_two: overlap_count += 1
+
     return overlap_count / len(text_one)
 
-def create_comparative_dictionary(chapter_filename, source_text_mappings, compare_texts_mappings):
+
+def create_comparative_dictionary(chapter_filename: Path,
+                                  source_text_mappings: dict,
+                                  compare_texts_mappings: dict) -> None:
     """Creates a .csv file for WHICH_CHAPTER, which contains a similarity score
     indicating how similar each text in COMPARE_TEXTS_MAPPINGS is to the text in
-    SOURCE_TEXT_MAPPINGS."""
-    with open('%s%s.csv' % (current_run_corpus_directory, os.path.basename(os.path.splitext(chapter_filename)[0])), "w") as the_stats_file:
+    SOURCE_TEXT_MAPPINGS.
+    """
+    assert isinstance(chapter_filename, Path)
+
+    with open(current_run_corpus_directory / chapter_filename.with_suffix('.csv'), 'w') as the_stats_file:
         the_stats_file.write('Text name, Similarity to source text\n')      # Write a header
         the_rows = [][:]
         the_writer = csv.writer(the_stats_file)
         for which_text in compare_texts_mappings:
             text_score = calculate_vocab_overlap(source_text_mappings, compare_texts_mappings[which_text])
             the_rows.append([which_text, text_score])
-        the_rows = sorted(the_rows, reverse=True, key=lambda the_row: the_row[1])     # Descending sort by similarity (second column)
+        the_rows = sorted(the_rows, reverse=True, key=lambda the_row: the_row[1])     # Descending, sort by similarity
         the_writer.writerows(the_rows)
 
-def main():
+
+def do_compare_texts():
     print('\n\n')
-    if (input('Process the text files in "%s"?  ' % unsorted_corpus_directory) or "no").lower()[0] != 'y':
-        print('\nRemember: set up the texts to be ranked in %s before starting this script.\n' % unsorted_corpus_directory)
+    if not cru.confirm(f'Process the text files in "{unsorted_corpus_directory}"?'):
+        print(f'\nSet up the texts to be ranked in {unsorted_corpus_directory} before starting this script.\n')
         sys.exit(1)
+
     print('\nCounting words in each text ...', end='')
-    ulysses_word_counts = get_all_word_counts(glob.glob('%s/??.txt' % ulysses_chapters_base_path))
-    other_texts_word_counts = get_all_word_counts(glob.glob('%s/*txt' % unsorted_corpus_directory))
+    ulysses_word_counts = get_all_word_counts(ulysses_chapters_base_path.glob('??.txt'))
+    other_texts_word_counts = get_all_word_counts(unsorted_corpus_directory.glob('*txt'))
     print(' ... done.')
+
     for which_chapter in ulysses_word_counts.keys():
-        print("  evaluating similarity for chapter %s ..." % which_chapter, end='')
+        print(f"  evaluating similarity for chapter {which_chapter} ...", end='')
         create_comparative_dictionary(which_chapter, ulysses_word_counts[which_chapter], other_texts_word_counts)
         print(" ... done.")
 
+
 if __name__ == "__main__":
-    main()
+    do_compare_texts()

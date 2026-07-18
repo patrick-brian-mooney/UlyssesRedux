@@ -12,7 +12,10 @@ where FILE is the chapter filename.
 This program is licensed under the GPL v3 or, at your option, any later
 version. See the file LICENSE.md for a copy of this licence.
 """
-import sys, os
+
+
+import os
+import sys
 
 filename = sys.argv[1]
 

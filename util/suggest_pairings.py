@@ -16,7 +16,7 @@ import markov_sentence_generator.text_generator as tg
 
 debugging = True
 
-joyce_list = glob.glob('%s/%s/%s/??.txt' % (base_directory, corpora_directory, ulysses_corpus_directory))
+joyce_list = glob.glob('%s/??.txt' % (ulysses_corpus_directory))
 compare_list = glob.glob('%s/*txt' % unsorted_corpus_directory)
 
 def zip_folder(path, outfile):
@@ -95,6 +95,7 @@ def give_matches(data):
     for which_row in range(len(data)):
         which_joyce_chapter = data[which_row].index(max(data[which_row]))
 
+
 if __name__ == "__main__":
     assert len(compare_list) > 0, "ERROR: there are no files in %s" % unsorted_corpus_directory
     print("\nWARNING: About to clear out the \"%s\" directory." % current_run_corpus_directory)
@@ -111,17 +112,21 @@ if __name__ == "__main__":
         if not archive_set_name.lower().endswith('.zip'): archive_set_name = archive_set_name + '.zip'
         zip_folder(current_run_corpus_directory, current_run_corpus_directory + archive_set_name)
 
-    if input('\nHit ENTER when ready to delete the "%s" directory ' % current_run_corpus_directory): pass
+    if input('\nHit ENTER when ready to delete the "%s" directory ' % current_run_corpus_directory):
+        pass
     try:
         shutil.rmtree(current_run_corpus_directory)
-    except: pass
+    except:
+        pass
     try:
         if not os.path.exists(current_run_corpus_directory):
             os.makedirs(current_run_corpus_directory)
         for which_chap in range(1, 19): os.mkdir('%s%02d' % (current_run_corpus_directory, which_chap))
-    except Exception: pass
+    except Exception:
+        pass
 
-    if debugging: print("Directory cleared out, moving on ...")
+    if debugging:
+        print("Directory cleared out, moving on ...")
 
     markov_length = 2
 
@@ -173,4 +178,5 @@ if __name__ == "__main__":
         else:
             print("Sorry, %s is not a valid option." % answer.upper())
 
-    if debugging: print(ulysses_chains is compare_texts_chains)
+    if debugging:
+        print(ulysses_chains is compare_texts_chains)

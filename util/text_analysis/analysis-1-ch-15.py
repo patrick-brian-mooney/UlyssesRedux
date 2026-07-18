@@ -2,7 +2,7 @@
 """Looks at the text of Joyce's 'Circe' chapter and coughs up some basic stats.
 
 This program is licensed under the GPL v3 or, at your option, any later
-version. See the file LICENSE.md for a copy of this licence.
+version. See the file LICENSE.md for a copy of this license.
 """
 
 from pprint import pprint

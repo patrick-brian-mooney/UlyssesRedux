@@ -2,7 +2,7 @@
 """Script to create the text generated based on the seventh chapter of Joyce's
 Ulysses, 'Aeolus.' It relies on a simply formatted text file that summarizes
 an automated analysis of 'Aeolus' performed by the script at /UlyssesRedux/
-scripts/utility_scripts/get-chapter-7-stats.py, which classifies the paragraphs of
+scripts/util/get-chapter-7-stats.py, which classifies the paragraphs of
 this chapter into three categories: headlines, spoken phrases, and other; and
 aims to replicate the structure of that chapter by reproducing the same
 paragraph types, with similar lengths, in the same order.

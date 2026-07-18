@@ -7,12 +7,13 @@ version. See the file LICENSE.md for a copy of this licence.
 """
 
 import subprocess
-
 import sys
+
+
 sys.path.append('/UlyssesRedux/scripts/')
-from directory_structure import *           # Gets us the listing of file and directory locations. 
+from directory_structure import *           # Gets us the listing of file and directory locations.
 
 for which_chapter in range(0, 18):
-    subprocess.call([daily_script_path], shell=True)
+    subprocess.call([daily_script_path])
 
-subprocess.call([postprocessing_script], shell=True)
+subprocess.call([postprocessing_script])

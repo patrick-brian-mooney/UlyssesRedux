@@ -25,7 +25,7 @@ def train_with_mixins(genny,                         # An object of type tg.Text
                       mixin_texts_list,              # List of mixin texts
                       joyce_ratio=1.1):              # How much Joyce relative to mixin textss?
     if debugging: print("train_withMixins() called; parameters are ...\n\n" + pprint.pformat(locals()))
- 
+
     joyce_text_length, mixin_texts_length = 0, 0
     for which_file in joyce_text_list:
         joyce_text_length += os.stat(which_file).st_size
@@ -33,7 +33,7 @@ def train_with_mixins(genny,                         # An object of type tg.Text
         mixin_texts_length += os.stat(which_file).st_size
 
     # This ratio must be at least 1, or the Joyce drops out!
-    joyce_scale_factor = max(int(round( (mixin_texts_length / joyce_text_length) * joyce_ratio )), 1)    
+    joyce_scale_factor = max(int(round( (mixin_texts_length / joyce_text_length) * joyce_ratio )), 1)
     text_list = joyce_text_list * joyce_scale_factor + mixin_texts_list
 
     if debugging:
@@ -42,7 +42,7 @@ def train_with_mixins(genny,                         # An object of type tg.Text
         print('  mixin_texts_length is: %d' % mixin_texts_length)
         print('  joyce_scale_factor is: %d' % joyce_scale_factor)
         print('\n\n    Training generator ...')
-    
+
     genny.train(the_files=text_list, markov_length=chain_length)
 
 
@@ -62,5 +62,5 @@ if __name__ == "__main__":
     debugging = True
     print('RUNNING SELF-TEST CODE ... Writing random Joyce-Lovecraft mashup.')
     print(write_generic_story(random.choice(range(2,4)), random.choice(range(20,80)), random.choice(range(4,8)),
-        random.choice(glob.glob('%s/%s/%s/*txt' % (base_directory, corpora_directory, ulysses_corpus_directory))),
+        random.choice(glob.glob('%s/*txt' % (ulysses_corpus_directory))),
         '/lovecraft/corpora/previous/', joyce_ratio=0.6))

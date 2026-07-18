@@ -22,32 +22,29 @@ import sys
 sys.path.append('/UlyssesRedux/scripts/')
 
 from directory_structure import *           # Gets us the listing of file and directory locations.
-import utility_scripts.current_run_data_utils as cr_data
+import util.current_run_utils as cr_data
 
-import patrick_logger, introspection       # From https://github.com/patrick-brian-mooney/personal-library
-from introspection import dump_str
-from patrick_logger import log_it
-
-import social_media         # From https://github.com/patrick-brian-mooney/personal-library
+from introspection import dump_str  # From https://github.com/patrick-brian-mooney/personal-library
+import social_media                 # From https://github.com/patrick-brian-mooney/personal-library
 
 
 with open('/social_media_auth.json', encoding='utf-8') as auth_file:
     ulysses_client = social_media.Tumblpy_from_dict(json.loads(auth_file.read())['ulysses_client'])
 
 
-recurring_tags = ['Ulysses (novel)', 'James Joyce', '1922', 'automatically generated text', 'Patrick Mooney']
-ulysses_chapters = open(ulysses_chapter_titles_file).readlines()
-
-patrick_logger.verbosity_level = 3
+RECURRING_TAGS = ['Ulysses (novel)', 'James Joyce', '1922', 'automatically generated text', 'Patrick Mooney']
+ULYSSES_CHAPTERS = open(ulysses_chapter_titles_file).readlines()
 
 # First, set up parameters.
-blog_url = 'http://ulyssesredux.tumblr.com/'
+BLOG_URL = 'http://ulyssesredux.tumblr.com/'
+
 
 # Some utility routines
 def out_of_content_warning():
     """Remind me that we're out of content."""
-    log_it("WARNING: There's work to be done! You have to reset the blog state on ulyssesredux.tumblr.com to get it working again! A full Ulysses project is done and needs to be cleared!")
-    log_it("    REMINDER: make this a more prominent warning!")  # FIXME
+    print("WARNING: There's work to be done! You have to reset the blog state on ulyssesredux.tumblr.com to get it "
+          "working again! A full Ulysses project is done and needs to be cleared!")
+    print("    REMINDER: make this a more prominent warning!")  # FIXME
     sys.exit(2)
 
 
@@ -55,27 +52,28 @@ if __name__ == "__main__":
     current_run_data = cr_data.read_current_run_parameters()
 
     try:
-        with open('%s/index.html' % current_run_directory, 'r') as index_file :
+        with open(current_run_directory / 'index.html', 'r') as index_file :
             the_lines = index_file.readlines()
             which_script = 1 + len(the_lines)   # If so far we've got, say, six lines in the file, we need to run script #7.
+
     except (FileNotFoundError,):
         which_script = 1
-        the_lines = [][:]
+        the_lines = list()
 
     if which_script not in range(1,19):
         out_of_content_warning()
 
     # Post parameters
-    the_title = ulysses_chapters[ which_script - 1 ].strip()
-    recurring_tags.append(the_title)
+    the_title = ULYSSES_CHAPTERS[which_script - 1].strip()
 
     current_chapter_temporary_tags = current_run_data['ch%02dtags' % which_script]
-    temporary_tags = [l.strip() for l in open('%s/temporary-tags' % current_run_directory).readlines()]
-    the_tags = ', '.join(recurring_tags + temporary_tags) + ', ' + current_chapter_temporary_tags
+    temporary_tags = [l.strip() for l in open(current_run_directory / 'temporary-tags').readlines()]
+    temporary_tags.append(the_title)
+    the_tags = ', '.join(RECURRING_TAGS + temporary_tags) + ', ' + current_chapter_temporary_tags
 
-    script_path = '%s.ch%02d' % (daily_scripts_directory, which_script)
+    script_path = f'{daily_scripts_directory}.ch{which_script:0>2}'
 
-    print("INFO: About to run script %s.py." % script_path)
+    print(f"INFO: About to run script {script_path}.py.")
 
     # OK, import the relevant chapter script as a module and write the story.
     the_script = importlib.import_module(script_path)
@@ -83,14 +81,14 @@ if __name__ == "__main__":
     print("content generated ...\n\n  ... postprocessing...")
 
     content_lines = the_content.split("\n")
-    # Now, split the first paragraph into sentences, keeping the final punctuation and joining it back to the end of the sentence.
-    first_sentence = ''.join(list(filter(None, re.split("([!?.]+)", content_lines[0])))[0:2])       # We'll use this as the summary in the table of contents.
+    # Now, split the 1st para into sentences, keeping final punctuation and joining it back on the end of the sentence.
+    first_sent = ''.join(list(filter(None, re.split("([!?.]+)", content_lines[0])))[0:2])       # We'll use this as the summary in the table of contents.
     content_lines = [ "<p>" + the_line.strip() + "</p>" for the_line in content_lines if len(the_line.strip()) > 0 ]
     the_content = '\n'.join(content_lines)
     print("INFO: postprocessed content is:\n\n" + "\n".join(content_lines))
 
-    print('INFO: Chapter title is "%s."' % the_title)
-    print("INFO: tags are %s." % str(recurring_tags + temporary_tags))
+    print(f'INFO: Chapter title is "{the_title}."')
+    print(f"INFO: tags are {(RECURRING_TAGS + temporary_tags)}.")
 
     # All right, post this content
     print('\nINFO: Attempting to post the content')
@@ -98,24 +96,24 @@ if __name__ == "__main__":
     print('\nINFO: the_status is: ' + dump_str(the_status))
     print('\nINFO: the_tumblr_data is: ' + dump_str(the_tumblr_data))
 
-    new_post_url = blog_url + "post/" + str(the_status['id'])
+    new_post_url = f"{BLOG_URL}post/{the_status['id']}"
 
     # Assemble some text to write to the index file
-    html_tags = ' | '.join([ '<a rel="me muse" href="%s">%s</a>' % (html.escape(blog_url + "tagged/" + the_tag), the_tag) for the_tag in the_tags.split(', ') ])
+    html_tags = ' | '.join([f"""<a rel="me muse" href="{html.escape(BLOG_URL + "tagged/" + t)}">{t}</a>"""
+                            for t in the_tags.split(', ')])
 
-    # Avoid using a really really long first sentence as a summary (a problem sometimes in tests with "Penelope").
-    while len(first_sentence) > 600 or len(first_sentence.split(' ')) > 150:
-        first_sentence = ' '.join(first_sentence.split(' ')[0 : math.floor(len(first_sentence.split(' ')) * 0.75)]) + '…'   # Lop off the last quarter and try again.
+    # Avoid letting a really, really long first sentence be the summary (a problem sometimes in tests with "Penelope").
+    while len(first_sent) > 600 or len(first_sent.split(' ')) > 150:
+        # Lop off the last quarter and try again.
+        first_sent = ' '.join(first_sent.split(' ')[0: math.floor(len(first_sent.split(' ')) * 0.75)]) + '…'
 
-    the_line = '<li><a rel="me muse" href="%s">%s</a>' % (new_post_url, the_title)
-    the_line += ' (%s), ' %  datetime.date.today().strftime("%d %B %Y")
-    the_line += current_run_data[ 'ch%02ddesc' % which_script ]
-    the_line += ': <blockquote><p>%s</p>' % first_sentence
-    the_line += '<p><small>tags: ' + html_tags + '</small></p>'
+    the_line = f'<li><a rel="me muse" href="{new_post_url}">{the_title}</a>'
+    the_line += f' ({datetime.date.today().strftime("%d %B %Y")}), '
+    the_line += current_run_data[f'ch{which_script:0>2}desc' ]
+    the_line += f': <blockquote><p>{first_sent}</p>'
+    the_line += f'<p><small>tags: {html_tags}</small></p>'
     the_line += '</blockquote></li>\n'
 
     # Now record the new line to the index file.
     the_lines.append(the_line)
-    index_file = open('%s/index.html' % current_run_directory, 'w')
-    index_file.writelines(the_lines)
-    index_file.close()
+    (current_run_directory / 'index.html').write_text('\n'.join(the_lines), encoding='utf-8')
