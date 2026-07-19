@@ -30,30 +30,35 @@ def do_setup_run() -> None:
         reader = csv.reader(last_run_data_file)
         last_run_data = {rows[0]:rows[1] for rows in reader}
 
-    is_done = False
-    while not is_done:
-        current_run_data = dict()
+    if cru.confirm("Want to change the run data for the next run right now in the terminal?"):
+        is_done = False
+        while not is_done:
+            current_run_data = dict()
 
-        print("\n\nOK, let's set up the parameters for the next run.")
-        print("You can type (all-caps) SAME at any prompt to re-use the last run's answer to that question.\n")
+            print("\n\nOK, let's set up the parameters for the next run.")
+            print("You can type (all-caps) SAME at any prompt to re-use the last run's answer to that question.\n")
 
-        for which_key in sorted(last_run_data.keys()):
-            answer = input(f'{which_key} (previously "{last_run_data[which_key]}") ---|  ')
-            if answer == "SAME":
-                current_run_data[which_key] = last_run_data[which_key]
-            elif answer != "":
-                current_run_data[which_key] = answer
+            for which_key in sorted(last_run_data.keys()):
+                answer = input(f'{which_key} (previously "{last_run_data[which_key]}") ---|  ')
+                if answer == "SAME":
+                    current_run_data[which_key] = last_run_data[which_key]
+                elif answer != "":
+                    current_run_data[which_key] = answer
 
-        print()
-        is_done = cru.confirm("Are you satisfied with that data? ")
+            print()
+            is_done = cru.confirm("Are you satisfied with that data? ")
+
+        # OK, write the new current run data to the .csv file
+        with open(current_run_data_path, 'w') as current_run_data_file:
+            writer = csv.writer(current_run_data_file)
+            for which_key in current_run_data:
+                writer.writerow([which_key, current_run_data[which_key]])
+
+    else:
+        print("Leaving run data the same as for the last run. (You probably at least want to edit the title.)")
+        current_run_data = last_run_data.copy()
 
     print(f'You can edit {current_run_data_path} manually. (Be careful about auto-substitution of smart quotes.)')
-
-    # OK, write the new dictionary
-    with open(current_run_data_path, 'w') as current_run_data_file:
-        writer = csv.writer(current_run_data_file)
-        for which_key in current_run_data:
-            writer.writerow([which_key, current_run_data[which_key]])
 
     # All right. Check on status of the Git repo.
     oldpath = os.getcwd()   # FIXME: do we even need to monkey with the working dir when using get_current_git_branch?
@@ -78,7 +83,7 @@ def do_setup_run() -> None:
                 subprocess.check_call(['git', 'merge', current_git_branch])
 
         if cru.confirm('Create and switch to new Git branch? '):
-            current_episode_number = 1 + int(sorted(webpage_contents_directory.glob('???.html'))[-1][-8:-5])
+            current_episode_number = 1 + int(str(sorted(webpage_contents_directory.glob('???.html'))[-1])[-8:-5])
             branch_name = f"{current_episode_number:03}{''.join([the_word.capitalize() for the_word in current_run_data['current-run-name'].split()])}"
             branch_name = ''.join([c for c in branch_name if c.isalpha() or c.isnumeric()])
             if not cru.confirm(f'  use suggested branch name "{branch_name}"? '):
