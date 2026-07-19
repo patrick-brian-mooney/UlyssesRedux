@@ -64,7 +64,12 @@ def do_setup_run() -> None:
                        f'switch to master branch? '):
 
             subprocess.check_call(['git', 'add', '-u'])
-            subprocess.call(['git', 'commit'])
+
+            commit_msg = f"setting up for next run after {current_git_branch}"
+            if not cru.confirm(f'  use "{commit_msg}" as commit message?'):
+                commit_msg = input("  enter commit message to use --| ")
+
+            subprocess.call(['git', 'commit', '-m', commit_msg])
             subprocess.check_call(['git', 'push', 'origin', current_git_branch])
             subprocess.check_call(['git', 'checkout', 'master'])
             print()
