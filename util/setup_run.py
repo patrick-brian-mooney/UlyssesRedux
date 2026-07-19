@@ -13,20 +13,20 @@ import sys
 
 
 sys.path.append('/UlyssesRedux/scripts/')
-from directory_structure import *           # Gets us the listing of file and directory locations.
+import directory_structure as ds    # Gets us the listing of file and directory locations.
 import util.current_run_utils as cru
 
 
 def do_setup_run() -> None:
     # First, remove the old index file
-    if toc_fragment.is_file():
+    if ds.toc_fragment.is_file():
         if cru.confirm('Delete existing table of contents from last run? '):
-            toc_fragment.unlink()
+            ds.toc_fragment.unlink()
         else:
             print('WARNING: daily script will not run & no new chapters will be posted until that file is removed.')
 
     # Set up the data dictionary, using the last run's dictionary keys as a template for this one's
-    with open(current_run_data_path, mode='r') as last_run_data_file:
+    with open(ds.current_run_data_path, mode='r') as last_run_data_file:
         reader = csv.reader(last_run_data_file)
         last_run_data = {rows[0]:rows[1] for rows in reader}
 
@@ -47,10 +47,10 @@ def do_setup_run() -> None:
         print()
         is_done = cru.confirm("Are you satisfied with that data? ")
 
-    print(f'You can edit {current_run_data_path} manually. (Be careful about auto-substitution of smart quotes.)')
+    print(f'You can edit {ds.current_run_data_path} manually. (Be careful about auto-substitution of smart quotes.)')
 
     # OK, write the new dictionary
-    with open(current_run_data_path, 'w') as current_run_data_file:
+    with open(ds.current_run_data_path, 'w') as current_run_data_file:
         writer = csv.writer(current_run_data_file)
         for which_key in current_run_data:
             writer.writerow([which_key, current_run_data[which_key]])
@@ -58,7 +58,7 @@ def do_setup_run() -> None:
     # All right. Check on status of the Git repo.
     oldpath = os.getcwd()   # FIXME: do we even need to monkey with the working dir when using get_current_git_branch?
     try:
-        os.chdir(git_repo_path)
+        os.chdir(ds.git_repo_path)
         current_git_branch = cru.get_current_git_branch()
         if cru.confirm(f'Current Git branch is "{current_git_branch}". Commit changes, push to remote, and '
                        f'switch to master branch? '):
@@ -73,7 +73,7 @@ def do_setup_run() -> None:
                 subprocess.check_call(['git', 'merge', current_git_branch])
 
         if cru.confirm('Create and switch to new Git branch? '):
-            current_episode_number = 1 + int(sorted(webpage_contents_directory.glob('???.html'))[-1][-8:-5])
+            current_episode_number = 1 + int(str(sorted(ds.webpage_contents_directory.glob('???.html'))[-1])[-8:-5])
             branch_name = f"{current_episode_number:03}{''.join([the_word.capitalize() for the_word in current_run_data['current-run-name'].split()])}"
             branch_name = ''.join([c for c in branch_name if c.isalpha() or c.isnumeric()])
             if not cru.confirm(f'  use suggested branch name "{branch_name}"? '):
@@ -85,7 +85,7 @@ def do_setup_run() -> None:
 
     # OK, write the 'temporary tags' file
     print('Temporary tags used in last run were:')
-    with open(temporary_tags_file) as old_tags_file:
+    with open(ds.temporary_tags_file) as old_tags_file:
         print(old_tags_file.read())
 
     new_temporary_tags = [][:]
@@ -99,11 +99,11 @@ def do_setup_run() -> None:
             else: new_temporary_tags.append(the_input + '\n')
         is_done = (input('Are you satisfied with this group of tags? ') or "yes").lower()[0] == 'y'
 
-    temporary_tags_file.write_text('\n'.join(new_temporary_tags), encoding='utf-8')
+    ds.temporary_tags_file.write_text('\n'.join(new_temporary_tags), encoding='utf-8')
 
     print('\n')
-    if cru.confirm(f'Remove all backup files ending in ~ from the entire "{base_directory}" directory? '):
-        subprocess.call([f'find {base_directory} -iname "*~" -print0 | xargs -0 rm'], shell=True)
+    if cru.confirm(f'Remove all backup files ending in ~ from the entire "{ds.base_directory}" directory? '):
+        subprocess.call([f'find {ds.base_directory} -iname "*~" -print0 | xargs -0 rm'], shell=True)
 
     print("\n\nOK, we're done!")
 

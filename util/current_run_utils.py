@@ -14,7 +14,7 @@ from typing import Dict, Iterable
 from directory_structure import current_run_corpus_directory
 
 sys.path.append('/UlyssesRedux/scripts/')
-from directory_structure import *           # Gets us the listing of file and directory locations.
+import directory_structure as ds    # Gets us the listing of file and directory locations.
 
 
 def confirm(prompt: str) -> bool:
@@ -31,7 +31,7 @@ def confirm(prompt: str) -> bool:
 def get_current_git_branch() -> str:
     oldpath = os.getcwd()
     try:
-        os.chdir(git_repo_path)
+        os.chdir(ds.git_repo_path)
         git_output = subprocess.check_output(['git', 'symbolic-ref', '--short', 'HEAD'])
         return git_output.decode().strip()
     finally:
@@ -42,7 +42,7 @@ def read_current_run_parameters() -> dict:
     """Read the .csv file recording parameters for the current run and return it as
     a dictionary.
     """
-    with open(current_run_data_path) as current_run_data_file:
+    with open(ds.current_run_data_path) as current_run_data_file:
         reader = csv.reader(current_run_data_file)
         return {rows[0]:rows[1] for rows in reader}
 
@@ -101,7 +101,7 @@ def validate_data():
             changed_keys = True     # Even if it's blank, the key has been added to the dictionary.
         if changed_keys:
             if confirm("Write changed dictionary back into data file? "):
-                with open(current_run_data_path, 'w') as current_run_data_file:
+                with open(ds.current_run_data_path, 'w') as current_run_data_file:
                     writer = csv.writer(current_run_data_file)
                     for which_key in current_run_data:
                         writer.writerow([which_key, current_run_data[which_key]])

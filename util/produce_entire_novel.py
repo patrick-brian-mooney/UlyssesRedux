@@ -11,9 +11,9 @@ import sys
 
 
 sys.path.append('/UlyssesRedux/scripts/')
-from directory_structure import *           # Gets us the listing of file and directory locations.
+import directory_structure as ds    # Gets us the listing of file and directory locations.
 
 for which_chapter in range(0, 18):
-    subprocess.call([daily_script_path])
+    subprocess.call([ds.daily_script_path])
 
-subprocess.call([postprocessing_script])
+subprocess.call([ds.postprocessing_script])

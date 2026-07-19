@@ -44,7 +44,7 @@ sys.path.append('/UlyssesRedux/scripts/')
 from util.current_run_utils import confirm
 import util.setup_run as sr
 
-from directory_structure import *           # Gets us the listing of file and directory locations.
+import directory_structure as ds    # Gets us the listing of file and directory locations.
 import util.current_run_utils as cru
 
 
@@ -66,27 +66,29 @@ def set_up_git() -> None:
     # First, get basic info about the current git branch that we'll need later even if not syncing.
     oldpath = os.getcwd()       # FIXME! do we even need this and the try/finally now that the current git branch is checked in cru.current_git_branch() instead of here?
     try:
-        os.chdir(git_repo_path)
+        os.chdir(ds.git_repo_path)
 
         print(f"\n\nCurrent git branch is:\n   {current_git_branch}")
         if not confirm('update Git repo with changed code files in this branch? '):
             return
-
         subprocess.check_call(['git', 'add', '-u'])
+
         current_git_status = subprocess.check_output(['git', 'status'])
         print(f"Current git status is\n  {current_git_status.decode()}")        # Check: do those two spaces after \n make sense?
-
         if not confirm('GIVEN THIS STATUS, do you want to commit? '):
             return
+        commit_msg = f'commiting script changes at end of {current_git_branch} run'
 
-        subprocess.call(['git', 'commit'])
-        if not confirm('Push branch %s to remote server? ' % current_git_branch):
+        if not confirm (f'Do you want to use "{commit_msg}" as the commit message'):
+            commit_msg = input("Type the commit message you want to use --|  ")
+        subprocess.call(['git', 'commit', '-m', commit_msg])
+
+        if not confirm(f'Push branch {current_git_branch} to remote server? '):
             return
-
         subprocess.check_call(['git', 'push', 'origin', current_git_branch])
+
         if not confirm('Switch to master branch and merge these changes? '):
             return
-
         print('\n')
         subprocess.check_call(['git', 'checkout', 'master'])
         subprocess.check_call(['git', 'merge', current_git_branch])
@@ -94,7 +96,6 @@ def set_up_git() -> None:
 
         if not confirm('Push master branch to remote server? '):
             return
-
         subprocess.check_call(['git', 'push', 'origin', 'master'])
 
     finally:
@@ -109,7 +110,7 @@ def set_up() -> None:
     if debugging:
         print("INFO: imports successful.")
 
-    CURRENT_EPISODE_NUMBER = 1 + int(str(sorted(list(webpage_contents_directory.glob('???.html')))[-1])[-8:-5])
+    CURRENT_EPISODE_NUMBER = 1 + int(str(sorted(list(ds.webpage_contents_directory.glob('???.html')))[-1])[-8:-5])
 
     # All right, let's read the expected data from the data file
     cru.validate_data()
@@ -188,13 +189,13 @@ def get_summary_fragment() -> str:
 
 
 def get_contents_fragment() -> str:
-    return f"""\n\n<h2 id="toc">Contents</h2>\n\n<ol>\n{open(toc_fragment).read()}\n</ol>"""
+    return f"""\n\n<h2 id="toc">Contents</h2>\n\n<ol>\n{open(ds.toc_fragment).read()}\n</ol>"""
 
 
 def get_scripts_fragment() -> str:
     return f"""<h2 id="scripts">Scripts</h2>
 
-<p>The scripts used to generate this edition of <cite class="book-title">Ulysses Redux</cite> are available <a rel="me" href="{(github_branch_base_path + current_git_branch)}">here</a>.</p>\n\n"""
+<p>The scripts used to generate this edition of <cite class="book-title">Ulysses Redux</cite> are available <a rel="me" href="{(ds.github_branch_base_path + current_git_branch)}">here</a>.</p>\n\n"""
 
 
 def get_ending_fragment() -> str:
@@ -304,7 +305,7 @@ def check_update_meta_toc() -> None:
     if not confirm('Update meta-TOC on local copy of website? '):
         return
 
-    toc_text = Path(meta_TOC_path).read_text(encoding='utf-8')
+    toc_text = Path(ds.meta_TOC_path).read_text(encoding='utf-8')
     toc_split = toc_text.split('</ol>')  # Works as long as there's only one ordered list in the document
 
     new_line = f'<li class="vevent"><a class="url location" rel="me muse" href="{CURRENT_EPISODE_NUMBER:03}.html">'
@@ -313,7 +314,7 @@ def check_update_meta_toc() -> None:
     new_line += f"""<span class="summary description">{current_run_data['summary']}</span></li>"""
 
     toc_text = toc_split[0] + new_line + '\n  </ol>\n</section>\n</div>\n</body>\n</html>'
-    Path(meta_TOC_path).write_text(toc_text, encoding='utf-8')
+    Path(ds.meta_TOC_path).write_text(toc_text, encoding='utf-8')
 
 
 if __name__ == "__main__":
@@ -323,14 +324,14 @@ if __name__ == "__main__":
     if debugging:
         print(f"INFO Generated HTML file is:\n{html_file}\n")
 
-    the_output_file = Path(webpage_contents_directory) / f'{CURRENT_EPISODE_NUMBER:03}.html'
+    the_output_file = Path(ds.webpage_contents_directory) / f'{CURRENT_EPISODE_NUMBER:03}.html'
     the_output_file.write_text(html_file, encoding='utf-8')
     if debugging:
         print("INFO: HTML file written; tidying ...")
 
     subprocess.call(['tidy', '-m', '-i', '-w', '0', '-utf8', '--doctype', 'html5', '--fix-uri', 'true',
                      '--new-blocklevel-tags', 'footer', '--quote-nbsp', 'true', '--preserve-entities',
-                     'yes', str(Path(webpage_contents_directory) / f'{CURRENT_EPISODE_NUMBER:03}.html')])
+                     'yes', str(Path(ds.webpage_contents_directory) / f'{CURRENT_EPISODE_NUMBER:03}.html')])
     if debugging:
         print("\n\nINFO: Tidying done.")
 

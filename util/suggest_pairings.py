@@ -25,14 +25,14 @@ sys.path.append('/UlyssesRedux/scripts/')
 
 import text_generator as tg
 
-from directory_structure import *               # listing of file and directory locations.
+import directory_structure as ds    # Gets us the listing of file and directory locations.
 import util.current_run_utils as cru
 
 
 debugging = True
 
-joyce_list = list(ulysses_corpus_directory.glob('??.txt'))
-compare_list = list(unsorted_corpus_directory.glob('*txt'))
+joyce_list = list(ds.ulysses_corpus_directory.glob('??.txt'))
+compare_list = list(ds.unsorted_corpus_directory.glob('*txt'))
 
 
 def archive_dir(which_dir: Path,
@@ -120,10 +120,10 @@ def assign_matches(data: List[List[Union[str, float]]]) -> None:
     for which_chapter in assignment_order:
         joyce_matches = [row[which_chapter] for row in data]
         best_match = joyce_matches.index(max(joyce_matches[1:]))
-        move_loc = current_run_corpus_directory / f'{which_chapter:0>2}/'
+        move_loc = ds.current_run_corpus_directory / f'{which_chapter:0>2}/'
         print(f'    Moving "{Path(data[best_match][0]).name}" to {move_loc} ...')
-        shutil.move(unsorted_corpus_directory / data[best_match][0],
-                    current_run_corpus_directory / f'{which_chapter:0>2}/')
+        shutil.move(ds.unsorted_corpus_directory / data[best_match][0],
+                    ds.current_run_corpus_directory / f'{which_chapter:0>2}/')
         del(data[best_match])       # Eliminate that row; the text in question is no longer eligible
 
 
@@ -137,9 +137,9 @@ def give_matches(data) -> None:
     del(data[0])    # We're clearing the list. Start by dropping the header row.
     while len(data) > 0:
         which_joyce_chapter = data[0].index(max(data[0][1:]))
-        move_dir = current_run_corpus_directory / f'{which_joyce_chapter:0>2}/'
+        move_dir = ds.current_run_corpus_directory / f'{which_joyce_chapter:0>2}/'
         print(f'    Moving "{Path(data[0][0]).name}" to {move_dir} ...')
-        shutil.move(unsorted_corpus_directory / data[0][0], move_dir)
+        shutil.move(ds.unsorted_corpus_directory / data[0][0], move_dir)
         del(data[0])        # Delete this row before we move on to the next one.
 
     for which_row in range(len(data)):
@@ -147,12 +147,12 @@ def give_matches(data) -> None:
 
 
 if __name__ == "__main__":
-    assert len(compare_list) > 0, f"ERROR: there are no files in {unsorted_corpus_directory}"
-    print(f'\nWARNING: About to clear out the "{current_run_corpus_directory}" directory.')
+    assert len(compare_list) > 0, f"ERROR: there are no files in {ds.unsorted_corpus_directory}"
+    print(f'\nWARNING: About to clear out the "{ds.current_run_corpus_directory}" directory.')
 
     if cru.confirm("Want to compress the last run's mix-in text set? "):
         oldpath = os.getcwd()
-        os.chdir(git_repo_path)
+        os.chdir(ds.git_repo_path)
 
         try:
             git_output = subprocess.check_output(['git', 'symbolic-ref', '--short', 'HEAD'])
@@ -166,22 +166,22 @@ if __name__ == "__main__":
 
         os.chdir(oldpath)
         if not archive_set_name.casefold().endswith('.zip'): archive_set_name = archive_set_name + '.zip'
-        archive_dir(which_dir=current_run_corpus_directory,
-                    outfile=(current_run_corpus_directory / archive_set_name))
+        archive_dir(which_dir=ds.current_run_corpus_directory,
+                    outfile=(ds.current_run_corpus_directory / archive_set_name))
 
-    if input(f'\nHit ENTER when ready to delete the "{current_run_corpus_directory}" directory '):
+    if input(f'\nHit ENTER when ready to delete the "{ds.current_run_corpus_directory}" directory '):
         pass
 
     try:
-        shutil.rmtree(current_run_corpus_directory)
+        shutil.rmtree(ds.current_run_corpus_directory)
     except Exception as errr:
-        print(f'Unable to delete {current_run_corpus_directory}. The system said:{errr}')
+        print(f'Unable to delete {ds.current_run_corpus_directory}. The system said:{errr}')
 
     try:
-        if not current_run_corpus_directory.is_dir():
-            current_run_corpus_directory.mkdir(parents=True)
+        if not ds.current_run_corpus_directory.is_dir():
+            ds.current_run_corpus_directory.mkdir(parents=True)
         for which_chap in range(1, 19):
-            (current_run_corpus_directory / f"{which_chap:02}").mkdir(parents=True, exist_ok=True)
+            (ds.current_run_corpus_directory / f"{which_chap:02}").mkdir(parents=True, exist_ok=True)
     except Exception as errr:
         print(f"Unable to create directories! The system said: {errr}")
 
@@ -205,7 +205,7 @@ if __name__ == "__main__":
             rev_pct = calculate_overlap(other_chains[which_compare], joyce_chains[which_joyce])
             overlap_dict[which_joyce][which_compare] = fwd_pct * rev_pct
 
-    with open(unsorted_corpus_directory / f'{markov_length}.csv', "w") as the_stats_file:
+    with open(ds.unsorted_corpus_directory / f'{markov_length}.csv', "w") as the_stats_file:
         data = [ [' '] ]                                # First row starts with an empty cell ...
         the_writer = csv.writer(the_stats_file)
         for which_joyce in sorted(list(joyce_list)):

@@ -41,7 +41,7 @@ from typing import Dict, Iterable
 
 
 sys.path.append('/UlyssesRedux/scripts/')
-from directory_structure import *           # file and directory locations.
+import directory_structure as ds    # Gets us the listing of file and directory locations.
 import util.current_run_utils as cru
 import markov_sentence_generator.text_generator as tg
 
@@ -102,7 +102,7 @@ def create_comparative_dictionary(chapter_filename: Path,
     """
     assert isinstance(chapter_filename, Path)
 
-    with open(current_run_corpus_directory / chapter_filename.with_suffix('.csv'), 'w') as the_stats_file:
+    with open(ds.current_run_corpus_directory / chapter_filename.with_suffix('.csv'), 'w') as the_stats_file:
         the_stats_file.write('Text name, Similarity to source text\n')      # Write a header
         the_rows = [][:]
         the_writer = csv.writer(the_stats_file)
@@ -115,13 +115,13 @@ def create_comparative_dictionary(chapter_filename: Path,
 
 def do_compare_texts():
     print('\n\n')
-    if not cru.confirm(f'Process the text files in "{unsorted_corpus_directory}"?'):
-        print(f'\nSet up the texts to be ranked in {unsorted_corpus_directory} before starting this script.\n')
+    if not cru.confirm(f'Process the text files in "{ds.unsorted_corpus_directory}"?'):
+        print(f'\nSet up the texts to be ranked in {ds.unsorted_corpus_directory} before starting this script.\n')
         sys.exit(1)
 
     print('\nCounting words in each text ...', end='')
-    ulysses_word_counts = get_all_word_counts(ulysses_chapters_base_path.glob('??.txt'))
-    other_texts_word_counts = get_all_word_counts(unsorted_corpus_directory.glob('*txt'))
+    ulysses_word_counts = get_all_word_counts(ds.ulysses_chapters_base_path.glob('??.txt'))
+    other_texts_word_counts = get_all_word_counts(ds.unsorted_corpus_directory.glob('*txt'))
     print(' ... done.')
 
     for which_chapter in ulysses_word_counts.keys():

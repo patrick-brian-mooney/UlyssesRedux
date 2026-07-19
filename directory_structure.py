@@ -92,3 +92,4 @@ ithaca_stats_path                   = stats_directory / '17-stats.csv'
 
 # Other file locations outside of the project directory
 sync_to_website_script              = Path("""/home/patrick/.scripts/sync-to-nfs.sh""")
+social_media_auth                   = Path("""/social_media_auth.json""")

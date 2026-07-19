@@ -17,23 +17,28 @@ import importlib
 import json
 import math
 import re
-
 import sys
+
+import pyximport; pyximport.install()       # https://cython.org/
+
+
 sys.path.append('/UlyssesRedux/scripts/')
 
-from directory_structure import *           # Gets us the listing of file and directory locations.
+import directory_structure as ds    # Gets us the listing of file and directory locations.
 import util.current_run_utils as cr_data
 
 from introspection import dump_str  # From https://github.com/patrick-brian-mooney/personal-library
 import social_media                 # From https://github.com/patrick-brian-mooney/personal-library
 
 
-with open('/social_media_auth.json', encoding='utf-8') as auth_file:
-    ulysses_client = social_media.Tumblpy_from_dict(json.loads(auth_file.read())['ulysses_client'])
+ulysses_auth = json.loads(ds.social_media_auth.read_text(encoding='utf-8'))['ulysses_client']
+ulysses_client = social_media.Tumblpy_from_dict(ulysses_auth)
 
 
-RECURRING_TAGS = ['Ulysses (novel)', 'James Joyce', '1922', 'automatically generated text', 'Patrick Mooney']
-ULYSSES_CHAPTERS = open(ulysses_chapter_titles_file).readlines()
+RECURRING_TAGS = ['Ulysses (novel)', 'James Joyce', '1922',
+                  'Patrick Mooney', 'automatically generated text', 'Python',
+                  str(datetime.datetime.now().year)]
+ULYSSES_CHAPTERS = open(ds.ulysses_chapter_titles_file).readlines()
 
 # First, set up parameters.
 BLOG_URL = 'http://ulyssesredux.tumblr.com/'
@@ -52,13 +57,13 @@ if __name__ == "__main__":
     current_run_data = cr_data.read_current_run_parameters()
 
     try:
-        with open(current_run_directory / 'index.html', 'r') as index_file :
-            the_lines = index_file.readlines()
-            which_script = 1 + len(the_lines)   # If so far we've got, say, six lines in the file, we need to run script #7.
+        with open(ds.current_run_directory / 'index.html', 'r') as index_file :
+            toc_lines = [l.strip() for l in index_file.readlines() if l.strip()]
+            which_script = 1 + len(toc_lines)   # If so far we've got, say, six lines in the file, we need to run script #7.
 
     except (FileNotFoundError,):
         which_script = 1
-        the_lines = list()
+        toc_lines = list()
 
     if which_script not in range(1,19):
         out_of_content_warning()
@@ -66,12 +71,12 @@ if __name__ == "__main__":
     # Post parameters
     the_title = ULYSSES_CHAPTERS[which_script - 1].strip()
 
-    current_chapter_temporary_tags = current_run_data['ch%02dtags' % which_script]
-    temporary_tags = [l.strip() for l in open(current_run_directory / 'temporary-tags').readlines()]
+    current_chapter_temporary_tags = current_run_data[f'ch{which_script:02}tags']
+    temporary_tags = [l.strip() for l in open(ds.current_run_directory / 'temporary-tags').readlines()]
     temporary_tags.append(the_title)
     the_tags = ', '.join(RECURRING_TAGS + temporary_tags) + ', ' + current_chapter_temporary_tags
 
-    script_path = f'{daily_scripts_directory}.ch{which_script:0>2}'
+    script_path = f'{ds.daily_scripts_directory}.ch{which_script:0>2}'
 
     print(f"INFO: About to run script {script_path}.py.")
 
@@ -83,9 +88,9 @@ if __name__ == "__main__":
     content_lines = the_content.split("\n")
     # Now, split the 1st para into sentences, keeping final punctuation and joining it back on the end of the sentence.
     first_sent = ''.join(list(filter(None, re.split("([!?.]+)", content_lines[0])))[0:2])       # We'll use this as the summary in the table of contents.
-    content_lines = [ "<p>" + the_line.strip() + "</p>" for the_line in content_lines if len(the_line.strip()) > 0 ]
+    content_lines = [ f"<p>{the_line.strip()}</p>" for the_line in content_lines if len(the_line.strip()) > 0 ]
     the_content = '\n'.join(content_lines)
-    print("INFO: postprocessed content is:\n\n" + "\n".join(content_lines))
+    print("INFO: postprocessed content is:\n\n" + the_content)
 
     print(f'INFO: Chapter title is "{the_title}."')
     print(f"INFO: tags are {(RECURRING_TAGS + temporary_tags)}.")
@@ -115,5 +120,5 @@ if __name__ == "__main__":
     the_line += '</blockquote></li>\n'
 
     # Now record the new line to the index file.
-    the_lines.append(the_line)
-    (current_run_directory / 'index.html').write_text('\n'.join(the_lines), encoding='utf-8')
+    toc_lines.append(the_line.strip())
+    (ds.current_run_directory / 'index.html').write_text('\n'.join([l.strip() for l in toc_lines]), encoding='utf-8')
