@@ -80,7 +80,7 @@ def set_up_git() -> None:
             return
 
         subprocess.call(['git', 'commit'])
-        if not confirm('Push branch %s to remote server? ' % current_git_branch):
+        if not confirm(f'Push branch {current_git_branch} to remote server? '):
             return
 
         subprocess.check_call(['git', 'push', 'origin', current_git_branch])
