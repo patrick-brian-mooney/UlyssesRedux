@@ -79,7 +79,7 @@ def do_setup_run() -> None:
             subprocess.check_call(['git', 'checkout', 'master'])
             print()
 
-            if cru.confirm('Merge changes from branch "%s" into master branch? ' % current_git_branch):
+            if cru.confirm(f'Merge changes from branch "{current_git_branch}" into master branch? '):
                 subprocess.check_call(['git', 'merge', current_git_branch])
 
         if cru.confirm('Create and switch to new Git branch? '):
