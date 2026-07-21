@@ -26,7 +26,7 @@ For most (all?) of these actions, explicit user confirmation is requested before
 the action is actually performed.
 
 This program is licensed under the GPL v3 or, at your option, any later
-version. See the file LICENSE.md for a copy of this licence.
+version. See the file LICENSE.md for a copy of this license.
 """
 
 
@@ -144,14 +144,14 @@ def get_html_header() -> str:
   <link rel="next" href="{(CURRENT_EPISODE_NUMBER + 1):03}.html" />
 
   <title>Ulysses Redux #{CURRENT_EPISODE_NUMBER:03}</title>
-  <meta name="generator" content="https://github.com/patrick-brian-mooney/UlyssesRedux/blob/master/utility_scripts/postprocess-set.py" />
+  <meta name="generator" content="Bluefish 2.2.12" />
   <meta name="author" content="Patrick Mooney" />
   <meta name="dcterms.rights" content="Copyright © 2015&ndash;26 Patrick Mooney" />
   <meta name="description" content="Table of contents for Ulysses Redux #{CURRENT_EPISODE_NUMBER:03}" />
   <meta name="rating" content="general" />
   <meta name="revisit-after" content="10 days" />
 
-  <meta name="date" content="{time.strftime("%Y-%m-%dT%H:%M:%S")}" />
+  <meta name="date" content="2026-07-20T17:54:38-0700" %Y-%m-%dT%H:%M:%S")}" />
   <meta property="fb:admins" content="100006098197123" />
   <meta property="og:url" content="http://patrickbrianmooney.nfshost.com/~patrick/projects/UlyssesRedux/contents/{CURRENT_EPISODE_NUMBER:03}.html" />
   <meta property="og:title" content="Ulysses Redux #{CURRENT_EPISODE_NUMBER:03}" />
@@ -255,13 +255,13 @@ def check_update_coding_journal() -> None:
   <link href="/~patrick/feeds/updates.xml" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed" />
 
   <title>Ulysses Redux Coding Notes</title>
-  <meta name="generator" content="https://github.com/patrick-brian-mooney/UlyssesRedux/blob/master/utility_scripts/postprocess-set.py" />
+  <meta name="generator" content="Bluefish 2.2.12" />
   <meta name="author" content="Patrick Mooney" />
   <meta name="dcterms.rights" content="Copyright © 2015–{datetime.datetime.now().year} Patrick Mooney" />
   <meta name="description" content="Coding notes for Ulysses Redux, blog of auto-generated text based on Joyce's Ulysses" />
   <meta name="rating" content="general" />
   <meta name="revisit-after" content="10 days" />
-  <meta name="date" content="{datetime.datetime.now().isoformat()}" />
+  <meta name="date" content="2026-07-20T17:54:38-0700" />
   <meta property="fb:admins" content="100006098197123" />
   <meta property="og:url" content="http://patrickbrianmooney.nfshost.com/~patrick/projects/UlyssesRedux/coding.html" />
   <meta property="og:title" content="Ulysses Redux Coding Notes" />

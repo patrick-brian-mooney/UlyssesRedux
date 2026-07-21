@@ -1,9 +1,9 @@
 .idea/
-__pycache__/
 introspection.py
 lib/
 lib64
-social_media.py
+__pycache__/
 *pyx
+social_media.py
 text_handling.py
 venv/

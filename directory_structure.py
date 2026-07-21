@@ -2,7 +2,7 @@
 """File that serves as a central namespace listing file locations for UlyssesRedux.
 
 This program is licensed under the GPL v3 or, at your option, any later
-version. See the file LICENSE.md for a copy of this licence.
+version. See the file LICENSE.md for a copy of this license.
 """
 from pathlib import Path
 
@@ -88,7 +88,3 @@ aeolus_stats_path                   = stats_directory / '07-stats.csv'
 wandering_rocks_stats_file          = stats_directory / '10-stats.csv'
 circe_stats_path                    = stats_directory / '15-stats.psv'
 ithaca_stats_path                   = stats_directory / '17-stats.csv'
-
-
-# Other file locations outside of the project directory
-sync_to_website_script              = Path("""/home/patrick/.scripts/sync-to-nfs.sh""")

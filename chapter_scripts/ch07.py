@@ -13,7 +13,7 @@ would be useful. Not today (6 Feb 2016), though. Currently, mixin texts are
 used for non-headlines chunks only.
 
 This program is licensed under the GPL v3 or, at your option, any later
-version. See the file LICENSE.md for a copy of this licence.
+version. See the file LICENSE.md for a copy of this license.
 """
 
 # First, set up constants

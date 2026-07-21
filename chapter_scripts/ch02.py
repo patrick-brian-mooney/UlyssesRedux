@@ -8,7 +8,7 @@ A Markov length of 3 seems to work well here, according to insufficient tests
 evaluated informally.
 
 This program is licensed under the GPL v3 or, at your option, any later
-version. See the file LICENSE.md for a copy of this licence.
+version. See the file LICENSE.md for a copy of this license.
 """
 
 import sys
@@ -21,7 +21,7 @@ from chapter_scripts.generic_chapter import write_generic_story
 # First, set up constants
 chain_length = 2
 chapter_length = 694                    # Measured in sentences.
-sentences_per_paragraph = 3.1834862385  # On average, in this chapter 
+sentences_per_paragraph = 3.1834862385  # On average, in this chapter
 mixin_texts_dir = '%s02' % current_run_corpus_directory
 
 def write_story():

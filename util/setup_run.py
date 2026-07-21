@@ -2,7 +2,7 @@
 """Script to set up for a new run of Ulysses Redux. Performs set-up operations.
 
 This program is licensed under the GPL v3 or, at your option, any later
-version. See the file LICENSE.md for a copy of this licence.
+version. See the file LICENSE.md for a copy of this license.
 """
 
 
