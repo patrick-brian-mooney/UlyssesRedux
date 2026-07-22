@@ -12,10 +12,11 @@ This program is licensed under the GPL v3 or, at your option, any later
 version. See the file LICENSE.md for a copy of this license.
 """
 
+
 import sys
 
 sys.path.append('/UlyssesRedux/scripts/')
-from directory_structure import *           # Gets us the listing of file and directory locations.
+import directory_structure as ds                # listing of file and directory locations.
 from chapter_scripts.generic_chapter import write_generic_story
 
 
@@ -23,11 +24,13 @@ from chapter_scripts.generic_chapter import write_generic_story
 chain_length = 2
 chapter_length = 1871                         # Measured in sentences.
 sentences_per_paragraph = 4.6311881188        # On average, in this chapter
-mixin_texts_dir = '%s06' % current_run_corpus_directory
+mixin_texts_dir = ds.current_run_corpus_directory / '06'
+
 
 def write_story():
-    return write_generic_story(chain_length, chapter_length, sentences_per_paragraph, hades_base_text_path, mixin_texts_dir)
+    return write_generic_story(chain_length, chapter_length, sentences_per_paragraph,
+                               ds.hades_base_text_path, mixin_texts_dir)
+
 
 if __name__ == "__main__":
-    debugging = True
     print(write_story())

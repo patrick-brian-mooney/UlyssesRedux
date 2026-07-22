@@ -6,14 +6,18 @@ This program is licensed under the GPL v3 or, at your option, any later
 version. See the file LICENSE.md for a copy of this license.
 """
 
-import subprocess
+
 import sys
+
+import pyximport; pyximport.install()           # https://cython.org/
 
 
 sys.path.append('/UlyssesRedux/scripts/')
-from directory_structure import *           # Gets us the listing of file and directory locations.
+import daily_script as ds
+import util.postprocess_set as ps
+
 
 for which_chapter in range(0, 18):
-    subprocess.call([daily_script_path])
+    ds.do_write_chapter()
 
-subprocess.call([postprocessing_script])
+ps.do_postprocess()
