@@ -11,31 +11,31 @@ This program is licensed under the GPL v3 or, at your option, any later
 version. See the file LICENSE.md for a copy of this license.
 """
 
+
 import datetime
 import html
 import importlib
 import json
 import math
 import re
-
 import sys
-sys.path.append('/UlyssesRedux/scripts/')
 
-from directory_structure import *           # Gets us the listing of file and directory locations.
+
+import pyximport; pyximport.install()           # https://cython.org/
+
+
+sys.path.append('/UlyssesRedux/scripts/')
+import directory_structure as ds    # Gets us the listing of file and directory locations.
 import util.current_run_utils as cr_data
 
 from introspection import dump_str  # From https://github.com/patrick-brian-mooney/personal-library
 import social_media                 # From https://github.com/patrick-brian-mooney/personal-library
 
 
-with open('/social_media_auth.json', encoding='utf-8') as auth_file:
-    ulysses_client = social_media.Tumblpy_from_dict(json.loads(auth_file.read())['ulysses_client'])
-
-
+# constants, utility functions, etc.
 RECURRING_TAGS = ['Ulysses (novel)', 'James Joyce', '1922', 'automatically generated text', 'Patrick Mooney']
-ULYSSES_CHAPTERS = open(ulysses_chapter_titles_file).readlines()
+ULYSSES_CHAPTERS = [l.rstrip() for l in open(ds.ulysses_chapter_titles_file).readlines() if l.rstrip()]
 
-# First, set up parameters.
 BLOG_URL = 'http://ulyssesredux.tumblr.com/'
 
 
@@ -48,17 +48,20 @@ def out_of_content_warning():
     sys.exit(2)
 
 
-if __name__ == "__main__":
+def do_write_chapter() -> None:
+    with open('/social_media_auth.json', encoding='utf-8') as auth_file:
+        ulysses_client = social_media.Tumblpy_from_dict(json.loads(auth_file.read())['ulysses_client'])
+
     current_run_data = cr_data.read_current_run_parameters()
 
     try:
-        with open(current_run_directory / 'index.html', 'r') as index_file :
-            the_lines = index_file.readlines()
-            which_script = 1 + len(the_lines)   # If so far we've got, say, six lines in the file, we need to run script #7.
+        with open(ds.current_run_directory / 'index.html', 'r') as index_file :
+            toc_lines = [l.strip() for l in index_file.readlines() if l.strip()]
+            which_script = 1 + len(toc_lines)   # If so far we've got, say, six lines in the file, we need to run script #7.
 
     except (FileNotFoundError,):
         which_script = 1
-        the_lines = list()
+        toc_lines = list()
 
     if which_script not in range(1,19):
         out_of_content_warning()
@@ -66,12 +69,12 @@ if __name__ == "__main__":
     # Post parameters
     the_title = ULYSSES_CHAPTERS[which_script - 1].strip()
 
-    current_chapter_temporary_tags = current_run_data['ch%02dtags' % which_script]
-    temporary_tags = [l.strip() for l in open(current_run_directory / 'temporary-tags').readlines()]
+    current_chapter_temporary_tags = current_run_data[f'ch{which_script:0>2}tags']
+    temporary_tags = [l.rstrip() for l in open(ds.current_run_directory / 'temporary-tags').readlines()]
     temporary_tags.append(the_title)
     the_tags = ', '.join(RECURRING_TAGS + temporary_tags) + ', ' + current_chapter_temporary_tags
 
-    script_path = f'{daily_scripts_directory}.ch{which_script:0>2}'
+    script_path = f'{ds.daily_scripts_directory}.ch{which_script:0>2}'
 
     print(f"INFO: About to run script {script_path}.py.")
 
@@ -112,8 +115,13 @@ if __name__ == "__main__":
     the_line += current_run_data[f'ch{which_script:0>2}desc' ]
     the_line += f': <blockquote><p>{first_sent}</p>'
     the_line += f'<p><small>tags: {html_tags}</small></p>'
-    the_line += '</blockquote></li>\n'
+    the_line += '</blockquote></li>'
 
     # Now record the new line to the index file.
-    the_lines.append(the_line)
-    (current_run_directory / 'index.html').write_text('\n'.join(the_lines), encoding='utf-8')
+    toc_lines.append(the_line.strip())
+    (ds.current_run_directory / 'index.html').write_text('\n'.join([l.strip() for l in toc_lines]).strip(),
+                                                         encoding='utf-8')
+
+
+if __name__ == "__main__":
+    do_write_chapter()

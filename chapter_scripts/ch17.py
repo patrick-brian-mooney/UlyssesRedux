@@ -17,51 +17,56 @@ This program is licensed under the GPL v3 or, at your option, any later
 version. See the file LICENSE.md for a copy of this license.
 """
 
-import sys, glob
-sys.path.append('/UlyssesRedux/scripts/')
-from directory_structure import *           # Gets us the listing of file and directory locations.
-from chapter_scripts.generic_chapter import train_with_mixins
 
-sys.path.append(markov_generator_path)
+import glob
+import sys
+
+sys.path.append('/UlyssesRedux/scripts/')
+import directory_structure as ds                # listing of file and directory locations.
+from chapter_scripts.generic_chapter import train_with_mixins
+import util.current_run_utils as cru
+
+
+sys.path.append(ds.markov_generator_path)
 import text_generator as tg
 
-import patrick_logger                 # From https://github.com/patrick-brian-mooney/personal-library
-from patrick_logger import log_it
 
 # First, set up constants
 questions_chain_length = 1
 answers_chain_length = 2
-mixin_texts_dir = '%s17' % current_run_corpus_directory
+mixin_texts_dir = ds.current_run_corpus_directory / '17'
 
-patrick_logger.verbosity_level = 0
-log_it("INFO: Imports successful, moving on", 2)
+cru.log_it.verbosity = 0
+cru.log_it("INFO: Imports successful, moving on", 2)
 
 # Create the necessary sets of Markov chains once, at the beginning of the script's run
 
 questions_genny = tg.TextGenerator(name="Ithaca questions generator")
-questions_genny.train([ithaca_questions_path], markov_length=questions_chain_length)
+questions_genny.train([ds.ithaca_questions_path], markov_length=questions_chain_length)
 
 answers_genny = tg.TextGenerator(name="Ithaca answers generator")
-train_with_mixins(answers_genny, joyce_text_list=[ithaca_answers_path], mixin_texts_list=glob.glob('%s/*txt' %
-                  mixin_texts_dir), chain_length=answers_chain_length)
+train_with_mixins(answers_genny, joyce_text_list=[ds.ithaca_answers_path],
+                  mixin_texts_list=list(mixin_texts_dir.glob('*txt')), chain_length=answers_chain_length)
 
-
-
-
-log_it("INFO: trained generators for both questions and answers; moving on ...", 2)
+cru.log_it("INFO: trained generators for both questions and answers; moving on ...", 2)
 
 # Unlike the 'Aeolus' script, this script makes no effort to enforce sticking within word-limit boundaries.
 # You can see that in the next two routines, which just call sentence_generator.gen_text() directly.
 
-def getQuestion(num_sents, num_words):
-    log_it("    getQuestion() called", 2)
-    log_it("      num_sents: %d; num_words: %d" % (num_sents, num_words), 3)
+
+def get_question(num_sents: int,
+                 num_words: int):
+    cru.log_it("    get_question() called", 2)
+    cru.log_it(f"      num_sents: {num_sents}; num_words: {num_words}", 3)
     return questions_genny.gen_text(sentences_desired=num_sents, paragraph_break_probability=0)
 
-def getAnswer(num_sents, num_words):
-    log_it("    getAnswer() called", 2)
-    log_it("      num_sents: %d; num_words: %d" % (num_sents, num_words), 3)
+
+def get_answer(num_sents: int,
+               num_words: int):
+    cru.log_it("    get_answer() called", 2)
+    cru.log_it(f"      num_sents: {num_sents}; num_words: {num_words}", 3)
     return answers_genny.gen_text(sentences_desired=num_sents, paragraph_break_probability=0)
+
 
 def get_appropriate_paragraph(structure_description):
     """Parse the coded lines in /UlyssesRedux/stats/17-stats.csv and produce an
@@ -82,23 +87,26 @@ def get_appropriate_paragraph(structure_description):
     """
     num_sents, num_words = tuple(structure_description[1:].split(','))
     if structure_description[0] == "?":
-        return getQuestion(int(num_sents), int(num_words))
+        return get_question(int(num_sents), int(num_words))
     elif structure_description[0] == " ":
-        return getAnswer(int(num_sents), int(num_words))
+        return get_answer(int(num_sents), int(num_words))
     else:
-        raise LookupError("Cannot interpret the 'Ithaca' stats file located at %s:\n    line begins with unknown character '%s'." % (ithaca_stats_path, structure_description[0].encode()))
+        raise LookupError(f"Cannot interpret the 'Ithaca' stats file located at {ds.ithaca_stats_path}:\n"
+                          f"    line begins with unknown character {structure_description[0].encode()}s'.")
+
 
 def write_story():
     chapter_paragraphs = []
-    log_it("INFO: about to start reading and processing the stats file", 2)
-    with open(ithaca_stats_path) as statsfile:     # OK, parse the coded structure line
-        log_it("INFO: successfully opened stats file %s." % ithaca_stats_path, 3)
+    cru.log_it("INFO: about to start reading and processing the stats file", 2)
+    with open(ds.ithaca_stats_path) as statsfile:     # OK, parse the coded structure line
+        cru.log_it(f"INFO: successfully opened stats file {ds.ithaca_stats_path}.", 3)
         for structure_line in statsfile:
-            log_it("  processing line '%s'." % structure_line.rstrip())
+            cru.log_it(f"  processing line '{structure_line.rstrip()}'.")
             chapter_paragraphs.append(get_appropriate_paragraph(structure_line))
 
     return'\n'.join(chapter_paragraphs)
 
+
 if __name__ == "__main__":
-    patrick_logger.verbosity_level = 3
+    cru.log_it.verbosity = 3
     print(write_story())

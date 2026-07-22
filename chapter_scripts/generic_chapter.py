@@ -7,24 +7,40 @@ This program is licensed under the GPL v3 or, at your option, any later
 version. See the file LICENSE.md for a copy of this license.
 """
 
-debugging = False
 
-import sys, glob, os, pprint
+import glob
+import numbers
+import os
+import pprint
+import sys
 
-if debugging: import pprint
+from pathlib import Path
+from typing import List
 
 sys.path.append('/UlyssesRedux/scripts/')
-from directory_structure import *           # Gets us the listing of file and directory locations.
+import directory_structure as ds                # listing of file and directory locations.
 
-sys.path.append(markov_generator_path)
+sys.path.append(ds.markov_generator_path)
 import text_generator as tg
 
-def train_with_mixins(genny,                         # An object of type tg.TextGenerator(), which this procudure will train
-                      chain_length,                  # In words
-                      joyce_text_list,               # List of files representing Joyce's text under consideration
-                      mixin_texts_list,              # List of mixin texts
-                      joyce_ratio=1.1):              # How much Joyce relative to mixin textss?
-    if debugging: print("train_withMixins() called; parameters are ...\n\n" + pprint.pformat(locals()))
+
+debugging = False
+
+
+def train_with_mixins(genny: tg.TextGenerator,
+                      chain_length: int,
+                      joyce_text_list: List[Path],
+                      mixin_texts_list: List[Path],
+                      joyce_ratio: float = 1.1) -> None:
+    """Trains GENNY, a tg.TextGenerator (or subclass, I suppose) on the provided
+    texts, at the given parameters. Modifies GENNY in place and returns None.
+    """
+    assert isinstance(joyce_text_list, list)
+    assert isinstance(mixin_texts_list, list)
+    assert all([isinstance(f, Path) for f in joyce_text_list])
+    assert all([isinstance(f, Path) for f in mixin_texts_list])
+    if debugging:
+        print("train_withMixins() called; parameters are ...\n\n" + pprint.pformat(locals()))
 
     joyce_text_length, mixin_texts_length = 0, 0
     for which_file in joyce_text_list:
@@ -33,27 +49,31 @@ def train_with_mixins(genny,                         # An object of type tg.Text
         mixin_texts_length += os.stat(which_file).st_size
 
     # This ratio must be at least 1, or the Joyce drops out!
-    joyce_scale_factor = max(int(round( (mixin_texts_length / joyce_text_length) * joyce_ratio )), 1)
+    joyce_scale_factor = max(int(round((mixin_texts_length / joyce_text_length) * joyce_ratio )), 1)
     text_list = joyce_text_list * joyce_scale_factor + mixin_texts_list
 
     if debugging:
         print('file lengths calculated...')
-        print('  joyce_text_length is: %d' % joyce_text_length)
-        print('  mixin_texts_length is: %d' % mixin_texts_length)
-        print('  joyce_scale_factor is: %d' % joyce_scale_factor)
+        print(f'  joyce_text_length is: {joyce_text_length}')
+        print(f'  mixin_texts_length is: {mixin_texts_length}')
+        print(f'  joyce_scale_factor is: {joyce_scale_factor}')
         print('\n\n    Training generator ...')
 
     genny.train(the_files=text_list, markov_length=chain_length)
 
 
-def write_generic_story(chain_length,
-                        chapter_length,             # In sentences
-                        sentences_per_paragraph,    # On average
-                        joyce_text_path,            # A list
-                        mixin_texts_dir,            # Full path
-                        joyce_ratio=1.2):
+def write_generic_story(chain_length: int,
+                        chapter_length: int,
+                        sentences_per_paragraph: numbers.Real,
+                        joyce_text_path: Path,
+                        mixin_texts_dir: Path,            # Full path
+                        joyce_ratio: float = 1.2) -> str:
+    """Train a tg.TextGenerator on the provided texts, given the specified parameters,
+    and use it to produce and return a "story."
+    """
     genny = tg.TextGenerator()
-    train_with_mixins(genny, chain_length, [joyce_text_path], glob.glob('%s/*txt' % mixin_texts_dir), joyce_ratio)
+    train_with_mixins(genny, chain_length, [joyce_text_path],
+                      list(mixin_texts_dir.glob('*txt')), joyce_ratio)
     return genny.gen_text(sentences_desired=chapter_length, paragraph_break_probability=(1/sentences_per_paragraph))
 
 
@@ -62,5 +82,5 @@ if __name__ == "__main__":
     debugging = True
     print('RUNNING SELF-TEST CODE ... Writing random Joyce-Lovecraft mashup.')
     print(write_generic_story(random.choice(range(2,4)), random.choice(range(20,80)), random.choice(range(4,8)),
-        random.choice(glob.glob('%s/*txt' % (ulysses_corpus_directory))),
+        random.choice(list(ds.ulysses_corpus_directory.glob('*txt'))),
         '/lovecraft/corpora/previous/', joyce_ratio=0.6))

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Miscellaneous utils for Ulysses Redux scripts
 """
+
+
 import collections
 import csv
 import os
@@ -173,6 +175,18 @@ def create_comparative_dictionary(chapter_filename: Path,
             the_rows.append([which_text, text_score])
         the_rows = sorted(the_rows, reverse=True, key=lambda the_row: the_row[1])     # Descending sort by similarity (second column)
         the_writer.writerows(the_rows)
+
+
+def log_it(what: str,
+           minimum_verbosity: int = 1) -> None:
+    """Quick logging function to provide conditional output, used by some of the more
+    complex scripts to help with  debugging.
+    """
+    if log_it.verbosity >= minimum_verbosity:
+        print(what)
+
+
+log_it.verbosity = 0
 
 
 if __name__ == "__main__":

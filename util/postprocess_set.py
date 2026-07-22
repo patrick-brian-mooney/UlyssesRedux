@@ -151,7 +151,7 @@ def get_html_header() -> str:
   <meta name="rating" content="general" />
   <meta name="revisit-after" content="10 days" />
 
-  <meta name="date" content="2026-07-20T17:54:38-0700" %Y-%m-%dT%H:%M:%S")}" />
+  <meta name="date" content="{datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")}" />
   <meta property="fb:admins" content="100006098197123" />
   <meta property="og:url" content="http://patrickbrianmooney.nfshost.com/~patrick/projects/UlyssesRedux/contents/{CURRENT_EPISODE_NUMBER:03}.html" />
   <meta property="og:title" content="Ulysses Redux #{CURRENT_EPISODE_NUMBER:03}" />
