@@ -95,7 +95,7 @@ def do_setup_run() -> None:
 
     # OK, write the 'temporary tags' file
     with open(temporary_tags_file) as old_tags_file:
-        old_tags = old_tags_file.read()
+        old_tags = [l.strip() for l in old_tags_file.readlines()]
 
     print(f'Temporary tags used in last run were:\n{old_tags}')
 
@@ -116,7 +116,7 @@ def do_setup_run() -> None:
 
     print('\n')
     if cru.confirm(f'Remove all backup files ending in ~ from the entire "{base_directory}" directory? '):
-        count, failed = 0
+        count, failed = 0, 0
         for f in base_directory.glob('*~'):
             if f.is_file():
                 try:
