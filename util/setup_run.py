@@ -72,7 +72,7 @@ def do_setup_run() -> None:
 
             commit_msg = f"setting up for next run after {current_git_branch}"
             if not cru.confirm(f'  use "{commit_msg}" as commit message?'):
-                commit_msg = input("  enter commit message to use --| ")
+                commit_msg = input("  enter commit message to use --| ").strip()
 
             subprocess.call(['git', 'commit', '-m', commit_msg])
             subprocess.check_call(['git', 'push', 'origin', current_git_branch])
@@ -94,26 +94,39 @@ def do_setup_run() -> None:
         os.chdir(oldpath)
 
     # OK, write the 'temporary tags' file
-    print('Temporary tags used in last run were:')
     with open(temporary_tags_file) as old_tags_file:
-        print(old_tags_file.read())
+        old_tags = old_tags_file.read()
 
-    new_temporary_tags = [][:]
-    is_done = False
-    while not is_done:
-        print('\nEnter tags to be associated with this run, one per line. Hit ENTER on an empty line when finished.')
-        empty_line = False
-        while not empty_line:
-            the_input = input('---| ')
-            if the_input == "": empty_line = True
-            else: new_temporary_tags.append(the_input + '\n')
-        is_done = (input('Are you satisfied with this group of tags? ') or "yes").lower()[0] == 'y'
+    print(f'Temporary tags used in last run were:\n{old_tags}')
 
-    temporary_tags_file.write_text('\n'.join(new_temporary_tags), encoding='utf-8')
+    if cru.confirm("Do you want to entire a new set of temporary tags for the upcoming run now in the terminal?"):
+        new_temporary_tags = list()
+        is_done = False
+        while not is_done:
+            print('\nEnter tags to be associated with this run, one per line. Hit ENTER on empty line when finished.')
+            empty_line = False
+            while not empty_line:
+                the_input = input('---| ')
+                if the_input == "":
+                    empty_line = True
+                else: new_temporary_tags.append(the_input + '\n')
+            is_done = (input('Are you satisfied with this group of tags? ') or "yes").lower()[0] == 'y'
+
+        temporary_tags_file.write_text('\n'.join(new_temporary_tags), encoding='utf-8')
 
     print('\n')
     if cru.confirm(f'Remove all backup files ending in ~ from the entire "{base_directory}" directory? '):
-        subprocess.call([f'find {base_directory} -iname "*~" -print0 | xargs -0 rm'], shell=True)
+        count, failed = 0
+        for f in base_directory.glob('*~'):
+            if f.is_file():
+                try:
+                    f.unlink()
+                    count += 1
+                except (IOError,) as errrr:
+                    print(f"  ... unable to delete {f}; the system said: {errrr}")
+                    failed += 1
+        print(f"{('%d' % count if count else 'No')} file{'s' if count != 1 else ''} deleted; "
+              f"unable to delete {failed} file{'s' if failed != 1 else ''}.")
 
     print("\n\nOK, we're done!")
 

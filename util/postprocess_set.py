@@ -79,7 +79,7 @@ def set_up_git() -> None:
         if not confirm('GIVEN THIS STATUS, do you want to commit? '):
             return
 
-        subprocess.call(['git', 'commit'])
+        subprocess.call(['git', 'commit'])          # FIXME! Add commit message
         if not confirm(f'Push branch {current_git_branch} to remote server? '):
             return
 
