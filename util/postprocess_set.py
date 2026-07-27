@@ -87,7 +87,7 @@ def set_up_git() -> None:
         if not confirm(f'Push branch {current_git_branch} to remote server? '):
             return
 
-        subprocess.check_call(['git', 'push', 'origin', current_git_branch])
+        subprocess.check_call(['git', 'push', '--set-upstream', 'origin', current_git_branch])
         if not confirm('Switch to master branch and merge these changes? '):
             return
 
