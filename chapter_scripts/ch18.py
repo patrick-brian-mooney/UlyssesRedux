@@ -42,8 +42,9 @@ def write_story():
     while random.random() >= end_prob(len(the_text)):
         the_text += " " + write_generic_story(chain_length, chapter_length, sentences_per_paragraph,
                                               ds.penelope_base_text_path, mixin_texts_dir)
-    return the_text + """\n\nTrieste-Zurich-Paris 1914—1921\n
-    Santa Barbara-Denver-St. Paul-Los Angeles 2015—%s""" % datetime.datetime.now().year
+    the_text += f"\n\nTrieste-Zurich-Paris 1914—1921\n"\
+                f"Santa Barbara-Denver-St. Paul-Los Angeles 2015—{datetime.datetime.now().year}"
+    return the_text
 
 
 if __name__ == "__main__":

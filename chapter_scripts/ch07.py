@@ -17,7 +17,6 @@ version. See the file LICENSE.md for a copy of this license.
 """
 
 
-import glob
 import os
 import sys
 
@@ -25,6 +24,7 @@ sys.path.append('/UlyssesRedux/scripts/')
 import directory_structure as ds                # listing of file and directory locations.
 import util.current_run_utils as cru
 
+import pyximport; pyximport.install()           # https://cython.org/
 
 sys.path.append(ds.markov_generator_path)
 import text_generator as tg

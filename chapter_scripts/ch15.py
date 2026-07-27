@@ -14,8 +14,6 @@ version. See the file LICENSE.md for a copy of this license.
 """
 
 
-import glob
-import os
 import pprint
 import sys
 
@@ -34,7 +32,7 @@ cru.log_it.verbosity = 0
 
 
 def write_story():
-    corpora = {}.copy()
+    corpora = dict()
 
     cru.log_it("INFO: about to start processing corpora.")
 

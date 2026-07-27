@@ -79,7 +79,11 @@ def set_up_git() -> None:
         if not confirm('GIVEN THIS STATUS, do you want to commit? '):
             return
 
-        subprocess.call(['git', 'commit'])          # FIXME! Add commit message
+        commit_msg = f"wrapping up complete novel in {current_git_branch}"
+        if not cru.confirm(f'  use "{commit_msg}" as commit message?'):
+            commit_msg = input("  enter commit message to use --| ").strip()
+
+        subprocess.call(['git', 'commit', '-m', commit_msg])
         if not confirm(f'Push branch {current_git_branch} to remote server? '):
             return
 

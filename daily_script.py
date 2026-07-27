@@ -1,4 +1,5 @@
-#!/UlyssesRedux/scripts/bin/python3
+#!/UlyssesRedux/scripts/venv/bin/python3
+# cython: language_level=3
 # -*- coding: utf-8 -*-
 """Script to call modules that generate the blog's content, then posts that
 content to the ulyssesredux.tumblr.com.

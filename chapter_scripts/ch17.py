@@ -104,7 +104,7 @@ def write_story():
             cru.log_it(f"  processing line '{structure_line.rstrip()}'.")
             chapter_paragraphs.append(get_appropriate_paragraph(structure_line))
 
-    return'\n'.join(chapter_paragraphs)
+    return '\n'.join(chapter_paragraphs)
 
 
 if __name__ == "__main__":

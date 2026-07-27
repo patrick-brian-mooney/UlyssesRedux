@@ -50,7 +50,6 @@ def train_with_mixins(genny: tg.TextGenerator,
 
     # This ratio must be at least 1, or the Joyce drops out!
     joyce_scale_factor = max(int(round((mixin_texts_length / joyce_text_length) * joyce_ratio )), 1)
-    text_list = joyce_text_list * joyce_scale_factor + mixin_texts_list
 
     if debugging:
         print('file lengths calculated...')
@@ -59,7 +58,11 @@ def train_with_mixins(genny: tg.TextGenerator,
         print(f'  joyce_scale_factor is: {joyce_scale_factor}')
         print('\n\n    Training generator ...')
 
-    genny.train(the_files=text_list, markov_length=chain_length)
+    for which_t in joyce_text_list:
+        genny._train_from_text(the_text=which_t.read_text(encoding='utf-8'), markov_length=chain_length, weight=joyce_ratio)
+    for which_t in mixin_texts_list:
+        genny._train_from_text(the_text=which_t.read_text(encoding='utf-8'), markov_length=chain_length)
+    genny._finalize_mapping()
 
 
 def write_generic_story(chain_length: int,
