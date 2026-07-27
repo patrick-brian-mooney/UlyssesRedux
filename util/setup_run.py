@@ -150,6 +150,7 @@ def do_setup_run(delete_toc: Union[bool, None] = None,
         new_name = bump_novel_title(last_run_data['current-run-name'])
         print(f"Updated title for this run to {new_name}")
         current_run_data = dict(collections.ChainMap({'current-run-name': new_name}, last_run_data))
+        write_current_run_data(current_run_data)
 
     else:
         print("Leaving run data the same as for the last run. (You probably at least want to edit the title.)")
@@ -182,7 +183,7 @@ def do_setup_run(delete_toc: Union[bool, None] = None,
         current_episode_number = 1 + int(str(sorted(webpage_contents_directory.glob('???.html'))[-1])[-8:-5])
         ep_title = ''.join([the_word.capitalize() for the_word in current_run_data['current-run-name'].split()])
 
-        rom_nums = list(re.finditer(r'\([IVXLCDM]+\)', ep_title))
+        rom_nums = list(re.finditer(r'[IVXLCDM]+', ep_title))
         if rom_nums:
             if len(rom_nums) > 1:
                 warnings.warn("Found multiple possible Roman numerals in {previous_title}. Using the last ...")
@@ -197,6 +198,9 @@ def do_setup_run(delete_toc: Union[bool, None] = None,
         else:
             suffix = "II"
             warnings.warn(f"Unable to break down previous title; using II for suffix ...")
+
+        if ep_title.casefold().endswith(suffix.casefold()):     # CHEcKME: is this trunction working as expected?
+            ep_title = ep_title[:-len(suffix)]
 
         branch_name = f"{current_episode_number:03}{ep_title}{suffix.upper()}"
         branch_name = ''.join([c for c in branch_name if c.isalpha() or c.isnumeric()])
