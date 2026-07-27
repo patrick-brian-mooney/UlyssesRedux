@@ -6,31 +6,127 @@ version. See the file LICENSE.md for a copy of this license.
 """
 
 
+import collections
 import csv
 import os
+import re
 import subprocess
 import sys
+import warnings
 
+from typing import Callable, Optional, Union
+
+import roman                # https://github.com/zopefoundation/roman
 
 sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
 import util.current_run_utils as cru
 
 
-def do_setup_run() -> None:
+def confirm_exec(prompt: str,
+                 pre_prompt_func: Optional[Callable] = None,
+                 conf_param: Union[bool, None] = None,
+                 ) -> Union[bool, None]:
+    """Convenience function to interpret the "do we change things here" parameters for
+    do_setup_run(), below: True menns "yes, prompt for new parameters without
+    asking"; False means "no, keep the same parameters without even prompting"; and
+    None means "prompt the user in the terminal to determine whether to change the
+    relevant run parameters."
+
+    PROMPT is the question to ask. If PRE_PROMPT_FUNC is not None, it is run before
+    asking the PROMPT question.
+    """
+    assert conf_param in {True, False, None}
+
+    if isinstance(conf_param, bool):
+        return conf_param
+    else:
+        if pre_prompt_func:
+            pre_prompt_func()
+        return cru.confirm(prompt)
+
+
+def bump_novel_title(previous_title: str) -> str:
+    """Given PREVIOUS_TITLE, the title of the previous Ulysses Redux novel, generate
+    and return the title of the next novel. If the previous novel's title ends with
+    a Roman numeral in parentheses, the generated title will replace it with the
+    next higher Roman numeral. Otherwise, tries to make reasonable
+    """
+    suffixes = list(re.finditer(r'\([IVXLCDM]+\)', previous_title))
+    if not suffixes:
+        ret = f"{previous_title} (II)"
+        warnings.warn(f"Unable to break down previous title; using {ret} ...")
+
+    if len(suffixes) > 1:
+        warnings.warn("Found multiple possible matches for Roman numerals in {previous_title}. Using the last ...")
+    suffix = suffixes[-1]
+
+    try:
+        rom = roman.fromRoman(previous_title[suffix.start():suffix.end()].lstrip('(').rstrip(')').strip())
+        return f"{previous_title[:suffix.start()]} ({roman.toRoman(1 + rom)})"
+    except (IndexError, roman.RomanError,) as errrr:
+        ret = f"{previous_title[:suffix.start()].strip()}"
+        warnings.warn(f"Unable to formulate new title: using {ret}")
+        return ret
+
+
+def write_current_run_data(current_run_data) -> None:
+    # OK, write the new current run data to the .csv file
+    with open(current_run_data_path, 'w') as current_run_data_file:
+        writer = csv.writer(current_run_data_file)
+        for which_key in current_run_data:
+            writer.writerow([which_key, current_run_data[which_key]])
+
+    print(f"Wrote current run data to {current_run_data_path}")
+
+
+def do_setup_run(delete_toc: Union[bool, None] = None,
+                 manually_edit_parameters: Union[bool, None] = None,
+                 manually_manage_git_branch: Union[bool, None] = None,
+                 manually_manage_temp_tags: Union[bool, None] = None,
+                 delete_temp_files: Union[bool, None] = None,
+                 ) -> None:
+    """Set up the file system and relevant data files to generate the next iteration
+    of Ulysses Redux. All the parameters to this function can be True, False, or
+    None: True means "do the thing"; false means "don't do the thing"; and None
+    means "prompt the user in the terminal to see whether the thing should be done.
+    Historically, the None behavior (ask the user in the terminal whether to do the
+    thing or not) has been the default behavior; these parameters let that choice be
+    made by other code that can call this function to schedule a new run so I don't
+    have to babysit the blog every 18 days.
+
+    DELETE_TOC indicates whether the table of contents for the previous iteration
+      should be deleted (if this is not done new chapters will not be written when
+      daily_script.py is invoked by cron).
+    MANUALLY_EDIT_PARAMETERS: if True, offer to let the user change the by-novel and
+      by-chapter data (currently 38 items) describing the previous run. If False,
+      leaves that data alone, except it attempts to automatically generate a new
+      title for the novel being written.
+    MANUALLY_MANAGE_GIT_BRANCH: if True, commits the changes made to code in the
+      current Git branch, which should be for the specific iteration being written;
+      then mergest those changes into the master branch and commits that change,
+      then pushes the master branch to the remote GitHub repository.
+    MANUALLY_MaNAGE_TEMP_TAGS: If Trye, prompts the user to enter a new set of
+      temporary tags to be applied to each Tumblr post in this series. If False,
+      re-uses the same tags as the last run.
+    DELETE_TEMP_FILES: If True, all files whose names end with a tilde in the entire
+      project directory (not just the code-related subfolder) are deleted.
+    """
     # First, remove the old index file
     if toc_fragment.is_file():
-        if cru.confirm('Delete existing table of contents from last run? '):
-            toc_fragment.unlink()
+        if confirm_exec(conf_param=delete_toc, prompt='Delete existing table of contents from last run? '):
+            toc_fragment.unlink(missing_ok=True)    # don't complain if it's already been done
         else:
-            print('WARNING: daily script will not run & no new chapters will be posted until that file is removed.')
+            warnings.warn('daily script will not run & no new chapters will be posted until that file is removed.')
 
     # Set up the data dictionary, using the last run's dictionary keys as a template for this one's
     with open(current_run_data_path, mode='r') as last_run_data_file:
         reader = csv.reader(last_run_data_file)
         last_run_data = {rows[0]:rows[1] for rows in reader}
 
-    if cru.confirm("Want to change the run data for the next run right now in the terminal?"):
+    manually_edit_parameters = confirm_exec(conf_param=manually_edit_parameters,
+                                            prompt="Change the run data for the next run right now in the terminal?")
+    if manually_edit_parameters:
         is_done = False
         while not is_done:
             current_run_data = dict()
@@ -48,11 +144,12 @@ def do_setup_run() -> None:
             print()
             is_done = cru.confirm("Are you satisfied with that data? ")
 
-        # OK, write the new current run data to the .csv file
-        with open(current_run_data_path, 'w') as current_run_data_file:
-            writer = csv.writer(current_run_data_file)
-            for which_key in current_run_data:
-                writer.writerow([which_key, current_run_data[which_key]])
+        write_current_run_data(current_run_data)
+
+    elif manually_edit_parameters is False:
+        new_name = bump_novel_title(last_run_data['current-run-name'])
+        print(f"Updated title for this run to {new_name}")
+        current_run_data = dict(collections.ChainMap({'current-run-name': new_name}, last_run_data))
 
     else:
         print("Leaving run data the same as for the last run. (You probably at least want to edit the title.)")
@@ -61,45 +158,61 @@ def do_setup_run() -> None:
     print(f'You can edit {current_run_data_path} manually. (Be careful about auto-substitution of smart quotes.)')
 
     # All right. Check on status of the Git repo.
-    oldpath = os.getcwd()   # FIXME: do we even need to monkey with the working dir when using get_current_git_branch?
-    try:
-        os.chdir(git_repo_path)
-        current_git_branch = cru.get_current_git_branch()
-        if cru.confirm(f'Current Git branch is "{current_git_branch}". Commit changes, push to remote, and '
-                       f'switch to master branch? '):
+    # os.chdir(git_repo_path)
+    # try:
+    current_git_branch = cru.get_current_git_branch()
+    if confirm_exec(f'Current Git branch is "{current_git_branch}". Commit changes, push to remote, and '
+                    f'switch to master branch?', conf_param=manually_manage_git_branch):
 
-            subprocess.check_call(['git', 'add', '-u'])
+        subprocess.check_call(['git', 'add', '-u'])
 
-            commit_msg = f"setting up for next run after {current_git_branch}"
-            if not cru.confirm(f'  use "{commit_msg}" as commit message?'):
-                commit_msg = input("  enter commit message to use --| ").strip()
+        commit_msg = f"setting up for next run after {current_git_branch}"
+        if not cru.confirm(f'  use "{commit_msg}" as commit message?'):
+            commit_msg = input("  enter commit message to use --| ").strip()
 
-            subprocess.call(['git', 'commit', '-m', commit_msg])
-            subprocess.check_call(['git', 'push', 'origin', current_git_branch])
-            subprocess.check_call(['git', 'checkout', 'master'])
-            print()
+        subprocess.call(['git', 'commit', '-m', commit_msg])
+        subprocess.check_call(['git', 'push', 'origin', current_git_branch])
+        subprocess.check_call(['git', 'checkout', 'master'])
+        print()
 
-            if cru.confirm(f'Merge changes from branch "{current_git_branch}" into master branch? '):
-                subprocess.check_call(['git', 'merge', current_git_branch])
+        if cru.confirm(f'Merge changes from branch "{current_git_branch}" into master branch? '):
+            subprocess.check_call(['git', 'merge', current_git_branch])
 
-        if cru.confirm('Create and switch to new Git branch? '):
-            current_episode_number = 1 + int(str(sorted(webpage_contents_directory.glob('???.html'))[-1])[-8:-5])
-            branch_name = f"{current_episode_number:03}{''.join([the_word.capitalize() for the_word in current_run_data['current-run-name'].split()])}"
-            branch_name = ''.join([c for c in branch_name if c.isalpha() or c.isnumeric()])
-            if not cru.confirm(f'  use suggested branch name "{branch_name}"? '):
-                branch_name = input('What branch name would you like to use? ')
-            subprocess.check_call(['git', 'checkout', '-b', branch_name])
+    if confirm_exec('Create and switch to new Git branch?', conf_param=manually_manage_git_branch):
+        current_episode_number = 1 + int(str(sorted(webpage_contents_directory.glob('???.html'))[-1])[-8:-5])
+        ep_title = ''.join([the_word.capitalize() for the_word in current_run_data['current-run-name'].split()])
 
-    finally:
-        os.chdir(oldpath)
+        rom_nums = list(re.finditer(r'\([IVXLCDM]+\)', ep_title))
+        if rom_nums:
+            if len(rom_nums) > 1:
+                warnings.warn("Found multiple possible Roman numerals in {previous_title}. Using the last ...")
+            suffix = rom_nums[-1]
 
-    # OK, write the 'temporary tags' file
+            try:
+                rom = roman.fromRoman(ep_title[suffix.start():suffix.end()].strip().lstrip('(').rstrip(')').strip())
+                suffix = roman.toRoman(1 + rom)
+            except (IndexError, roman.RomanError,) as errrr:
+                warnings.warn(f"Unable to formulate new title: using no Roman numeral suffix ...")
+                suffix = ""
+        else:
+            suffix = "II"
+            warnings.warn(f"Unable to break down previous title; using II for suffix ...")
+
+        branch_name = f"{current_episode_number:03}{ep_title}{suffix.upper()}"
+        branch_name = ''.join([c for c in branch_name if c.isalpha() or c.isnumeric()])
+
+        if not cru.confirm(f'  use suggested branch name "{branch_name}"? '):
+            branch_name = input('What branch name would you like to use? ')
+        subprocess.check_call(['git', 'checkout', '-b', branch_name])
+    # finally:
+    #    os.chdir(oldpath)
+
     with open(temporary_tags_file) as old_tags_file:
         old_tags = [l.strip() for l in old_tags_file.readlines()]
 
-    print(f'Temporary tags used in last run were:\n{old_tags}')
-
-    if cru.confirm("Do you want to entire a new set of temporary tags for the upcoming run now in the terminal?"):
+    if confirm_exec("Do you want to entire a new set of temporary tags for the upcoming run now in the terminal?",
+                    pre_prompt_func=lambda: print(f'Temporary tags used in last run were:\n{old_tags}'),
+                    conf_param=manually_manage_temp_tags):
         new_temporary_tags = list()
         is_done = False
         while not is_done:
@@ -115,7 +228,8 @@ def do_setup_run() -> None:
         temporary_tags_file.write_text('\n'.join(new_temporary_tags), encoding='utf-8')
 
     print('\n')
-    if cru.confirm(f'Remove all backup files ending in ~ from the entire "{base_directory}" directory? '):
+    if confirm_exec(f'Remove all backup files ending in ~ from the entire "{base_directory}" directory?',
+                    conf_param = delete_temp_files):
         count, failed = 0, 0
         for f in base_directory.glob('*~'):
             if f.is_file():
