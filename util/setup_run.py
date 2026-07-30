@@ -183,7 +183,7 @@ def do_setup_run(delete_toc: Union[bool, None] = None,
         current_episode_number = 1 + int(str(sorted(webpage_contents_directory.glob('???.html'))[-1])[-8:-5])
         ep_title = ''.join([the_word.capitalize() for the_word in current_run_data['current-run-name'].split()])
 
-        rom_nums = list(re.finditer(r'[IVXLCDM]+', ep_title))
+        rom_nums = list(re.finditer(r'\([IVXLCDM]+\)', ep_title))
         if rom_nums:
             if len(rom_nums) > 1:
                 warnings.warn("Found multiple possible Roman numerals in {previous_title}. Using the last ...")
@@ -191,16 +191,14 @@ def do_setup_run(delete_toc: Union[bool, None] = None,
 
             try:
                 rom = roman.fromRoman(ep_title[suffix.start():suffix.end()].strip().lstrip('(').rstrip(')').strip())
-                suffix = roman.toRoman(1 + rom)
+                ep_title = ep_title[:suffix.start()]
+                suffix = roman.toRoman(rom)
             except (IndexError, roman.RomanError,) as errrr:
                 warnings.warn(f"Unable to formulate new title: using no Roman numeral suffix ...")
                 suffix = ""
         else:
             suffix = "II"
             warnings.warn(f"Unable to break down previous title; using II for suffix ...")
-
-        if ep_title.casefold().endswith(suffix.casefold()):     # CHEcKME: is this trunction working as expected?
-            ep_title = ep_title[:-len(suffix)]
 
         branch_name = f"{current_episode_number:03}{ep_title}{suffix.upper()}"
         branch_name = ''.join([c for c in branch_name if c.isalpha() or c.isnumeric()])
@@ -214,7 +212,7 @@ def do_setup_run(delete_toc: Union[bool, None] = None,
     with open(temporary_tags_file) as old_tags_file:
         old_tags = [l.strip() for l in old_tags_file.readlines()]
 
-    if confirm_exec("Do you want to entire a new set of temporary tags for the upcoming run now in the terminal?",
+    if confirm_exec("Do you want to enter a new set of temporary tags for the upcoming run now in the terminal?",
                     pre_prompt_func=lambda: print(f'Temporary tags used in last run were:\n{old_tags}'),
                     conf_param=manually_manage_temp_tags):
         new_temporary_tags = list()
