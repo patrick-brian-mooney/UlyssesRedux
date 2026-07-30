@@ -66,6 +66,7 @@ def do_write_chapter() -> None:
 
     if which_script not in range(1,19):
         out_of_content_warning()
+        sys.exit(3)
 
     # Post parameters
     the_title = ULYSSES_CHAPTERS[which_script - 1].strip()

@@ -8,15 +8,15 @@ version. See the file LICENSE.md for a copy of this license.
 
 import collections
 import csv
-import os
 import re
 import subprocess
 import sys
 import warnings
 
-from typing import Callable, Optional, Union
+from typing import Callable, Literal, Optional, Union
 
 import roman                # https://github.com/zopefoundation/roman
+
 
 sys.path.append('/UlyssesRedux/scripts/')
 from directory_structure import *           # Gets us the listing of file and directory locations.
@@ -70,26 +70,17 @@ def bump_novel_title(previous_title: str) -> str:
         return ret
 
 
-def write_current_run_data(current_run_data) -> None:
-    # OK, write the new current run data to the .csv file
-    with open(current_run_data_path, 'w') as current_run_data_file:
-        writer = csv.writer(current_run_data_file)
-        for which_key in current_run_data:
-            writer.writerow([which_key, current_run_data[which_key]])
-
-    print(f"Wrote current run data to {current_run_data_path}")
-
-
-def do_setup_run(delete_toc: Union[bool, None] = None,
-                 manually_edit_parameters: Union[bool, None] = None,
-                 manually_manage_git_branch: Union[bool, None] = None,
-                 manually_manage_temp_tags: Union[bool, None] = None,
-                 delete_temp_files: Union[bool, None] = None,
+def do_setup_run(delete_toc: Union[bool, None, Literal["auto"]] = None,
+                 manually_edit_parameters: Union[bool, None, Literal["auto"]] = None,
+                 manually_manage_git_branch: Union[bool, None, Literal["auto"]] = None,
+                 manually_manage_temp_tags: Union[bool, None, Literal["auto"]] = None,
+                 delete_temp_files: Union[bool, None, Literal["auto"]] = None,
                  ) -> None:
     """Set up the file system and relevant data files to generate the next iteration
     of Ulysses Redux. All the parameters to this function can be True, False, or
-    None: True means "do the thing"; false means "don't do the thing"; and None
-    means "prompt the user in the terminal to see whether the thing should be done.
+    None: True means "do the thing"; false means "don't do the thing"; None
+    means "prompt the user in the terminal to see whether the thing should be done;
+    and the literal string "auto" means "do what we do when auto-resetting."
     Historically, the None behavior (ask the user in the terminal whether to do the
     thing or not) has been the default behavior; these parameters let that choice be
     made by other code that can call this function to schedule a new run so I don't
@@ -97,24 +88,28 @@ def do_setup_run(delete_toc: Union[bool, None] = None,
 
     DELETE_TOC indicates whether the table of contents for the previous iteration
       should be deleted (if this is not done new chapters will not be written when
-      daily_script.py is invoked by cron).
+      daily_script.py is invoked by cron). "auto" means True here.
     MANUALLY_EDIT_PARAMETERS: if True, offer to let the user change the by-novel and
       by-chapter data (currently 38 items) describing the previous run. If False,
       leaves that data alone, except it attempts to automatically generate a new
-      title for the novel being written.
+      title for the novel being written. "auto" means False here
     MANUALLY_MANAGE_GIT_BRANCH: if True, commits the changes made to code in the
       current Git branch, which should be for the specific iteration being written;
       then mergest those changes into the master branch and commits that change,
-      then pushes the master branch to the remote GitHub repository.
-    MANUALLY_MaNAGE_TEMP_TAGS: If Trye, prompts the user to enter a new set of
+      then pushes the master branch to the remote GitHub repository. "auto" means
+      "do all the committing stuff I normally do, and automatically generate a name
+      for the new branch in the way I would do so" here.
+    MANUALLY_MaNAGE_TEMP_TAGS: If True, prompts the user to enter a new set of
       temporary tags to be applied to each Tumblr post in this series. If False,
-      re-uses the same tags as the last run.
+      re-uses the same tags as the last run. "auto" means False here.
     DELETE_TEMP_FILES: If True, all files whose names end with a tilde in the entire
-      project directory (not just the code-related subfolder) are deleted.
+      project directory (not just the code-related subfolder) are deleted. "auto"
+      means False here.
     """
     # First, remove the old index file
     if toc_fragment.is_file():
-        if confirm_exec(conf_param=delete_toc, prompt='Delete existing table of contents from last run? '):
+        if (delete_toc == "auto") or confirm_exec(conf_param=delete_toc,
+                                                  prompt='Delete existing table of contents from last run? '):
             toc_fragment.unlink(missing_ok=True)    # don't complain if it's already been done
         else:
             warnings.warn('daily script will not run & no new chapters will be posted until that file is removed.')
@@ -124,8 +119,9 @@ def do_setup_run(delete_toc: Union[bool, None] = None,
         reader = csv.reader(last_run_data_file)
         last_run_data = {rows[0]:rows[1] for rows in reader}
 
-    manually_edit_parameters = confirm_exec(conf_param=manually_edit_parameters,
-                                            prompt="Change the run data for the next run right now in the terminal?")
+    manually_edit_parameters = ((manually_edit_parameters != "auto") and
+                                confirm_exec(conf_param=manually_edit_parameters,
+                                             prompt="Change the run data for the next run right now in the terminal?"))
     if manually_edit_parameters:
         is_done = False
         while not is_done:
@@ -144,31 +140,35 @@ def do_setup_run(delete_toc: Union[bool, None] = None,
             print()
             is_done = cru.confirm("Are you satisfied with that data? ")
 
-        write_current_run_data(current_run_data)
-
     elif manually_edit_parameters is False:
         new_name = bump_novel_title(last_run_data['current-run-name'])
         print(f"Updated title for this run to {new_name}")
         current_run_data = dict(collections.ChainMap({'current-run-name': new_name}, last_run_data))
-        write_current_run_data(current_run_data)
 
     else:
         print("Leaving run data the same as for the last run. (You probably at least want to edit the title.)")
         current_run_data = last_run_data.copy()
 
+    try:
+        del current_run_data['last-posted']     # This only gets set for a run when we post something for that run
+    except KeyError:            # is that not in the current run parameters? No need to delete it, then
+        pass
+
+    cru.write_current_run_data(current_run_data)
     print(f'You can edit {current_run_data_path} manually. (Be careful about auto-substitution of smart quotes.)')
 
-    # All right. Check on status of the Git repo.
+    # FIXME: detect and handle the case that we already are on the mast branch.
     # os.chdir(git_repo_path)
     # try:
     current_git_branch = cru.get_current_git_branch()
-    if confirm_exec(f'Current Git branch is "{current_git_branch}". Commit changes, push to remote, and '
-                    f'switch to master branch?', conf_param=manually_manage_git_branch):
+    if (manually_manage_git_branch == "auto" or
+            confirm_exec(f'Current Git branch is "{current_git_branch}". Commit changes, push to remote, and '
+                         f'switch to master branch?', conf_param=manually_manage_git_branch)):
 
         subprocess.check_call(['git', 'add', '-u'])
 
         commit_msg = f"setting up for next run after {current_git_branch}"
-        if not cru.confirm(f'  use "{commit_msg}" as commit message?'):
+        if manually_manage_git_branch != "auto" and not cru.confirm(f'  use "{commit_msg}" as commit message?'):
             commit_msg = input("  enter commit message to use --| ").strip()
 
         subprocess.call(['git', 'commit', '-m', commit_msg])
@@ -176,14 +176,15 @@ def do_setup_run(delete_toc: Union[bool, None] = None,
         subprocess.check_call(['git', 'checkout', 'master'])
         print()
 
-        if cru.confirm(f'Merge changes from branch "{current_git_branch}" into master branch? '):
+        if ((manually_manage_git_branch == "auto") or
+                cru.confirm(f'Merge changes from branch "{current_git_branch}" into master branch? ')):
             subprocess.check_call(['git', 'merge', current_git_branch])
 
     if confirm_exec('Create and switch to new Git branch?', conf_param=manually_manage_git_branch):
-        current_episode_number = 1 + int(str(sorted(webpage_contents_directory.glob('???.html'))[-1])[-8:-5])
+        current_episode_number = 1 + int(str(sorted(webpage_contents_directory.glob('???.html'))[-1])[-8:-5])       # FIXME:Watch for why this isn't working well
         ep_title = ''.join([the_word.capitalize() for the_word in current_run_data['current-run-name'].split()])
 
-        rom_nums = list(re.finditer(r'\([IVXLCDM]+\)', ep_title))
+        rom_nums = list(re.finditer(r'\([IVXLCDM]+\)', ep_title, flags=re.IGNORECASE))
         if rom_nums:
             if len(rom_nums) > 1:
                 warnings.warn("Found multiple possible Roman numerals in {previous_title}. Using the last ...")
@@ -203,7 +204,7 @@ def do_setup_run(delete_toc: Union[bool, None] = None,
         branch_name = f"{current_episode_number:03}{ep_title}{suffix.upper()}"
         branch_name = ''.join([c for c in branch_name if c.isalpha() or c.isnumeric()])
 
-        if not cru.confirm(f'  use suggested branch name "{branch_name}"? '):
+        if (manually_manage_git_branch != "auto") and not cru.confirm(f'  use suggested branch name "{branch_name}"? '):
             branch_name = input('What branch name would you like to use? ')
         subprocess.check_call(['git', 'checkout', '-b', branch_name])
     # finally:
@@ -212,9 +213,10 @@ def do_setup_run(delete_toc: Union[bool, None] = None,
     with open(temporary_tags_file) as old_tags_file:
         old_tags = [l.strip() for l in old_tags_file.readlines()]
 
-    if confirm_exec("Do you want to enter a new set of temporary tags for the upcoming run now in the terminal?",
-                    pre_prompt_func=lambda: print(f'Temporary tags used in last run were:\n{old_tags}'),
-                    conf_param=manually_manage_temp_tags):
+    if ((manually_manage_temp_tags != "auto") and
+            confirm_exec("Do you want to enter a new set of temporary tags now in the terminal?",
+                         pre_prompt_func=lambda: print(f'Temporary tags used in last run were:\n{old_tags}'),
+                         conf_param=manually_manage_temp_tags)):
         new_temporary_tags = list()
         is_done = False
         while not is_done:
@@ -230,8 +232,9 @@ def do_setup_run(delete_toc: Union[bool, None] = None,
         temporary_tags_file.write_text('\n'.join(new_temporary_tags), encoding='utf-8')
 
     print('\n')
-    if confirm_exec(f'Remove all backup files ending in ~ from the entire "{base_directory}" directory?',
-                    conf_param = delete_temp_files):
+    if (delete_temp_files == "auto") or confirm_exec(f'Remove all backup files ending in ~ from the entire '
+                                                     f'"{base_directory}" directory?',
+                                                     conf_param = delete_temp_files):
         count, failed = 0, 0
         for f in base_directory.glob('*~'):
             if f.is_file():
