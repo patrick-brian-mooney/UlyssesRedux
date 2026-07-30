@@ -63,7 +63,7 @@ def bump_novel_title(previous_title: str) -> str:
 
     try:
         rom = roman.fromRoman(previous_title[suffix.start():suffix.end()].lstrip('(').rstrip(')').strip())
-        return f"{previous_title[:suffix.start()]} ({roman.toRoman(1 + rom)})"
+        return f"{previous_title[:suffix.start()].strip()} ({roman.toRoman(1 + rom)})"
     except (IndexError, roman.RomanError,) as errrr:
         ret = f"{previous_title[:suffix.start()].strip()}"
         warnings.warn(f"Unable to formulate new title: using {ret}")
