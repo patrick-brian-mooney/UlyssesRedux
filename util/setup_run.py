@@ -158,7 +158,7 @@ def do_setup_run(delete_toc: Union[bool, None] = None,
 
     print(f'You can edit {current_run_data_path} manually. (Be careful about auto-substitution of smart quotes.)')
 
-    # All right. Check on status of the Git repo.
+    # FIXME: detect and handle the case that we already are on the mast branch.
     # os.chdir(git_repo_path)
     # try:
     current_git_branch = cru.get_current_git_branch()
@@ -180,10 +180,10 @@ def do_setup_run(delete_toc: Union[bool, None] = None,
             subprocess.check_call(['git', 'merge', current_git_branch])
 
     if confirm_exec('Create and switch to new Git branch?', conf_param=manually_manage_git_branch):
-        current_episode_number = 1 + int(str(sorted(webpage_contents_directory.glob('???.html'))[-1])[-8:-5])
+        current_episode_number = 1 + int(str(sorted(webpage_contents_directory.glob('???.html'))[-1])[-8:-5])       # FIXME:Watch for why this isn't working well
         ep_title = ''.join([the_word.capitalize() for the_word in current_run_data['current-run-name'].split()])
 
-        rom_nums = list(re.finditer(r'\([IVXLCDM]+\)', ep_title))
+        rom_nums = list(re.finditer(r'\([IVXLCDM]+\)', ep_title, flags=re.IGNORECASE))
         if rom_nums:
             if len(rom_nums) > 1:
                 warnings.warn("Found multiple possible Roman numerals in {previous_title}. Using the last ...")
