@@ -5,18 +5,54 @@
 
 import collections
 import csv
+import functools
 import os
 import re
 import subprocess
 import sys
+import warnings
 
 from pathlib import Path
-from typing import Dict, Iterable
+from typing import Any, Callable, Dict, Iterable
 
-from directory_structure import current_run_corpus_directory
+import pidfile          # https://pypi.org/project/python-pidfile/
 
 sys.path.append('/UlyssesRedux/scripts/')
-from directory_structure import *           # Gets us the listing of file and directory locations.
+import directory_structure as ds        # Gets us the listing of file and directory locations.
+
+
+def only_if_not_running(pidfile_loc: Path) -> Any:
+    """Decorator that only runs the function FUNC if "it" is not already running. "It"
+    should be the top-level function for a particular script, because this decorator
+    is not magic and does not track individual functions, only PIDs. It's a
+    convenience wrapper for top-level main()-type functions only.
+    """
+    assert isinstance(pidfile_loc, Path)
+    def actual_decorator(func: Callable) -> Any:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs) -> Any:
+            try:
+                with pidfile.PIDFile(pidfile_loc):
+                    return func(*args, **kwargs)
+            except pidfile.AlreadyRunningError:
+                warnings.warn(f"{func.__name__} is already running! Not invoking again.")
+
+        return wrapper
+    return actual_decorator
+
+
+def gui_dialog(msg: str) -> None:
+    """Display a Tkinter dialog showing the message MSG. Since we don't structure any
+    of our scripts around a Tkinter event loop, this function fakes an elementary
+    Tkinter setup.
+    """
+    import tkinter as tk
+    from tkinter import messagebox
+
+    root = tk.Tk()
+    root.withdraw()  # Hides the main Tkinter root window
+    messagebox.showinfo("UlyssesRedux status", msg)
+    root.destroy()
 
 
 def confirm(prompt: str) -> bool:
@@ -31,22 +67,52 @@ def confirm(prompt: str) -> bool:
 
 
 def get_current_git_branch() -> str:
-    oldpath = os.getcwd()
+    old_path = os.getcwd()
     try:
-        os.chdir(git_repo_path)
+        os.chdir(ds.git_repo_path)
         git_output = subprocess.check_output(['git', 'symbolic-ref', '--short', 'HEAD'])
         return git_output.decode().strip()
     finally:
-        os.chdir(oldpath)
+        os.chdir(old_path)
 
 
-def read_current_run_parameters() -> dict:
+def read_current_run_data() -> dict:
     """Read the .csv file recording parameters for the current run and return it as
     a dictionary.
     """
-    with open(current_run_data_path) as current_run_data_file:
+    with open(ds.current_run_data_path) as current_run_data_file:
         reader = csv.reader(current_run_data_file)
         return {rows[0]:rows[1] for rows in reader}
+
+
+def write_current_run_data(current_run_data: dict) -> None:
+    """Write the new current run data to the .csv file
+    """
+    with open(ds.current_run_data_path, 'w') as current_run_data_file:
+        writer = csv.writer(current_run_data_file)
+        for which_key in current_run_data:
+            writer.writerow([which_key, current_run_data[which_key]])
+
+    print(f"Wrote current run data to {ds.current_run_data_path}")
+
+
+def get_current_run_parameter(key: str) -> str:
+    """Get the data item stored in the "current run data" .csv file that is identified
+    by the key called KEY.
+    """
+    return read_current_run_data()[key]
+
+
+def set_current_run_parameter(key: str, value: str) -> None:
+    """Read the current run data from the .csv file, set the content of the dictionary
+    KEY to VALUE, and write the data back to disk.
+    """
+    assert isinstance(key, str)
+    assert isinstance(value, str)
+
+    data = read_current_run_data()
+    data[key] = value
+    write_current_run_data(data)
 
 
 expected_keys = {   # expect keyname -> question to ask if that keyname is missing
@@ -93,9 +159,9 @@ expected_keys = {   # expect keyname -> question to ask if that keyname is missi
 
 def validate_data():
     """Read in the current run parameters and make sure we have the expected data.
-    Prompts for missing stuff.
+    Prompt for missing items.
     """
-    current_run_data = read_current_run_parameters()
+    current_run_data = read_current_run_data()
     changed_keys = False
     for which_key in list(expected_keys.keys()):
         if which_key not in current_run_data.keys():

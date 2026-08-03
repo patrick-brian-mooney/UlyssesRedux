@@ -117,7 +117,7 @@ def set_up() -> None:
 
     # All right, let's read the expected data from the data file
     cru.validate_data()
-    current_run_data = cru.read_current_run_parameters()
+    current_run_data = cru.read_current_run_data()
 
     if debugging:
         print("INFO: parameters read in and calculated.")
