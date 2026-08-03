@@ -95,7 +95,7 @@ def do_setup_run(delete_toc: Union[bool, None, Literal["auto"]] = None,
       title for the novel being written. "auto" means False here
     MANUALLY_MANAGE_GIT_BRANCH: if True, commits the changes made to code in the
       current Git branch, which should be for the specific iteration being written;
-      then mergest those changes into the master branch and commits that change,
+      then merges those changes into the master branch and commits that change,
       then pushes the master branch to the remote GitHub repository. "auto" means
       "do all the committing stuff I normally do, and automatically generate a name
       for the new branch in the way I would do so" here.
@@ -181,7 +181,8 @@ def do_setup_run(delete_toc: Union[bool, None, Literal["auto"]] = None,
                              conf_param=manually_manage_git_branch)):
             subprocess.check_call(['git', 'merge', current_git_branch])
 
-    if confirm_exec('Create and switch to new Git branch?', conf_param=manually_manage_git_branch):
+    if (manually_manage_git_branch == "auto" or
+            confirm_exec('Create and switch to new Git branch?', conf_param=manually_manage_git_branch)):
         current_episode_number = 1 + int(str(sorted(webpage_contents_directory.glob('???.html'))[-1])[-8:-5])       # FIXME:Watch for why this isn't working well
         ep_title = ''.join([the_word.capitalize() for the_word in current_run_data['current-run-name'].split()])
 

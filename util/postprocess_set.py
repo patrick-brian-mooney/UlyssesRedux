@@ -79,7 +79,7 @@ def set_up_git() -> None:
         if not confirm('GIVEN THIS STATUS, do you want to commit? '):
             return
 
-        commit_msg = f"wrapping up complete novel in {current_git_branch}"
+        commit_msg = f"wrapping up complete novel in {cru.get_current_run_parameter['current-run-name']}"
         if not cru.confirm(f'  use "{commit_msg}" as commit message?'):
             commit_msg = input("  enter commit message to use --| ").strip()
 

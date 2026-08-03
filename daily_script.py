@@ -74,7 +74,7 @@ def handle_out_of_content() -> None:
     """
     date_str = cru.get_current_run_parameter('last-posted')
     date = datetime.datetime.fromisoformat(date_str)
-    if (datetime.datetime.now() - date).days > DAYS_TO_WAIT_BEFORE_RESETTING:
+    if (datetime.datetime.now() - date).days >= DAYS_TO_WAIT_BEFORE_RESETTING:
         do_reset_blog()
     else:
         out_of_content_warning()
@@ -97,8 +97,8 @@ def do_write_chapter() -> None:
         toc_lines = list()
 
     if which_script not in range(1,19):
-        out_of_content_warning()
-        sys.exit(3)
+        handle_out_of_content()
+        sys.exit(3)                 # we should have already quit by now, but be sure.
 
     # Post parameters
     the_title = ULYSSES_CHAPTERS[which_script - 1].strip()

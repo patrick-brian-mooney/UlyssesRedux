@@ -114,7 +114,7 @@ def set_current_run_parameter(key: str, value: str) -> None:
     assert isinstance(key, str)
     assert isinstance(value, str)
 
-    data = read_current_run_data()
+    data = read_current_run_parameters()
     data[key] = value
     write_current_run_data(data)
 
