@@ -21,13 +21,16 @@ import math
 import re
 import sys
 
+from pathlib import Path
+
 
 import pyximport; pyximport.install()           # https://cython.org/
 
 
 sys.path.append('/UlyssesRedux/scripts/')
 import directory_structure as ds    # Gets us the listing of file and directory locations.
-import util.current_run_utils as cr_data
+import util.current_run_utils as cru
+import util.setup_run as sr
 
 from introspection import dump_str  # From https://github.com/patrick-brian-mooney/personal-library
 import social_media                 # From https://github.com/patrick-brian-mooney/personal-library
@@ -38,27 +41,56 @@ RECURRING_TAGS = ['Ulysses (novel)', 'James Joyce', '1922', 'automatically gener
 ULYSSES_CHAPTERS = [l.rstrip() for l in open(ds.ulysses_chapter_titles_file).readlines() if l.rstrip()]
 
 BLOG_URL = 'http://ulyssesredux.tumblr.com/'
+DAYS_TO_WAIT_BEFORE_RESETTING = 4.8
 
 
 # Some utility routines
 def out_of_content_warning():
     """Remind me that we're out of content."""
-    print("WARNING: There's work to be done! You have to reset the blog state on ulyssesredux.tumblr.com to get it "
-          "working again! A full Ulysses project is done and needs to be cleared!")
-    print("    REMINDER: make this a more prominent warning!")  # FIXME
+    msg = ("WARNING: There's work to be done! You have to reset the blog state on ulyssesredux.tumblr.com to get it "
+           "working again! A full Ulysses project is done and needs to be cleared!")
+    print(msg)  # in case cron is mailing output to me.
+    cru.gui_dialog(msg)
     sys.exit(2)
 
 
+def do_reset_blog() -> None:
+    """Reset the blog parameters to get ready for the next run. Let me know that this
+    was done.
+    """
+    sr.do_setup_run(delete_toc='auto', manually_edit_parameters='auto', manually_manage_git_branch='auto',
+                    manually_manage_temp_tags='auto', delete_temp_files='auto')
+    msg = (f"INFO: After {DAYS_TO_WAIT_BEFORE_RESETTING} days of not posting, automatically reset UlyssesRedux state "
+           f"so we can post tomorrow. Current Git branch name is: {cru.get_current_git_branch()}")
+    cru.gui_dialog(msg)
+    print(msg)      # in case cron is mailing output to me.
+    sys.exit(2)
+
+
+def handle_out_of_content() -> None:
+    """Handle being out of content. For the first few days, just display a warning.
+    Once we've done that for at least DAYS_TO_WAIT_BEFORE_RESETTING, go ahead and
+    auto-prepare for the next run.
+    """
+    date_str = cru.get_current_run_parameter('last-posted')
+    date = datetime.datetime.fromisoformat(date_str)
+    if (datetime.datetime.now() - date).days > DAYS_TO_WAIT_BEFORE_RESETTING:
+        do_reset_blog()
+    else:
+        out_of_content_warning()
+
+
+@cru.only_if_not_running(pidfile_loc=Path(__file__).parent / 'daily_script.pid')
 def do_write_chapter() -> None:
     with open('/social_media_auth.json', encoding='utf-8') as auth_file:
         ulysses_client = social_media.Tumblpy_from_dict(json.loads(auth_file.read())['ulysses_client'])
 
-    current_run_data = cr_data.read_current_run_parameters()
+    current_run_data = cru.read_current_run_parameters()
 
     try:
         with open(ds.current_run_directory / 'index.html', 'r') as index_file :
             toc_lines = [l.strip() for l in index_file.readlines() if l.strip()]
-            which_script = 1 + len(toc_lines)   # If so far we've got, say, six lines in the file, we need to run script #7.
+            which_script = 1 + len(toc_lines)   # If so far we've got, say, six lines, we need to run script #7.
 
     except (FileNotFoundError,):
         which_script = 1

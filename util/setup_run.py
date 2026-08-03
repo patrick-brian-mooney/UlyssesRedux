@@ -177,7 +177,8 @@ def do_setup_run(delete_toc: Union[bool, None, Literal["auto"]] = None,
         print()
 
         if ((manually_manage_git_branch == "auto") or
-                cru.confirm(f'Merge changes from branch "{current_git_branch}" into master branch? ')):
+                confirm_exec(f'Merge changes from branch "{current_git_branch}" into master branch? ',
+                             conf_param=manually_manage_git_branch)):
             subprocess.check_call(['git', 'merge', current_git_branch])
 
     if confirm_exec('Create and switch to new Git branch?', conf_param=manually_manage_git_branch):
