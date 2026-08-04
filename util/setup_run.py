@@ -209,7 +209,7 @@ def do_setup_run(delete_toc: Union[bool, None, Literal["auto"]] = None,
         subprocess.check_call(['git', 'checkout', '-b', branch_name])
 
     with open(temporary_tags_file) as old_tags_file:
-        old_tags = [l.strip() for l in old_tags_file.readlines()]
+        old_tags = [l.strip() for l in old_tags_file.readlines() if l.strip()]
 
     if ((manually_manage_temp_tags != "auto") and
             confirm_exec("Do you want to enter a new set of temporary tags now in the terminal?",

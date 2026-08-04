@@ -133,6 +133,10 @@ def do_write_chapter() -> None:
     print('\nINFO: the_status is: ' + dump_str(the_status))
     print('\nINFO: the_tumblr_data is: ' + dump_str(the_tumblr_data))
 
+    # and record that we've done so.
+    cru.set_current_run_parameter('last-posted', datetime.datetime.now().isoformat())
+
+    # and track the posting we made by writing a line into our fragmentary HTML table of contents
     new_post_url = f"{BLOG_URL}post/{the_status['id']}"
 
     # Assemble some text to write to the index file
@@ -151,7 +155,7 @@ def do_write_chapter() -> None:
     the_line += f'<p><small>tags: {html_tags}</small></p>'
     the_line += '</blockquote></li>'
 
-    # Now record the new line to the index file.
+    # Finally, record the new line to the index file.
     toc_lines.append(the_line.strip())
     (ds.current_run_directory / 'index.html').write_text('\n'.join([l.strip() for l in toc_lines]).strip(),
                                                          encoding='utf-8')
