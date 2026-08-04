@@ -157,9 +157,7 @@ def do_setup_run(delete_toc: Union[bool, None, Literal["auto"]] = None,
     cru.write_current_run_data(current_run_data)
     print(f'You can edit {current_run_data_path} manually. (Be careful about auto-substitution of smart quotes.)')
 
-    # FIXME: detect and handle the case that we already are on the mast branch.
-    # os.chdir(git_repo_path)
-    # try:
+    # FIXME: detect and handle the case that we already are on the master branch.
     current_git_branch = cru.get_current_git_branch()
     if (manually_manage_git_branch == "auto" or
             confirm_exec(f'Current Git branch is "{current_git_branch}". Commit changes, push to remote, and '
@@ -209,8 +207,6 @@ def do_setup_run(delete_toc: Union[bool, None, Literal["auto"]] = None,
         if (manually_manage_git_branch != "auto") and not cru.confirm(f'  use suggested branch name "{branch_name}"? '):
             branch_name = input('What branch name would you like to use? ')
         subprocess.check_call(['git', 'checkout', '-b', branch_name])
-    # finally:
-    #    os.chdir(oldpath)
 
     with open(temporary_tags_file) as old_tags_file:
         old_tags = [l.strip() for l in old_tags_file.readlines()]
@@ -234,9 +230,9 @@ def do_setup_run(delete_toc: Union[bool, None, Literal["auto"]] = None,
         temporary_tags_file.write_text('\n'.join(new_temporary_tags), encoding='utf-8')
 
     print('\n')
-    if (delete_temp_files == "auto") or confirm_exec(f'Remove all backup files ending in ~ from the entire '
-                                                     f'"{base_directory}" directory?',
-                                                     conf_param = delete_temp_files):
+    if ((delete_temp_files == "auto") or
+            confirm_exec(f'Remove all backup files ending in ~ from the entire "{base_directory}" directory?',
+                         conf_param = delete_temp_files)):
         count, failed = 0, 0
         for f in base_directory.glob('*~'):
             if f.is_file():

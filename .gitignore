@@ -7,3 +7,4 @@ __pycache__/
 social_media.py
 text_handling.py
 venv/
+*pid
