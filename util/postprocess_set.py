@@ -150,7 +150,7 @@ def get_html_header() -> str:
   <title>Ulysses Redux #{CURRENT_EPISODE_NUMBER:03}</title>
   <meta name="generator" content="Bluefish 2.2.12" />
   <meta name="author" content="Patrick Mooney" />
-  <meta name="dcterms.rights" content="Copyright © 2015&ndash;26 Patrick Mooney" />
+  <meta name="dcterms.rights" content="Copyright © 2015&ndash;{datetime.datetime.now().strftime("%y")} Patrick Mooney" />
   <meta name="description" content="Table of contents for Ulysses Redux #{CURRENT_EPISODE_NUMBER:03}" />
   <meta name="rating" content="general" />
   <meta name="revisit-after" content="10 days" />
