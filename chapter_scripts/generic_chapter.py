@@ -31,7 +31,7 @@ def train_with_mixins(genny: tg.TextGenerator,
                       chain_length: int,
                       joyce_text_list: List[Path],
                       mixin_texts_list: List[Path],
-                      joyce_ratio: float = 1.1) -> None:
+                      joyce_ratio: float = 1.1,) -> None:
     """Trains GENNY, a tg.TextGenerator (or subclass, I suppose) on the provided
     texts, at the given parameters. Modifies GENNY in place and returns None.
     """
@@ -59,10 +59,11 @@ def train_with_mixins(genny: tg.TextGenerator,
         print('\n\n    Training generator ...')
 
     for which_t in joyce_text_list:
-        genny._train_from_text(the_text=which_t.read_text(encoding='utf-8'), markov_length=chain_length, weight=joyce_ratio)
+        genny.train_from_text(the_text=which_t.read_text(encoding='utf-8'), markov_length=chain_length,
+                              weight=joyce_ratio, learn_starts=True)
     for which_t in mixin_texts_list:
-        genny._train_from_text(the_text=which_t.read_text(encoding='utf-8'), markov_length=chain_length)
-    genny._finalize_mapping()
+        genny.train_from_text(the_text=which_t.read_text(encoding='utf-8'), markov_length=chain_length)
+    genny.finalize_mapping()
 
 
 def write_generic_story(chain_length: int,

@@ -18,6 +18,7 @@ import html
 import importlib
 import json
 import math
+import os
 import re
 import sys
 
@@ -162,4 +163,5 @@ def do_write_chapter() -> None:
 
 
 if __name__ == "__main__":
+    os.chdir(ds.git_repo_path)
     do_write_chapter()
