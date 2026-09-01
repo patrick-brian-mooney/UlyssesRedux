@@ -157,12 +157,13 @@ def do_setup_run(delete_toc: Union[bool, None, Literal["auto"]] = None,
     cru.write_current_run_data(current_run_data)
     print(f'You can edit {current_run_data_path} manually. (Be careful about auto-substitution of smart quotes.)')
 
+    current_git_branch = cru.get_current_git_branch()
+
     # FIXME: detect and handle the case that we already are on the master branch.
     if (manually_manage_git_branch == "auto" or
             confirm_exec(f'Current Git branch is "{current_git_branch}". Commit changes, push to remote, and '
                          f'switch to master branch?', conf_param=manually_manage_git_branch)):
 
-        current_git_branch = cru.get_current_git_branch()
         subprocess.check_call(['git', 'add', '-u'])
 
         commit_msg = f"setting up for next run after {current_git_branch}"      #FIXME: this winds up being "setting up for next run after master" often, which is suboptimal
